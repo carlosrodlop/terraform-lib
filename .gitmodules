@@ -1,0 +1,3 @@
+[submodule "libs/tf-cb"]
+	path = libs/tf-cb
+	url = git@github.com:ryecarrigan/terraform-cloudbees-ci.git
