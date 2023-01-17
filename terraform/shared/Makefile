@@ -23,15 +23,6 @@ ifndef AWS_PROFILE
 	@exit 1
 endif
 
-#https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable
-.PHONY: check_kubeconfig
-check_kubeconfig: ## Check for the required KUBECONFIG environment variable
-check_kubeconfig:
-ifndef KUBECONFIG
-	@echo Warning: KUBECONFIG Environment variable isn\'t defined and it is required for helm\; Example: export KUBECONFIG=exampleProfile
-	@exit 1
-endif
-
 .PHONY: tf_init_shared
 tf_init_shared: ## Init Common Terraform modules for the labs
 tf_init_shared: guard-ROOT

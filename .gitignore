@@ -34,10 +34,10 @@ override.tf.json
 
 .env
 !.env.example
-labs/cloudbees-no-tf/helm/cbci.yaml
 secrets.yaml
 *secrets.yaml
 !*secrets.yaml.example
 !*secrets.yaml.example.enc
 kube.*.conf.yaml
 !kube.*.conf.yaml.enc
+cbci.yaml

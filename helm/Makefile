@@ -1,19 +1,10 @@
 MKFILE   		:= $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PARENT_MKFILE   := $(HOME)/.Makefile
 DEBUG			:= true
-DIR_HELM		:= $(MKFILE)/helm
-DIR_HELMFILE	:= $(MKFILE)/helmfile
-DIR_SHARED_CB	:= $(MKFILE)/../../shared/cb
+DIR_SHARED_CB	:= $(MKFILE)/../shared/cb
 SHELL 			:= /bin/bash
 
 include $(PARENT_MKFILE)
-
-# define isDebug
-# ifeq ($(DEBUG),true)
-# 	@echo "Debug is enabled"
-# 	@alias helm="helm --debug"
-# endif
-# endef
 
 #https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable
 .PHONY: check_kubeconfig
@@ -26,7 +17,7 @@ endif
 
 .PHONY: cb-helm-update
 cb-helm-update: ## Install and Update CloudBees Core via Helm. It requires the file .env
-cb-helm-update: check_kubeconfig
+cb-helm-update: check_kubeconfig guard-ROOT
 	$(call print_title,Update CloudBees Core via Helm)
 	source $(DIR_HELM)/.env && \
 		cp $(DIR_SHARED_CB)/casc/oc/general/main.yaml.tpl $(DIR_SHARED_CB)/casc/oc/general/main.yaml && \
@@ -36,7 +27,7 @@ cb-helm-update: check_kubeconfig
 	source $(DIR_HELM)/.env && \
 		kubectl create ns $$CBCI_NS || echo "There is an existing namespace $$CBCI_NS" && \
 		kubectl delete configmap oc-casc-bundle -n "$$CBCI_NS" || echo "There is NOT existing configmap oc-casc-bundle in $$CBCI_NS to delete" &&  \
-		kubectl create configmap oc-casc-bundle -n "$$CBCI_NS" --from-file=$(DIR_SHARED_CB)/casc/oc/general   && \
+		kubectl create configmap oc-casc-bundle -n "$$CBCI_NS" --from-file=$(DIR_SHARED_CB)/casc/oc/general && \
 		kubectl delete secret oc-secrets -n "$$CBCI_NS" || echo "There is NOT existing secret oc-secrets in $$CBCI_NS to delete" &&  \
 		kubectl create secret generic oc-secrets -n "$$CBCI_NS" \
 			--from-literal=jenkinsPass="$(shell yq r $(DIR_SHARED_CB)/secrets/cbci-secrets.yaml 'jenkinsPass')" \
@@ -59,13 +50,3 @@ cb-helm-delete: check_kubeconfig
 		kubectl delete ns "$$CBCI_NS" || echo "There is NOT existing namespace $$CBCI_NS" && \
 		kubectl delete ns "$$AGENT_NA" || echo "There is NOT existing namespace $$AGENT_NA" && \
 		helm repo remove cloudbees || echo "Repository cloudbees doesn't exist"
-
-.PHONY: cb-helmfile-create
-cb-helmfile-create: ## Install CloudBees Core via Helmfile
-cb-helmfile-create: check_kubeconfig
-	$(call print_title,Install CloudBees Core via Helmfile)
-
-.PHONY: cb-helmfile-delete
-cb-helmfile-delete: ## Uninstall CloudBees Core via Helmfile
-cb-helmfile-delete: check_kubeconfig
-	$(call print_title,Uninstall CloudBees Core via Helmfile)
