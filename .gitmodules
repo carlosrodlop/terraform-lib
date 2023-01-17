@@ -1,3 +1,0 @@
-[submodule "examples/cloudbees/submodule/tf-cloudbees"]
-	path = examples/cloudbees/submodule/tf-cloudbees
-	url = git@github.com:ryecarrigan/terraform-cloudbees-ci.git
