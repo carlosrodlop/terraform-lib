@@ -1,0 +1,9 @@
+[submodule "terraform/cloudbees/modules/ryan-tf-cb"]
+	path = terraform/cloudbees/modules/ryan-tf-cb
+	url = git@github.com:ryecarrigan/terraform-cloudbees-ci.git
+[submodule "shared/cb/casc/oc"]
+	path = shared/cb/casc/oc
+	url = git@github.com:carlosrodlop/cb-casc-oc.git
+[submodule "shared/cb/casc/controllers"]
+	path = shared/cb/casc/controllers
+	url = git@github.com:carlosrodlop/cb-casc-controllers.git
