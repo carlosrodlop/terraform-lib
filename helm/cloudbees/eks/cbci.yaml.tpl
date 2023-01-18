@@ -1,6 +1,6 @@
 OperationsCenter:
   HostName: @@HOSTNAME@@
-  Platform: eks
+  Platform: @@PLATFORM@@
   Protocol: https
   Ingress:
     Class: alb
