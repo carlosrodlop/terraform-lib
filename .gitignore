@@ -38,6 +38,5 @@ secrets.yaml
 *secrets.yaml
 !*secrets.yaml.example
 !*secrets.yaml.example.enc
-values.yaml
 kubeconfig-*.yaml
 !kubeconfig-*.yaml.enc
