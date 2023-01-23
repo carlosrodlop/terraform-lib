@@ -6,6 +6,7 @@
   - It focuses more on the deployment and configuration of your target application and 3rd party integrations. It focuses less on the deployment of EKS, its add-ons and well-known cloud applications.
 - Shift-left for Security and Terraform validations
   - Validate EKS security [aws-samples/hardeneks: Runs checks to see if an EKS cluster follows EKS Best Practices.](https://github.com/aws-samples/hardeneks)
+- Separate Helm provider from the Cluster Generation per [Docs overview | hashicorp/kubernetes | Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
 
 ### Bookmarks
 
