@@ -38,6 +38,6 @@ secrets.yaml
 *secrets.yaml
 !*secrets.yaml.example
 !*secrets.yaml.example.enc
-kube.*.conf.yaml
-!kube.*.conf.yaml.enc
-cbci.yaml
+values.yaml
+kubeconfig-*.yaml
+!kubeconfig-*.yaml.enc
