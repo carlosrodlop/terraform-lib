@@ -1,0 +1,7 @@
+zoneIdFilters:
+  - ${zoneIdFilter}
+policy: "sync"
+aws:
+  zoneType: "public"
+  zonesCacheDuration: "1m"
+logLevel: "debug"
