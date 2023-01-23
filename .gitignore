@@ -31,7 +31,6 @@ override.tf.json
 # example: *tfplan*
 
 *.plan
-
 .env
 !.env.example
 secrets.yaml
@@ -40,3 +39,5 @@ secrets.yaml
 !*secrets.yaml.example.enc
 kubeconfig-*.yaml
 !kubeconfig-*.yaml.enc
+values.yaml
+!values.yaml.tpl
