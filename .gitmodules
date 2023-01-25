@@ -1,6 +1,3 @@
-[submodule "shared/cb/casc/oc"]
-	path = shared/cb/casc/oc
-	url = git@github.com:carlosrodlop/cb-casc-oc.git
-[submodule "shared/cb/casc/controllers"]
-	path = shared/cb/casc/controllers
-	url = git@github.com:carlosrodlop/cb-casc-controllers.git
+[submodule "shared-helm"]
+path = shared-helm
+url = git@github.com:carlosrodlop/helm-labs.git
