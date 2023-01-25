@@ -60,10 +60,3 @@ repos:
       #   args:
       #     - --args=--config-file=__GIT_WORKING_DIR__/tfsec.yaml
       #     - --args=--concise-output
-  - repo: https://github.com/norwoodj/helm-docs
-    rev: v1.11.0
-    hooks:
-      - id: helm-docs
-        files: ^helm/
-      - id: helm-docs-built
-        files: ^helm/
