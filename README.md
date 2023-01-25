@@ -4,9 +4,10 @@
 
 - Deploy anything on the top of [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
   - It focuses more on the deployment and configuration of your target application and 3rd party integrations. It focuses less on the deployment of EKS, its add-ons and well-known cloud applications.
-- Shift-left for Security and Terraform validations
-  - Validate EKS security [aws-samples/hardeneks: Runs checks to see if an EKS cluster follows EKS Best Practices.](https://github.com/aws-samples/hardeneks)
-- Separate Helm provider from the Cluster Generation per [Docs overview | hashicorp/kubernetes | Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
+- EKS security validation by using [aws-samples/hardeneks: Runs checks to see if an EKS cluster follows EKS Best Practices.](https://github.com/aws-samples/hardeneks)
+- [Pre-commits](.pre-commit-config.yaml) for Security, Validations and Documentation
+- Separation of Helm provider from the Cluster Generation per [Docs overview | hashicorp/kubernetes | Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
+- Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
 
 ### Bookmarks
 
@@ -15,14 +16,13 @@
 
 ## Shared
 
-It contains resources shared among labs including
+It contains resources that can be shared across different Cloud Providers and are not tight to AWS.
 
-- Terraform Modules e.g. State Backend in S3
-- Variables. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
-- Secrets managed as [Kubernetes Secrets](https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets) and mounted in the `SECRET` path of the container.
+- Managed Secrets as [Kubernetes Secrets](https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets) and mounted them in the `SECRET` path of the container.
 - CloudBees Configuration as Code
   - Controllers: [carlosrodlop/cb-casc-controllers](https://github.com/carlosrodlop/cb-casc-controllers)
   - Operation Center: [carlosrodlop/cb-casc-oc](https://github.com/carlosrodlop/cb-casc-oc)
+- Helm Chart Repository:
 
 ### Target Applications
 
@@ -33,6 +33,7 @@ It contains resources shared among labs including
 
 ## References
 
+- [EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/)
 - [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
 - [Amazon EKS Workshop :: Amazon EKS Workshop](https://www.eksworkshop.com/)
 - [Artifact Hub](https://artifacthub.io/)
