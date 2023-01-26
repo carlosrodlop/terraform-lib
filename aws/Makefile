@@ -4,8 +4,10 @@ PARENT_MKFILE   := $(HOME)/.Makefile # docker
 DEBUG			:= true
 ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
+SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
+DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
+ENC_KEY	  	  	:= $(shell age-keygen -y $(SOPS_KEY))
 
-#DEFAULTS
 ROOT 			?= aws
 BACKEND         ?= false
 
