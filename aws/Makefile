@@ -1,6 +1,6 @@
 MKFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PARENT_MKFILE   := $(HOME)/.Makefile # docker
-#PARENT_MKFILE   := $(MKFILE)/../carlosrodlop/Makefile # local
+#PARENT_MKFILE   := $(MKFILE)/../../carlosrodlop/Makefile # local
 DEBUG			:= true
 ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
