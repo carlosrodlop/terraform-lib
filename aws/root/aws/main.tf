@@ -14,13 +14,17 @@ data "aws_eks_cluster_auth" "this" {
   name = module.eks_blueprints.eks_cluster_id
 }
 
+data "aws_route53_zone" "this" {
+  name = var.domain_name
+}
+
 locals {
   root             = basename(abspath(path.module))
   workspace_suffix = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
   name             = "${var.preffix}${local.workspace_suffix}"
   vpc_name         = "${local.name}-vpc"
   cluster_name     = "${local.name}-eks"
-
+  route53_zone_id  = data.aws_route53_zone.this.id
 
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
@@ -30,10 +34,20 @@ locals {
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
 
 }
-module "acm_certificate" {
-  source = "../../modules/aws-acm-certificate"
+
+#https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 4.3.2"
 
   domain_name = var.domain_name
+  zone_id     = local.route53_zone_id
+
+  subject_alternative_names = [
+    #"new.sub.${var.domain_name}",
+    "*.${var.domain_name}"
+  ]
+
 }
 
 #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html

@@ -1,12 +1,12 @@
 MKFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-PARENT_MKFILE   := $(HOME)/.Makefile # docker
-#PARENT_MKFILE   := $(MKFILE)/../../carlosrodlop/Makefile # local
+#PARENT_MKFILE   := $(HOME)/.Makefile # docker
+PARENT_MKFILE   := $(MKFILE)/../../carlosrodlop/Makefile # local
 DEBUG			:= true
 ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
-SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
-DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
-ENC_KEY	  	  	:= $(shell age-keygen -y $(SOPS_KEY))
+# SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
+# DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
+# ENC_KEY	  	  	:= $(shell age-keygen -y $(SOPS_KEY))
 
 ROOT 			?= aws
 BACKEND         ?= false
@@ -33,7 +33,7 @@ ifndef AWS_DEFAULT_REGION
 endif
 
 .PHONY: tf_init
-tf_init: ## Init Terraform modules for the labs
+tf_init: ## Init Terraform root passing as parameter (ROOT, default to aws). It can accept a remote BACKEND (default to false). Usage: ROOT=eks BACKEND=true make tf_init
 tf_init: guard-ROOT guard-BACKEND
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),false)
@@ -53,17 +53,16 @@ else #TODO Test this!
 endif
 
 .PHONY: tf_apply
-tf_apply: ## Apply Terraform modules for the labs
+tf_apply: ## Apply Terraform root passing as parameter (ROOT, default to aws). Usage: ROOT=eks make tf_apply
 tf_apply: check_aws_env guard-ROOT
 	@rm -rf $(TF_LOG_PATH)
-	$(call print_title,Apply $(ROOT) resources) |tee -a $(TF_LOG_PATH)
+	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
 ifeq ($(ROOT),eks)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars" \
 		-var "eks_cluster_id=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw eks_cluster_id)" \
 		-var "eks_cluster_endpoint=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw eks_cluster_endpoint)" \
 		-var "eks_oidc_provider=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw eks_oidc_provider)" \
-		-var "eks_cluster_version=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw eks_cluster_version)" \
-		-var "kubeconfig_file_path=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw kubeconfig_file_path)"
+		-var "eks_cluster_version=$(shell terraform -chdir=$(ROOT_SHARED)/aws output --raw eks_cluster_version)"
 	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(ROOT).plan"
 #else ifeq ($(ROOT),aws) #More detailed options
 else
@@ -72,7 +71,7 @@ else
 endif
 
 .PHONY: tf_destroy
-tf_destroy: ## Destroy CloudBees root cluster passed as parameter. Usage: ROOT=ci-alpha make tf_destroy
+tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to aws). Usage: ROOT=eks make tf_destroy
 tf_destroy: guard-ROOT check_aws_env
 	$(call print_title,Destroy $(ROOT) Cluster) |tee -a $(TF_LOG_PATH)
 	@rm -rf $(TF_LOG_PATH)

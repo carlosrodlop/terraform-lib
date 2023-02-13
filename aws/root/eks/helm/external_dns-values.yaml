@@ -1,3 +1,4 @@
+#Defaults to https://artifacthub.io/packages/helm/bitnami/external-dns
 zoneIdFilters:
   - ${zoneIdFilter}
 policy: "sync"

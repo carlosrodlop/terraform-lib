@@ -1,6 +1,6 @@
 output "acm_certificate_arn" {
   description = "ACM certificate ARN"
-  value       = module.acm_certificate.certificate_arn
+  value       = module.acm.acm_certificate_arn
 }
 
 output "eks_cluster_id" {
