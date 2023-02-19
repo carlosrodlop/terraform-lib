@@ -3,9 +3,10 @@ data "aws_availability_zones" "available" {}
 locals {
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
   #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
-  vpc_tags = {
+
+  tags = merge(var.tags, {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-  }
+  })
 }
 
 module "vpc" {
@@ -35,6 +36,6 @@ module "vpc" {
 
   private_subnet_tags = var.private_subnet_tags
 
-  tags = local.vpc_tags
+  tags = local.tags
 
 }

@@ -1,0 +1,4 @@
+#https://artifacthub.io/packages/helm/aws/aws-load-balancer-controller
+nodeSelector:
+  kubernetes.io/os: ${os}
+  kubernetes.io/arch: amd64

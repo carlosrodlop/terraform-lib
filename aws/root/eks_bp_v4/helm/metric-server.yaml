@@ -1,0 +1,4 @@
+#Defaults tohttps://artifacthub.io/packages/helm/metrics-server/metrics-server
+nodeSelector:
+  kubernetes.io/os: ${os}
+  kubernetes.io/arch: amd64

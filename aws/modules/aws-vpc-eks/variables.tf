@@ -23,3 +23,9 @@ variable "private_subnet_tags" {
   description = "value for Private Subnets tags"
   type        = map(string)
 }
+
+variable "tags" {
+  description = "Tags to apply to resources"
+  default     = {}
+  type        = map(string)
+}

@@ -1,5 +1,9 @@
 # AWS
 
+![version](https://img.shields.io/badge/version-v4.20.0-blue)
+
+NOTE: Potential Breaking Changes in Version 5
+
 ## Principles
 
 - Deploy anything on the top of [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
