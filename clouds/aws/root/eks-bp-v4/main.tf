@@ -41,21 +41,23 @@ locals {
 
   kubeconfig_file      = "kubeconfig-${module.eks_blueprints.eks_cluster_id}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
+  helm_values_path     = "${path.module}/../../../../helm-labs/helm/values"
 
 }
 
-#https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html
+
 module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.3.2"
 
   domain_name = var.domain_name
-  zone_id     = local.route53_zone_id
-
   subject_alternative_names = [
-    #"new.sub.${var.domain_name}",
+    "*.ci.${var.domain_name}",
     "*.${var.domain_name}"
   ]
+
+  #https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html
+  zone_id = local.route53_zone_id
 
   tags = local.tags
 }
@@ -159,8 +161,8 @@ module "eks_blueprints" {
     }
   }
   #https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.24.0/node-groups/#windows-self-managed-node-groups
-  enable_windows_support = true
-  self_managed_node_groups = {
+  enable_windows_support = var.windows_nodes
+  self_managed_node_groups = var.windows_nodes == true ? {
     ng_od_windows = {
       node_group_name    = "ng-od-windows"
       launch_template_os = "windows"
@@ -173,7 +175,7 @@ module "eks_blueprints" {
       #It seems not possible to add taints to windows nodes
       #k8s_taints         = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
     }
-  }
+  } : {}
 
   tags = local.tags
 
@@ -182,10 +184,10 @@ module "eks_blueprints" {
 #https://www.bitslovers.com/terraform-null-resource/
 resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks_blueprints]
-  # Enable this to update every time
-  /* triggers = {
+
+  triggers = var.refresh_kubeconf == true ? {
     always_run = "${timestamp()}"
-  } */
+  } : null
   provisioner "local-exec" {
     command = "${module.eks_blueprints.configure_kubectl} --kubeconfig ${local.kubeconfig_file_path}"
   }
@@ -217,16 +219,13 @@ module "eks_blueprints_kubernetes_addons" {
   # Add-ons
   enable_metrics_server = true
   metrics_server_helm_config = {
-    values = [templatefile("${path.module}/helm/metric-server.yaml", {
-      os = "linux"
-    })]
+    values = [file("${local.helm_values_path}/metric-server.yaml")]
   }
-  enable_cluster_autoscaler = true
+  /* BLOCK AUTOSCALER
+  enable_cluster_autoscaler = false
   cluster_autoscaler_helm_config = {
-    values = [templatefile("${path.module}/helm/cluster_autoscaler.yaml", {
-      os = "linux"
-    })]
-  }
+    values = [file("${local.helm_values_path}/cluster-autoscaler.yaml")]
+  } */
   enable_aws_load_balancer_controller = true
   aws_load_balancer_controller_helm_config = {
     #NOTE: Template not working
@@ -239,24 +238,29 @@ module "eks_blueprints_kubernetes_addons" {
   }
   enable_external_dns = true
   external_dns_helm_config = {
-    values = [templatefile("${path.module}/helm/external_dns-values.yaml", {
+    values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
       zoneIdFilter = local.route53_zone_id
-      os           = "linux"
     })]
   }
   enable_ingress_nginx = var.lb_type == "nlb" ? true : false
   ingress_nginx_helm_config = var.lb_type == "nlb" ? {
-    values = [templatefile("${path.module}/helm/nginx-values-nlb.yaml", {
-      hostname     = var.domain_name
-      ssl_cert_arn = module.acm.acm_certificate_arn
+    values = [templatefile("${local.helm_values_path}/aws-nginx-nlb.yaml", {
+      hostname = var.domain_name
+      cert_arn = module.acm.acm_certificate_arn
     })]
   } : null
-
   enable_kube_prometheus_stack = true
   kube_prometheus_stack_helm_config = {
-    values = [templatefile("${path.module}/helm/kube-stack-prometheus-values.yaml", {
-      os = "linux"
+    values = [templatefile("${local.helm_values_path}/kube-stack-prometheus-alb.yaml", {
+      hostname = "grafana.${var.domain_name}"
+      cert_arn = module.acm.acm_certificate_arn
     })]
+    set_sensitive = [
+      {
+        name  = "grafana.adminPassword"
+        value = var.grafana_admin_password
+      }
+    ]
   }
 
   tags = local.tags

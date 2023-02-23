@@ -26,8 +26,9 @@ variable "tags" {
 }
 
 variable "lb_type" {
-  default = "alb"
-  type    = string
+  description = "Type of load balancer to use."
+  default     = "alb"
+  type        = string
 
   validation {
     condition     = contains(["alb", "nlb"], var.lb_type)
@@ -36,6 +37,26 @@ variable "lb_type" {
 }
 
 variable "enable_eks_blueprints_kubernetes_addons" {
-  default = true
-  type    = bool
+  description = "Enable Kubernetes addons for EKS Blueprints. Helm provider."
+  default     = true
+  type        = bool
+}
+
+
+variable "refresh_kubeconf" {
+  description = "Refresh kubeconfig file."
+  default     = false
+  type        = bool
+}
+
+variable "windows_nodes" {
+  description = "Enable Windows nodes for Agents Node Pool."
+  default     = false
+  type        = bool
+}
+
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password."
+  type        = string
 }

@@ -1,3 +1,3 @@
-[submodule "shared-helm"]
-path = shared-helm
-url = git@github.com:carlosrodlop/helm-labs.git
+[submodule "helm-labs"]
+	path = helm-labs
+	url = git@github.com:carlosrodlop/helm-labs.git

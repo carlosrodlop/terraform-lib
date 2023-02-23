@@ -1,6 +1,6 @@
 MKFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-#PARENT_MKFILE   := $(HOME)/.Makefile # docker
-PARENT_MKFILE   := $(MKFILE)/../../carlosrodlop/Makefile # local
+PARENT_MKFILE   := $(HOME)/.Makefile # It requires to be run docker
+#PARENT_MKFILE   := $(MKFILE)/../../carlosrodlop/Makefile # local
 DEBUG			:= true
 ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
@@ -8,7 +8,7 @@ ENV_SHARED		:= $(MKFILE)/env
 # DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
 # ENC_KEY	  	  	:= $(shell age-keygen -y $(SOPS_KEY))
 
-ROOT 			?= eks_bp_v4
+ROOT 			?= eks-bp-v4
 BACKEND         ?= false
 
 include $(PARENT_MKFILE)
@@ -37,19 +37,19 @@ tf_init: ## Init Terraform root passing as parameter (ROOT, default to aws). It 
 tf_init: guard-ROOT guard-BACKEND
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),false)
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
 #else ifeq ($(ROOT),aws) #More detailed options
 else #TODO Test this!
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
 		-backend-config="bucket=$(shell terraform -chdir=$(ROOT_SHARED) output --raw backend_name)" \
 		-backend-config="region=$(shell terraform -chdir=$(ROOT_SHARED) output --raw aws_region)" \
 		-backend-config="dynamodb_table=$(shell terraform -chdir=$(ROOT_SHARED) output --raw dynamo_table_lock_name)"
 		-backend-config="key=state/$(ROOT).tfstate"
 		-backend-config="kms_key_id=alias/$(ROOT)-bucket-key"
-	@terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
 endif
 
 .PHONY: tf_apply
