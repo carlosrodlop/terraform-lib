@@ -41,7 +41,8 @@ locals {
 
   kubeconfig_file      = "kubeconfig-${module.eks_blueprints.eks_cluster_id}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
-  helm_values_path     = "${path.module}/../../../../helm-labs/helm/values"
+  helm_values_path     = "${path.module}/../../../../libs/k8s/helm/values"
+  helm_charts_path     = "${path.module}/../../../../libs/k8s/helm/charts"
 
 }
 
@@ -221,11 +222,10 @@ module "eks_blueprints_kubernetes_addons" {
   metrics_server_helm_config = {
     values = [file("${local.helm_values_path}/metric-server.yaml")]
   }
-  /* BLOCK AUTOSCALER
-  enable_cluster_autoscaler = false
+  enable_cluster_autoscaler = true
   cluster_autoscaler_helm_config = {
     values = [file("${local.helm_values_path}/cluster-autoscaler.yaml")]
-  } */
+  }
   enable_aws_load_balancer_controller = true
   aws_load_balancer_controller_helm_config = {
     #NOTE: Template not working
@@ -252,8 +252,12 @@ module "eks_blueprints_kubernetes_addons" {
   enable_kube_prometheus_stack = true
   kube_prometheus_stack_helm_config = {
     values = [templatefile("${local.helm_values_path}/kube-stack-prometheus-alb.yaml", {
-      hostname = "grafana.${var.domain_name}"
-      cert_arn = module.acm.acm_certificate_arn
+      hostname                         = "grafana.${var.domain_name}"
+      cert_arn                         = module.acm.acm_certificate_arn
+      alertmanager_to_mail             = var.alertmanager_to_mail
+      alertmanager_from_mail           = var.alertmanager_from_mail
+      alertmanager_from_mail_smarthost = var.alertmanager_from_mail_smarthost
+      alertmanager_from_mail_password  = var.alertmanager_from_mail_password
     })]
     set_sensitive = [
       {
@@ -264,4 +268,11 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
   tags = local.tags
+}
+
+resource "helm_release" "kube-prometheus-stack-config" {
+  depends_on = [module.eks_blueprints_kubernetes_addons]
+  name       = "kube-prometheus-stack-config"
+  chart      = "${local.helm_charts_path}/kube-prometheus-stack-config"
+  namespace  = "kube-prometheus-stack"
 }

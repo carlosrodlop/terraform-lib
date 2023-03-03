@@ -60,3 +60,23 @@ variable "grafana_admin_password" {
   description = "Grafana admin password."
   type        = string
 }
+
+variable "alertmanager_to_mail" {
+  description = "Alertmanager to mail."
+  type        = string
+}
+
+variable "alertmanager_from_mail" {
+  description = "Alertmanager from mail."
+  type        = string
+}
+
+variable "alertmanager_from_mail_smarthost" {
+  description = "Alertmanager from mail."
+  type        = string
+}
+
+variable "alertmanager_from_mail_password" {
+  description = "Alertmanager from mail."
+  type        = string
+}
