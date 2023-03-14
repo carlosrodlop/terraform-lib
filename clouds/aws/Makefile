@@ -53,7 +53,7 @@ else #TODO Test this!
 endif
 
 .PHONY: tf_apply
-tf_apply: ## Apply Terraform root passing as parameter (ROOT, default to aws). Usage: ROOT=eks make tf_apply
+tf_apply: ## Apply Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_apply
 tf_apply: check_aws_env guard-ROOT
 	@rm -rf $(TF_LOG_PATH)
 	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
@@ -61,7 +61,7 @@ tf_apply: check_aws_env guard-ROOT
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(ROOT).plan"
 
 .PHONY: tf_destroy
-tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to aws). Usage: ROOT=eks_bp_v4-eks make tf_destroy
+tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
 tf_destroy: guard-ROOT check_aws_env
 	$(call print_title,Destroy $(ROOT) Cluster) |tee -a $(TF_LOG_PATH)
 	@rm -rf $(TF_LOG_PATH)
