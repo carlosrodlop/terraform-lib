@@ -36,13 +36,6 @@ variable "lb_type" {
   }
 }
 
-variable "enable_eks_blueprints_kubernetes_addons" {
-  description = "Enable Kubernetes addons for EKS Blueprints. Helm provider."
-  default     = true
-  type        = bool
-}
-
-
 variable "refresh_kubeconf" {
   description = "Refresh kubeconfig file."
   default     = false
@@ -79,4 +72,16 @@ variable "alertmanager_from_mail_smarthost" {
 variable "alertmanager_from_mail_password" {
   description = "Alertmanager from mail."
   type        = string
+}
+
+variable "enable_addon_global" {
+  description = "Enable Kubernetes addons for EKS Blueprints. Helm provider."
+  default     = true
+  type        = bool
+}
+
+variable "enable_addon_kube_prometheus_stack" {
+  description = "Enable kube-prometheus-stack."
+  default     = true
+  type        = bool
 }
