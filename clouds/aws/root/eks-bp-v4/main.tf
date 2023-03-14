@@ -54,6 +54,7 @@ module "acm" {
   domain_name = var.domain_name
   subject_alternative_names = [
     "*.ci.${var.domain_name}",
+    "*.cd.${var.domain_name}",
     "*.${var.domain_name}"
   ]
 
@@ -199,7 +200,7 @@ resource "null_resource" "update_kubeconfig" {
 #---------------------------------------------------------------
 
 module "eks_blueprints_kubernetes_addons" {
-  count  = var.enable_eks_blueprints_kubernetes_addons ? 1 : 0
+  count  = var.enable_addon_global ? 1 : 0
   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.24.0"
 
   eks_cluster_id       = module.eks_blueprints.eks_cluster_id
@@ -249,30 +250,40 @@ module "eks_blueprints_kubernetes_addons" {
       cert_arn = module.acm.acm_certificate_arn
     })]
   } : null
-  enable_kube_prometheus_stack = true
-  kube_prometheus_stack_helm_config = {
-    values = [templatefile("${local.helm_values_path}/kube-stack-prometheus-alb.yaml", {
-      hostname                         = "grafana.${var.domain_name}"
-      cert_arn                         = module.acm.acm_certificate_arn
-      alertmanager_to_mail             = var.alertmanager_to_mail
-      alertmanager_from_mail           = var.alertmanager_from_mail
-      alertmanager_from_mail_smarthost = var.alertmanager_from_mail_smarthost
-      alertmanager_from_mail_password  = var.alertmanager_from_mail_password
-    })]
+  enable_kube_prometheus_stack = var.enable_addon_kube_prometheus_stack
+  kube_prometheus_stack_helm_config = var.enable_addon_kube_prometheus_stack ? {
+    values = [
+      templatefile("${local.helm_values_path}/kube-stack-prometheus.yaml", {
+        alertmanager_to_mail             = var.alertmanager_to_mail
+        alertmanager_from_mail           = var.alertmanager_from_mail
+        alertmanager_from_mail_smarthost = var.alertmanager_from_mail_smarthost
+        alertmanager_from_mail_password  = var.alertmanager_from_mail_password
+      }),
+      templatefile("${local.helm_values_path}/kube-stack-prometheus-grafana-alb.yaml", {
+        hostname                         = "grafana.${var.domain_name}"
+        cert_arn                         = module.acm.acm_certificate_arn
+      })
+    ]
     set_sensitive = [
       {
         name  = "grafana.adminPassword"
         value = var.grafana_admin_password
       }
     ]
-  }
+  } : null
 
   tags = local.tags
 }
 
-resource "helm_release" "kube-prometheus-stack-config" {
-  depends_on = [module.eks_blueprints_kubernetes_addons]
-  name       = "kube-prometheus-stack-config"
-  chart      = "${local.helm_charts_path}/kube-prometheus-stack-config"
-  namespace  = "kube-prometheus-stack"
+resource "helm_release" "kube-prometheus-stack-local" {
+  count             = var.enable_addon_kube_prometheus_stack ? 1 : 0
+  depends_on        = [module.eks_blueprints_kubernetes_addons]
+  name              = "kube-prometheus-stack-local"
+  chart             = "${local.helm_charts_path}/kube-prometheus-stack-local"
+  namespace         = "kube-prometheus-stack"
+  create_namespace  = true
+  timeout           = 1200
+  wait              = true
+  max_history       = 0
+  version           = "0.1.4"
 }
