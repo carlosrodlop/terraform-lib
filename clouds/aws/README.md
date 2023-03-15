@@ -41,3 +41,4 @@ It contains resources that can be shared across different Cloud Providers and ar
 - [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
 - [Amazon EKS Workshop :: Amazon EKS Workshop](https://www.eksworkshop.com/)
 - [Artifact Hub](https://artifacthub.io/)
+- [Cloud comparison Tables](https://media.licdn.com/dms/image/C5622AQEWNRJe_IJN1Q/feedshare-shrink_2048_1536/0/1678887625639?e=1681948800&v=beta&t=izj3rSdiOc4iMoqd8UuYScEzZXp6epoSSb7x9tFLFOc)
