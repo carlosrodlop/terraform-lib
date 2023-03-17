@@ -18,27 +18,10 @@ NOTE: Potential Breaking Changes in Version 5
 - [EKS Blueprints outputs](https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/main/outputs.tf)
 - [EKS Examples](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/main/examples)
 
-## Shared
-
-It contains resources that can be shared across different Cloud Providers and are not tight to AWS.
-
-- Managed Secrets as [Kubernetes Secrets](https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets) and mounted them in the `SECRET` path of the container.
-- CloudBees Configuration as Code
-  - Controllers: [carlosrodlop/cb-casc-controllers](https://github.com/carlosrodlop/cb-casc-controllers)
-  - Operation Center: [carlosrodlop/cb-casc-oc](https://github.com/carlosrodlop/cb-casc-oc)
-- Helm Chart Repository:
-
-### Target Applications
-
-#### CloudBees
-
-- [CloudBees CI Docs](https://docs.cloudbees.com/docs/cloudbees-ci/latest/)
-- [CloudBees CI release notes | CloudBees Docs](https://docs.cloudbees.com/docs/release-notes/latest/cloudbees-ci/)
-
 ## References
 
 - [EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/)
 - [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
 - [Amazon EKS Workshop :: Amazon EKS Workshop](https://www.eksworkshop.com/)
-- [Artifact Hub](https://artifacthub.io/)
-- [Cloud comparison Tables](https://media.licdn.com/dms/image/C5622AQEWNRJe_IJN1Q/feedshare-shrink_2048_1536/0/1678887625639?e=1681948800&v=beta&t=izj3rSdiOc4iMoqd8UuYScEzZXp6epoSSb7x9tFLFOc)
+- [Digital Cloud AWS Cheat Sheets](https://digitalcloud.training/aws-cheat-sheets/)
+- [IAM Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp?#)

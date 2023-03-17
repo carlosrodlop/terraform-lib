@@ -7,15 +7,7 @@
 
 ## My ![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg) references
 
+- [Artifact Hub](https://artifacthub.io/)
 - [Awesome Terraform Repos](https://github.com/stars/carlosrodlop/lists/iac-terraform)
 - [Cómo MANGO aplica DevOps: AWS, Jenkins, Kubernetes… | #laFunción 7x29 - YouTube](https://www.youtube.com/watch?v=61C6wD_y1HA&t=195s)
-
-### AWS
-
-- [Digital Cloud AWS Cheat Sheets](https://digitalcloud.training/aws-cheat-sheets/)
-- [IAM Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp?#)
-
-### GCP
-
-- [Terraform blueprints and modules for Google Cloud](https://cloud.google.com/docs/terraform/blueprints/terraform-blueprints)
-- [Best practices  |  Kubernetes Engine Documentation  |  Google Cloud](https://cloud.google.com/kubernetes-engine/docs/best-practices)
+- [Cloud comparison Tables](https://media.licdn.com/dms/image/C5622AQEWNRJe_IJN1Q/feedshare-shrink_2048_1536/0/1678887625639?e=1681948800&v=beta&t=izj3rSdiOc4iMoqd8UuYScEzZXp6epoSSb7x9tFLFOc)
