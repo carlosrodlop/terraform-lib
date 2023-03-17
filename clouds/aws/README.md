@@ -20,6 +20,7 @@ NOTE: Potential Breaking Changes in Version 5
 
 ## References
 
+- [Awesome AWS/EKS Repos](https://github.com/stars/carlosrodlop/lists/aws-eks)
 - [EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/)
 - [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
 - [Amazon EKS Workshop :: Amazon EKS Workshop](https://www.eksworkshop.com/)
