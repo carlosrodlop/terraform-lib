@@ -495,13 +495,16 @@ Exam tip: You can stop and start an EC2 instance to move it to a different physi
 
 #### EC2 Hibernate
 
-- Allows you to hibernate your EC2 instances, so that you can stop them and pick back up where you left off again.
-- It does this by saving the content from the in-memory state of the instance (RAM) to your EBS root volume.
-- You can hibernate an instance only if it’s enabled for hibernation and it meets the hibernation prerequisites.
-- Useful for long running services and services that take long to boot.
-- Can’t hibernate for more than 60 days.
-- Once in hibernation mode there is no hourly charge — you only pay for the elastic IP Address & other attached volumes.
+- Hibernation saves the contents from the instance memory (RAM) to your Amazon Elastic Block Store (Amazon EBS) root volume. Amazon EC2 persists the instance's EBS root volume and any attached EBS data volumes. When you start your instance:
+  - The EBS root volume is restored to its previous state
+  - The RAM contents are reloaded
+  - The processes that were previously running on the instance are resumed
+  - Previously attached data volumes are reattached and the instance retains its instance
 - Boots up a lot faster after hibernation as it does not need to reload the operating system.
+- You can hibernate an instance only if it’s enabled for hibernation and it meets the hibernation prerequisites.
+  - Can’t hibernate for more than 60 days.
+- Use case: For long running services and services that take long to boot. You can stop them and pick back up where you left off again.
+- Once in hibernation mode there is no hourly charge — you only pay for the elastic IP Address & other attached volumes.
 
 #### EC2 Instance Types
 
@@ -559,6 +562,9 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
     - Useful for regulatory requirements that may not support multi-tenant virtualisation.
     - Great for licensing which doesn't support multi-tenancy or cloud.
 
+Exam Question: A company runs a large batch processing job at the end of every quarter. The processing job runs for 5 days and uses 15 Amazon EC2 instances. The processing must run uninterrupted for 5 hours per day. The company is investigating ways to reduce the cost of the batch processing job. Which pricing model should the company choose?
+  - Each EC2 instance runs for 5 hours a day for 5 days per quarter or 20 days per year. This is time duration is insufficient to warrant `Reserved` instances as these require a commitment of a minimum of 1 year. In this case, there are no options presented that can reduce the cost and therefore on-demand instances should be used. ==> Only option is `On-Demand`.
+
 #### Security Groups
 
 - A security group acts as a virtual firewall for your EC2 instances to control incoming and outgoing traffic.
@@ -582,9 +588,9 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 - Elastic Network Interface (ENI) is a virtual network card, which you attach to EC2 instance in same AZ which is used to ensure a good network performance.
   - Enhanced Networking provides higher bandwidth, higher packets per second performance consistently lower it into instance latencies, and there's no additional charge for using
 - Types:
-  - Elastic Network Adapter (ENA) for C4, D2, and M4 EC2 instances, Upto 100 Gbps network speed.
-  - Intel 82599 Virtual Function (VF) Interface for C3, C4, D2, I2, M4, and R3 EC2 instances, Upto 10 Gbps network speed. Old instance types.
-  - Elastic Fabric Adapter (EFA) is ENA with additional OS-bypass functionality, which enables HPC and Machine Learning applications to bypass the operating system kernel and communicate directly with EFA device resulting in very high performance and low latency. for M5, C5, R5, I3, G4, metal EC2 instances.
+  - `Elastic Network Adapter (ENA)` for C4, D2, and M4 EC2 instances, Upto 100 Gbps network speed.
+  - `Intel 82599 Virtual Function (VF)` Interface for C3, C4, D2, I2, M4, and R3 EC2 instances, Upto 10 Gbps network speed. Old instance types.
+  - `Elastic Fabric Adapter (EFA)` is ENA with additional OS-bypass functionality, which enables **tightly-coupled High Performance Computing (HPC) and Machine Learning** applications to bypass the operating system kernel and communicate directly with EFA device resulting in very high performance and low latency. for M5, C5, R5, I3, G4, metal EC2 instances.
 
 #### EC2 Placement Groups Strategy
 
@@ -1006,6 +1012,9 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - `Glacier`: Cheaper choice to Archive Data. Retrival time configurable from minutes to hours
 - `Glacier Deep Archive`: Cheapest choice for Long-term storage of large amount of data for compliance. Retrival time configurable but slower than `Glacier`, strating from 12 hours.
 
+- Use Case: A team are planning to run analytics jobs on log files each day and require a storage solution. The size and number of logs is unknown and data will persist for 24 hours only. What is the MOST cost-effective solution?
+  - S3 standard is the best choice in this scenario for a short term storage solution. In this case the size and number of logs is unknown and it would be difficult to fully assess the access patterns at this stage. Therefore, using S3 standard is best as it is cost-effective, provides immediate access, and there are no retrieval fees or minimum capacity charge per object.
+
 #### Sharing S3 buckets Across Accounts
 
 For multiple accounts within the same organisation, to share S3 buckets among account:
@@ -1056,11 +1065,10 @@ aws s3 presign s3://mybucket/myobject --expires-in 300
 
 - It acts **like a backup tool** that stores all versions of an object (even writes & deletes).
   - If you delete a file it will still show up in versioning with the delete marker on it.
+- `Versioning's MFA Delete capability`, which uses multi-factor authentication, can be used to provide an **additional layer of security**.
 - When enabled on your bucket it cannot be disabled — only suspended.
-- It is possible to integrate it with lifecycle rules.
 - If you mark a single file as public and then upload a new version of it — the new version is private.
 - The size of your S3 bucket is the sum of all files and all versions of those files.
-- Versioning's MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security.
 
 #### S3 Performance
 
@@ -1157,7 +1165,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 | SSD VolumeTypes                  |  Description                         |  Usage                                                                                                             |
 | -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| General Purpose _SSD_ (gp2/gp3)  | Max 16000 IOPS                       | Balances price and performance and can be used for most workloads (boot volumes, dev environment, virtual desktop) |
+| General Purpose _SSD_ (gp2/gp3)  | Max **16000 IOPS**                       | Balances price and performance and can be used for most workloads (boot volumes, dev environment, virtual desktop) |
 | Provisioned IOPS _SSD_ (io1/io2) | 16000 - 64000 IOPS, EBS Multi-Attach | Mission critical business application, Databases (large SQL and NoSQL database workloads)                          |
 
 **B/ HDD** (Hard Disk Drive) or Magnectic for large/sequential IO operations, High Throughput means number of bytes read and write per second
@@ -1402,7 +1410,7 @@ Exam tip: the key use cases for ElastiCache are offloading reads from a database
 
 ### Amazon Kinesis
 
-- KeyWords: Streaming media
+- KeyWords: Streaming media, Real-time
 
 ![Amazon Kinesis](https://d1.awsstatic.com/Digital%20Marketing/House/1up/products/kinesis/Product-Page-Diagram_Amazon-Kinesis-Data-Streams.e04132af59c6aa1e9372cabf44a17749f4a81b16.png)
 
@@ -1414,6 +1422,8 @@ Exam tip: the key use cases for ElastiCache are offloading reads from a database
 - Enables playback, analytics and machine learning on video data that has been ingested.
 
 #### Kinesis Data Streams
+
+![Kinesis Data Streams](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-04-57-65202de89627ab9ac70ef6b89817c981.jpg)
 
 - It is SaaS for streaming data that makes it easy to capture, process, and store data streams at any scale.
 - Automatically stores data and encrypts it at rest
@@ -1428,6 +1438,7 @@ Exam tip: the key use cases for ElastiCache are offloading reads from a database
 - A shard is a sequence of data records in a stream with a fixed unit of capacity.
 - A shard can support 5 transactions per second for reads with a max 2mb read rate per second.
 - Only data streams have shards. The total capacity of a stream is the sum of the capacities of its shards.
+- A partition key is used to group data by shard within a stream. Kinesis Data Streams segregates the data records belonging to a stream into multiple shards. It uses the partition key that is associated with each data record to determine which shard a given data record belongs to.
 
 #### Kinesis Firehose
 
@@ -1530,6 +1541,9 @@ Go to [Index](#index)
 | FSx File Gateway | SMB & NTFS | FSx -> S3                               | Windows or Lustre File Server, integration with Microsoft AD                                                                         |
 | Volume Gateway   | iSCSI      | S3 -> EBS                               | Block storage in S3 with backups as EBS snapshots. Use **Cached Volume** for low-latency and **Stored Volume** for scheduled backups |
 | Tape Gateway     | iSCSI VTL  | S3 -> S3 Glacier & Glacier Deep Archive | Backup data in S3 and archive in Glacier using tape-based process                                                                    |
+
+- Use Case: Storage capacity has become an issue for a company that runs application servers on-premises. The servers are connected to a combination of block storage and NFS storage solutions. The company requires a solution that supports local caching without re-architecting its existing applications.
+  - The AWS Storage Gateway volume gateway should be used to replace the block-based storage systems as it is mounted over iSCSI and the file gateway should be used to replace the NFS file systems as it uses NFS.
 
 ### AWS DataSync
 
@@ -1830,7 +1844,7 @@ There are several methods of connecting to a VPC, including connection from Data
 
 - What: Common strategy for connecting geographically dispersed VPCs and locations to create a global network transit center (central hub)
 - When: Locations and VPC-deployed assets across multiple regions that need to communicate with one another
-- Pros: Ultimate flexibility and manageability but also AWS-managed VPN hub-and-spoke between VPCs. Supports IP Multicast, so can distribute the same content to multiple specific destinations (NOT supported by any other service). Simplify network topology.
+- Pros: Ultimate flexibility and manageability but also AWS-managed VPN hub-and-spoke between VPCs. Supports IP Multicast, so can distribute the same content to multiple specific destinations (NOT supported by any other service). Simplify network topology
 - Cons: You must design for any redundancy across the whole chain
 - How: Providers like Cisco, Juniper Networks, and Riverbed have offerings which work with their equipment and AWS VPC
 
@@ -1838,7 +1852,9 @@ There are several methods of connecting to a VPC, including connection from Data
 
 ![VPC Peering](https://docs.aws.amazon.com/images/vpc/latest/peering/images/peering-intro-diagram.png)
 
-- What: AWS-provided network connectivity between VPCs. It connects two VPC over a direct network route using private IP addresses. Instances on peered VPCs behave just like they are on the same network. Can connect one VPC to another in same or different region. VPC peering in different region called as VPC inter-region peering. Can connect one VPC to another in same or different AWS account
+- What: AWS-provided network connectivity between VPCs. It connects two VPC over a direct network route using **private IP addresses** (secure). Instances on peered VPCs behave just like they are on the same network.
+  - It can connect one VPC to another in same or different region (VPC inter-region peering).
+  - It can connect one VPC to another in same or different AWS account.
 - When: Multiple VPCs need to connect with one another and access their resources
 - Pros: Uses AWS backbone without traversing the internet
 - Cons: Transitive peering is not supported. Its connections are 1 to 1 (not transitive) i.e. VPC-A peering VPC-B and VPC-B peering to VPC-C doesn’t mean VPC-A peering VPC-C.
@@ -1914,7 +1930,10 @@ There are several methods of connecting to a VPC, including connection from Data
 - Use Cases:
   1. A company offers an online product brochure that is delivered from a static website running on Amazon S3. The company’s customers are mainly in the United States, Canada, and Europe. With Amazon CloudFront you can set the price class to determine where in the world the content will be cached. One of the price classes is “U.S, Canada and Europe” and this is where the company’s users are located. Choosing this price class will result in lower costs and better performance for the company’s users.
   2. A company runs a web application that serves weather updates. The application runs on a fleet of Amazon EC2 instances in a Multi-AZ Auto scaling group behind an Application Load Balancer (ALB). A solutions architect needs to make the application more resilient to sporadic increases in request rates.
-  - On the frontend an Amazon CloudFront distribution can be placed in front of the ALB and this will cache content for better performance and also offloads requests from the backend.
+     - On the frontend an Amazon CloudFront distribution can be placed in front of the ALB and this will cache content for better performance and also offloads requests from the backend.
+  3. An organization want to share regular updates about their charitable work using static webpages. The pages are expected to generate a large amount of views from around the world. The files are stored in an Amazon S3 bucket. A solutions architect has been asked to design an efficient and effective solution => Amazon CloudFront can be used to cache the files in edge locations around the world and this will improve the performance of the webpages. Possible configuration. Using a REST API endpoint or Using a website endpoint as the origin with anonymous (public) access allowed or with access restricted by a Referer header.
+  4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website.Which combination of actions should a solutions architect take to increase availability?
+     - You can set up CloudFront with origin failover for scenarios that require high availability. To get started, you create an origin group with two origins: a primary and a secondary. If the primary origin is unavailable or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.
 
 #### Restricting Access to CloudFront: Signed URL or Signed Cookies
 
