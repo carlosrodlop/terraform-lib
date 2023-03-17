@@ -5,9 +5,10 @@
 - It contains deployments for Kubernetes Cluster and its pre-requisites for different Cloud providers.
 - It uses the [Docker Labs](https://github.com/carlosrodlop/docker-labs) repository to run its content and make this content portable.
 
-## References
+## My ![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg) references
 
 - [Awesome Terraform Repos](https://github.com/stars/carlosrodlop/lists/iac-terraform)
+- [Cómo MANGO aplica DevOps: AWS, Jenkins, Kubernetes… | #laFunción 7x29 - YouTube](https://www.youtube.com/watch?v=61C6wD_y1HA&t=195s)
 
 ### AWS
 
