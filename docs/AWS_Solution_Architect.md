@@ -318,7 +318,7 @@ b. `Identity pools`: Cognito elements grant users temporary credentials to other
 
 Steps: You first authenticate user using `Cognito User Pools` and then exchange token with `Cognito Identity Pools` which further use `AWS STS` to generate temporary AWS credentials to access AWS Resources.
 
-Exam tip: To make it easier to remember the different between User Pools and Identity Pools, think of Users Pools as being like IAM Users or Active Directory and an Identity Pools as being like an IAM Role.
+**Exam Tip :** To make it easier to remember the different between User Pools and Identity Pools, think of Users Pools as being like IAM Users or Active Directory and an Identity Pools as being like an IAM Role.
 
 ### AWS Key Management Service (KMS)
 
@@ -347,7 +347,7 @@ Exam tip: To make it easier to remember the different between User Pools and Ide
   - `AWS Managed CMKs` (Dedicated to my account) → These are free and are created by an AWS service on your behalf and are managed for you. However, only that service can use them. Used by default if you pick encryption in most AWS services
   - `AWS Owned CMKs` (No Dedicated to my account) → owned and managed by AWS and shared across many accounts.
 
-Exam tip: Encryption keys are regional.
+**Exam Tip :** Encryption keys are regional.
 
 ### AWS CloudHSM
 
@@ -500,7 +500,7 @@ Exam tip: You can stop and start an EC2 instance to move it to a different physi
   - The RAM contents are reloaded
   - The processes that were previously running on the instance are resumed
   - Previously attached data volumes are reattached and the instance retains its instance
-- Boots up a lot faster after hibernation as it does not need to reload the operating system.
+- In comparison with EBS snapshot restore ==> Boots up a lot faster after hibernation as it does not need to reload the operating system.
 - You can hibernate an instance only if it’s enabled for hibernation and it meets the hibernation prerequisites.
   - Can’t hibernate for more than 60 days.
 - Use case: For long running services and services that take long to boot. You can stop them and pick back up where you left off again.
@@ -611,7 +611,10 @@ Exam Question: A company runs a large batch processing job at the end of every q
 - Customized image of an EC2 instance, having built-in OS, softwares, configurations, etc.
 - AMI's can be created from both Volumes and Snapshots.
   - You can create an AMI from EC2 instance and launch a new EC2 instance from AMI.
-- AMI are built for a specific region and can be copied across regions
+- AMI are built for a specific region and **can be copied across regions**
+- Use Cases: A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, a solutions architect needs to ensure that the resources can also be deployed to a second Region.
+  - Copy an Amazon Machine Image (AMI) of an EC2 instance and specify the second Region for the destination
+  - Launch a new EC2 instance from an Amazon Machine Image (AMI) in the second Region
 
 ### Elastic Load Balancing (ELB)
 
@@ -1100,26 +1103,31 @@ mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
 
 - For download this is call `S3 Byte Range Fetches` — Parallelises download by specifying byte ranges, which speeds up downloads and can download partial amounts of info.
 
-#### S3 Storage Gateway
+### AWS Storage Gateway
 
-- Is a hybrid cloud storage service for **connecting on-premises software applications with cloud based storage**.
-- Can be downloaded as a Virtual Machine Image and installed in your datacenter.
-- Has low latency as it caches data in the local VM or gateway hardware appliance.
-- Storage Gateways Type
-  - **1.** File Gateway (protocol NFS & SMB).
-    - Stores objects directly in s3.
-    - Utilises standard storage protocols with NFS & SMB.
-    - Use case: on-premise backup to the cloud
-  - **2.** Volume Gateway (ISCSI block protocol)
-    - Presents your applications with disk volumes using ISCSI block protocol.
-    - Stores/manages on-premise data in S3.
-    - It allows you to take point-in-time snapshots using AWS Backup and stores them in EBS (Only captures changed blocks).
-    - Types of Volume Gateways:
-      - Stored Volumes — Entire Dataset is stored on site and is asynchronously backed up to S3. Store you primary data locally so there is low latency to the entire dataset and then asynchronously backs up that data to S3.
-      - Cached Volumes — Entire Dataset is stored on S3 and the most frequently accessed data is cached on site. Uses s3 as your primary storage while retaining frequently accessed data locally. Minimise need to scale your on-premise infrastructure.
-  - **3.** Tape Gateway (VTL)
-    - Durable, cost effective archiving.
-    - Is a way of replacing physical tapes with a virtual tape interface in AWS without changes existing backup workflows.
+- Keyword: Hybrid solution without need to re-architecting
+
+![storagegateway](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_AWS-Storage-Gateway_HIW@2x.6df96d96cdbaa61ed3ce935262431aabcfb9e52d.png)
+
+- It is a set of **hybrid cloud storage** services that provide on-premises access to virtually unlimited cloud storage.
+- How? Applications connect to the Storage Gateway service through a virtual machine or hardware appliance that is installed on site (the data center) and uses standard protocols such as NFS, SMB, and iSCSI. This local device connects to the Storage Gateway service which in turn connects to AWS storage services such as Amazon S3, Amazon S3 Glacier, Amazon S3 Glacier Deep Archive and Amazon EBS, thus providing storage for your applications. This device is also used as a **local cache** to provide low latency access to the most active data. Since our priority at AWS is security, the connection to the AWS Storage Gateway service is made through a secure channel using HTTPS.
+
+![storagegateway_how](https://d2908q01vomqb2.cloudfront.net/4d134bc072212ace2df385dae143139da74ec0ef/2020/11/05/image002-2.png)
+
+- Types:
+
+| Storage Gateway  | Protocol   | Backed by                               | Use Case                                                                                                                             |
+| ---------------- | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| File Gateway     | NFS & SMB  | S3 -> S3-IA, S3 One Zone-IA             | Store files as object in S3, with a local cache for low-latency access, with user auth using Active Directory. On-premise backup to the cloud  |
+| FSx File Gateway | SMB & NTFS | FSx -> S3                               | Windows or Lustre File Server, integration with Microsoft AD |
+| Volume Gateway   | iSCSI (block protocol) | S3 -> EBS  | Block storage in S3 with **backups as EBS snapshots**. Use `Cached Volume`  (for low-latency) Dataset is stored on S3 and the most frequently accessed data is cached on site and `Stored Volume` for (scheduled backups) Dataset is stored on site and is asynchronously backed up to S3|
+| Tape Gateway     | VTL  | S3 -> S3 Glacier & Glacier Deep Archive | Durable, cost effective archiving. Backup data in S3 and archive in Glacier using tape-based process. It is a way of replacing physical tapes with a virtual tape interface in AWS without changes existing backup workflows.                                                                    |
+
+- Use Cases:
+  1. Storage capacity has become an issue for a company that runs application servers on-premises. The servers are connected to a combination of block storage and NFS storage solutions. The company requires a solution that supports local caching without re-architecting its existing applications.
+     - The AWS Storage Gateway Volume gateway should be used to replace the block-based storage systems as it is mounted over iSCSI and the file gateway should be used to replace the NFS file systems as it uses NFS.
+  2. A company is investigating methods to reduce the expenses associated with on-premises backup infrastructure. The Solutions Architect wants to reduce costs by eliminating the use of physical backup tapes. It is a requirement that existing backup applications and workflows should continue to function.
+     - The AWS Storage Gateway Tape Gateway enables you to replace using physical tapes on premises with virtual tapes in AWS without changing existing backup workflows.
 
 ###  Instance Store
 
@@ -1377,7 +1385,7 @@ Go to [Index](#index)
 - Caching is a balancing act between up-to-date accurate information and latency.
 - The further up you cache in your architecture the better e.g. at CloudFront level instead of waiting to DB level.
 
-Exam tip: the key use cases for ElastiCache are offloading reads from a database and storing the results of computations and session state. Also, remember that ElastiCache is an in-memory database and it’s a managed service (so you can’t run it on EC2).
+**Exam tip** : the key use cases for ElastiCache are offloading reads from a database and storing the results of computations and session state. Also, remember that ElastiCache is an in-memory database and it’s a managed service (so you can’t run it on EC2).
 
 ### Redshift
 
@@ -1523,27 +1531,6 @@ Go to [Index](#index)
 | Snowmobile    | 100PB   | N/A | offline        | no       | Exabyte scale  |
 
 ![snowmobile](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Snowmobile%402x.4f7215d254697f7cb01d2e7189b81cb660165260.png)
-
-### AWS Storage Gateway
-
-![storagegateway](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_AWS-Storage-Gateway_HIW@2x.6df96d96cdbaa61ed3ce935262431aabcfb9e52d.png)
-
-- It is a set of **hybrid cloud storage** services that provide on-premises access to virtually unlimited cloud storage.
-- How? Applications connect to the Storage Gateway service through a virtual machine or hardware appliance that is installed on site and uses standard protocols such as NFS, SMB, and iSCSI. This local device connects to the Storage Gateway service which in turn connects to AWS storage services such as Amazon S3, Amazon S3 Glacier, Amazon S3 Glacier Deep Archive and Amazon EBS, thus providing storage for your applications. This device is also used as a local cache to provide low latency access to the most active data. Since our priority at AWS is security, the connection to the AWS Storage Gateway service is made through a secure channel using HTTPS.
-
-![storagegateway_how](https://d2908q01vomqb2.cloudfront.net/4d134bc072212ace2df385dae143139da74ec0ef/2020/11/05/image002-2.png)
-
-- Types:
-
-| Storage Gateway  | Protocol   | Backed by                               | Use Case                                                                                                                             |
-| ---------------- | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| File Gateway     | NFS & SMB  | S3 -> S3-IA, S3 One Zone-IA             | Store files as object in S3, with a local cache for low-latency access, with user auth using Active Directory                        |
-| FSx File Gateway | SMB & NTFS | FSx -> S3                               | Windows or Lustre File Server, integration with Microsoft AD                                                                         |
-| Volume Gateway   | iSCSI      | S3 -> EBS                               | Block storage in S3 with backups as EBS snapshots. Use **Cached Volume** for low-latency and **Stored Volume** for scheduled backups |
-| Tape Gateway     | iSCSI VTL  | S3 -> S3 Glacier & Glacier Deep Archive | Backup data in S3 and archive in Glacier using tape-based process                                                                    |
-
-- Use Case: Storage capacity has become an issue for a company that runs application servers on-premises. The servers are connected to a combination of block storage and NFS storage solutions. The company requires a solution that supports local caching without re-architecting its existing applications.
-  - The AWS Storage Gateway volume gateway should be used to replace the block-based storage systems as it is mounted over iSCSI and the file gateway should be used to replace the NFS file systems as it uses NFS.
 
 ### AWS DataSync
 
@@ -1874,14 +1861,18 @@ There are several methods of connecting to a VPC, including connection from Data
 
 ##### VPC endpoints
 
-- Allows you to **privately connect a VPC to other AWS resources** and it is powered by Private Link.
-- Instances in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
+- Allows you to **privately connect a VPC to other AWS resources** and it is powered by `Private Link`.
+  - Instances in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
 - Eliminates the need of an Internet Gateway and NAT Instances/Gateway for instances in public and private subnets to access the other AWS services through public internet.
 - 2 types:
-  - Interface endpoint → Attach an Elastic Network Interface (ENI) with a private IP address onto your EC2 instance for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a supported service.
-  - Gateway endpoint → Create it as a route table target for traffic to services, like NAT gateways — its supported for only S3 & Dynamo.
+  - `Interface endpoint` → Attach an Elastic Network Interface (ENI) with a private IP address onto your EC2 instance for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a supported service.
+  - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for only S3 & Dynamo.
 
-`EXAM TIP`: Know which services use interface endpoints and gateway endpoints. The easiest way to remember this is that Gateway Endpoints are for Amazon S3 and DynamoDB only.
+- **Exam Tip :**
+  1. Know which services use interface endpoints and gateway endpoints. The easiest way to remember this is that Gateway Endpoints are for Amazon S3 and DynamoDB only.
+  2. In addition to VPC endpoints, it is require an route table to link the 2 services (e.g EC2 and DynamoDB via Gateway endpoint)
+
+![EC2 and DynamoDB via Gateway endpoint](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-00-45-ac665c89acb1641afb831f1eb795210e.jpg)
 
 ### Amazon API Gateway
 
@@ -1910,6 +1901,8 @@ There are several methods of connecting to a VPC, including connection from Data
 - Within endpoint, global accelerator monitor health checks of all AWS resources to send traffic to healthy resources only
 
 ### Amazon CloudFront
+
+- Keywords: Global Caché, Distribution
 
 ![cloudfront](https://docs.aws.amazon.com/images/AmazonCloudFront/latest/DeveloperGuide/images/how-you-configure-cf.png)
 
