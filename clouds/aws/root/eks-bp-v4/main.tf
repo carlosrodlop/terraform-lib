@@ -260,8 +260,8 @@ module "eks_blueprints_kubernetes_addons" {
         alertmanager_from_mail_password  = var.alertmanager_from_mail_password
       }),
       templatefile("${local.helm_values_path}/kube-stack-prometheus-grafana-alb.yaml", {
-        hostname                         = "grafana.${var.domain_name}"
-        cert_arn                         = module.acm.acm_certificate_arn
+        hostname = "grafana.${var.domain_name}"
+        cert_arn = module.acm.acm_certificate_arn
       })
     ]
     set_sensitive = [
@@ -276,14 +276,14 @@ module "eks_blueprints_kubernetes_addons" {
 }
 
 resource "helm_release" "kube-prometheus-stack-local" {
-  count             = var.enable_addon_kube_prometheus_stack ? 1 : 0
-  depends_on        = [module.eks_blueprints_kubernetes_addons]
-  name              = "kube-prometheus-stack-local"
-  chart             = "${local.helm_charts_path}/kube-prometheus-stack-local"
-  namespace         = "kube-prometheus-stack"
-  create_namespace  = true
-  timeout           = 1200
-  wait              = true
-  max_history       = 0
-  version           = "0.1.4"
+  count            = var.enable_addon_kube_prometheus_stack ? 1 : 0
+  depends_on       = [module.eks_blueprints_kubernetes_addons]
+  name             = "kube-prometheus-stack-local"
+  chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"
+  namespace        = "kube-prometheus-stack"
+  create_namespace = true
+  timeout          = 1200
+  wait             = true
+  max_history      = 0
+  version          = "0.1.4"
 }
