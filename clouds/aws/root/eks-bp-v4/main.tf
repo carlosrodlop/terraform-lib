@@ -150,17 +150,27 @@ module "eks_blueprints" {
       desired_size   = 1
       subnet_ids     = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
     },
-    mg_58xL_spot = {
-      node_group_name = "managed-spot"
-      #https://aws.amazon.com/ec2/instance-types/
-      instance_types = ["m5.8xlarge"]
-      capacity_type  = "SPOT"
-      min_size       = 1
-      max_size       = 6
-      desired_size   = 1
-      subnet_ids     = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
-      k8s_taints     = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
+    mg_54xL_agent = {
+      node_group_name = "managed-agent"
+      instance_types  = ["m5.4xlarge"]
+      capacity_type   = "ON_DEMAND"
+      min_size        = 1
+      max_size        = 1
+      desired_size    = 1
+      subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+      k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
     }
+    mg_54xL_agent_spot = {
+      node_group_name = "managed-agent-spot"
+      instance_types  = ["m5.4xlarge"]
+      capacity_type   = "SPOT"
+      min_size        = 1
+      max_size        = 6
+      desired_size    = 1
+      subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+      k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
+    }
+
   }
   #https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.24.0/node-groups/#windows-self-managed-node-groups
   enable_windows_support = var.windows_nodes
