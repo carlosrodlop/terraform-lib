@@ -400,13 +400,13 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
-- **Web Application Firewall** add an extra layer of protection to your web applications or APIs against web attacks from common exploits, such as SQL injection or Cross-site scripting (XSS).
+- **Web Application Firewall** protect against **Layer 7** (HTTP & HTTPS) attacks, adding protection to your web applications or APIs against web attacks from common exploits, such as SQL injection or Cross-site scripting (XSS).
   - SQL injection is a code injection technique used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution (e.g. to dump the database contents to the attacker).
   - Cross-site scripting (XSS) attacks enable attackers to inject client-side scripts into web pages viewed by other users. A cross-site scripting vulnerability may be used by attackers to bypass access controls such as the same-origin policy.
-- You can deploy WAF on CloudFront, Application Load Balancer, API Gateway and AWS AppSync
-- Protect against **Layer 7** (HTTP & HTTPS) attacks and block common attack patterns by setting up rules to control the traffic. How?
-  - Setting up your own rules to control the traffic by either only allowing what you specify or only blocking what you specify. Alternatively, you can count the requests that match a certain pattern.
-  - AWS also provides managed rules that you can use to get started quickly, these are fully pre-configured and cover things like the OWASP Top 10 Security risks.
+- You can deploy WAF on CloudFront, Application Load Balancer, API Gateway and AWS AppSync.
+- How? => AWS WAF lets you create **Rules** to **filter web traffic** based on **conditions that include IP addresses, HTTP headers and body, or custom URIs**.
+  - Those rules can allow or block what you specify. It also allows to count the requests that match a certain pattern.
+  - It offers a set of pre-configured managed rules that you can use to get started quickly. They cover things like the OWASP Top 10 Security risks.
   - Conditions are used in WAFs to specify when you want to allow/block requests. Below are some examples of conditions that you might:
     - Values on the request header
     - The country a request comes from
@@ -416,6 +416,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
     - Presence of SQL code
     - Presence of a script
 - Pay for what you use, based on the number of rules you have and requests your applications receive.
+- Use Case: A website runs on Amazon EC2 instances in an Auto Scaling group behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. What should a solutions architect do to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
 
 ### AWS Firewall Manager
 
@@ -526,9 +527,9 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
       - Applications being developed or tested on Amazon EC2 for the first time.
       - Applications with short term, spiky or unpredictable workloads that cannot be interrupted.
     - Users that want the low cost and flexibility of Amazon EC2 without any up-front payment for long-term commitment.
-- `Reserved` - Provides you with a capacity reservation, and offer significant discount on the hourly charge for an instance, but it requires to have a Contracts for 1 - 3 year terms. Higher discount with upfront payments and longer contracts. However, you can't move between regions.
+- `Reserved` - Provides you with a `Capacity Reservation`, and offer significant discount on the hourly charge for an instance, but it requires to have a **Contracts for 1 - 3 year terms**. Higher discount with upfront payments and longer contracts. However, you can't move between regions.
   - Uses Cases:
-    - **Production Enviroment**
+    - **Production Environment**
       - Applications with steady or predictable usage.
       - Applications that require reserved capacity.
     - Users able to make upfront payments to reduce their total computing costs even further.
@@ -692,6 +693,7 @@ Exam Question: A company runs a large batch processing job at the end of every q
 
 - Monitors and scales applications to optimise performance and costs.
 - It can be used across a number of different services including EC2 instances and Spot Fleets, ECS tasks, Aurora replicas and DynamoDB tables.
+  - Autoscaling across different AZs empowers High Availability for instances or services.
 - Instances are created in ASG using Launch Configuration (Legacy) or Launch Template (Recommended option)
   - You can create ASG that launches both Spot and On-Demand Instances or multiple instance types using launch template, not possible with launch configuration.
   - You cannot change the launch configuration for an ASG, you must create a new launch configuration and update your ASG with it.
@@ -701,6 +703,7 @@ Exam Question: A company runs a large batch processing job at the end of every q
 - Use Case: A company hosts a multiplayer game on AWS. The application uses Amazon EC2 instances in a single Availability Zone and users connect over Layer 4. How to make the architecture highly available and also more cost-effective.
   - Enable ASG to add and remove instances **across multiple availability zones**. This architecture will also be cost-effective as the Auto Scaling group will ensure the right number of instances are running based on demand.
   - Uses NLB (layer 4) to distribute the traffic to the instances.
+    - Important: Autocaling requires from a type of ELB to distribute the traffic load across the different AZs
 
 #### Scaling options
 
@@ -844,9 +847,11 @@ Go to [Index](#index)
     - To prevent other consumers from processing the message again, Amazon SQS sets a visibility timeout, a period of time during which Amazon SQS prevents other consumers from receiving and processing the message. The default visibility timeout for a message is 30 seconds.
     - Use Case: If you are getting messages delivered twice, the cause could be your visibility timeout is too low.
 - Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
-- Use Case: A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. The Architect would like to reduce-interdependencies so failures do no impact other components ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages
+- Use Cases:
+  1. A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. The Architect would like to reduce-interdependencies so failures do no impact other components ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages
+  2. A web application allows users to upload photos and add graphical elements to them. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
 
-#### Types od Queues
+#### Types of Queues
 
 There are two types of queues: Standard & FIFO
 
@@ -899,8 +904,11 @@ There are two types of queues: Standard & FIFO
 
 ### Amazon MQ
 
-- Amazon managed Apache ActiveMQ
-- Migrate an existing message broker using MQTT protocol to AWS.
+![Amazon MQ](https://d1.awsstatic.com/products/mq/Product-Page-Diagram_Amazon-MQ.17994587d6bf1579ec8c87db2bb3c5a6d485926e.png)
+
+- It Fully managed service for open-source message brokers
+- Message brokers allow software systems, which often use different programming languages on various platforms, to communication and exchange information. Amazon MQ is a managed message broker service for Apache ActiveMQ and RabbitMQ that streamlines setup, operation, and management of message brokers on AWS.
+- It can be configured in HA mode across to AZs.
 
 ## Storage
 
@@ -1213,7 +1221,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ![FSx for Windows AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/Product-Page-Diagram_Managed-File-System-How-it-Works_Updated@2x.c0c4e846c0fca27e8f43bd1651883b21b4cc1eec.png)
 
-- Fully managed, highly performant, native Microsoft Windows file system that supports SMB protocol & Windows NTFS. It also supports Microsoft Active Directory (AD) integration, ACLs, user quotas, DFS namespaces and DFS replication
+- Fully managed, highly performant, native Microsoft Windows file system that supports **SMB protocol & Windows NTFS**. It also supports Microsoft Active Directory (AD) integration, ACLs, User quotas, Distributed File System Namespace (DFSN) and Distributed File System Replication (DFSR)
 - Use cases:
   1. When you need centralised storage for Windows-based applications such as Sharepoint, Microsoft SQL Server, Workspaces, IIS Web Server or any other native Microsoft Application.
   2. Migration from on-premises a Microsoft Windows file server farm to the cloud
@@ -1254,7 +1262,7 @@ Go to [Index](#index)
 
 ### RDS (Relational Database Service)
 
-- KeyWords: Relation Database, Different Enginees
+- KeyWords: Relation Database, Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas)
 
 ![AWS RDS](https://d1.awsstatic.com/video-thumbs/RDS/product-page-diagram_Amazon-RDS-Regular-Deployment_HIW-V2.96bc5b3027474538840af756a5f2c636093f311f.png)
 
@@ -1263,10 +1271,10 @@ Go to [Index](#index)
   - RDS runs on Virtual Machines (can’t log in to the OS or SSH in)
   - RDS is not serverless — (one exception Aurora Serverless)
 - RDS Main Features
-  - **High Available > Multi AZ Recovery** > User For Disaster Recovery Scenarios
+  - **Multi AZ Deployment** > Used for HA and Disaster Recovery.
     - Have a primary and secondary database, if you lose the primary database, AWS would detect and automatically update the DNS to point at the secondary database.
     - You can force a fail-over from AZ to another by rebooting the RDS instance.
-  - **Scalable > Read Replicas** > Improves Performance
+  - **Read Replicas** > Used for Scaling, improving Performance.
     - A Read Replica allows you to have read-only copies (Upto 5 Read replicas) of your production database. This is achieved by using Asynchronous replication so reads are eventually consistent. Every time you write to the main database, it is replicated in the secondary databases.
     - Read replicas can be distributed across multiple AZ, even in a different Region of your running RDS instance. You pay for replication cross Region, but not for cross AZ.
     - **It must have automatic backups turned on in order to deploy a read replica**.
@@ -1291,22 +1299,30 @@ Go to [Index](#index)
 
 ### Amazon Aurora
 
-- KeyWords: Relation Database, Aurora Global Database (AWS proprietary), Serveless (optional)
+- KeyWords: Relation Database, Read Replicas (across AZs), Global Database (across Regions), AWS proprietary Database, Serveless (optional)
 
 ![AWS Aurora](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Aurora_How-it-Works.b1c2b37e7548757780b195c6dcceb58511de5b1d.png)
 
 - It is Saas which manages own AWS engine for relational database (Aurora Global Database) **compatible with MySQL and PostgreSQL**
   - Provides 5x better performance than MySQL
   - Provides 3x better performance than Postgres SQL
-- **Distributed**: 2 copies of your data is contained in each Availability Zone (AZ) — minimum of 3 AZ’s and 6 copies.
+- **Replicas**: 2 copies of your data is contained in each Availability Zone (AZ) — minimum of 3 AZ’s and 6 copies.
+
+![Aurora Replicas](https://digitalcloud.training/wp-content/uploads/2022/01/amazon-aurora-fault-tolerance.jpeg)
+
   - Typically operates as a DB cluster consist of one or more DB instances and a cluster volume that manages cluster data with each AZ having a copy of volume.
     - Primary DB instance - Only one primary instance, supports both read and write operation.
     - Read Replicas - There are two types of replication: Aurora replica (up to 15, In-region), MySQL Read Replica (up to 5, Cross-region).
-- **Fault tolerant**: It can handle the loss of up to 2 copies without affecting write ability and the lose of up to 3 copies of data without affecting read ability.
-- **Self-healing storage system** (Data blocks and disks are continuously scanned for errors and repaired automatically.)
-- **Autoscaling for storage and computer capacity**
-  - Start with 10Gb, Scales in 10 GB increments to 64 TB (Storage Autoscaling)
-  - Compute resources can scale up tp 32vCPUS and 244GB of Memory
+  - **Fault tolerant**: It can handle the loss of up to 2 copies without affecting write ability and the lose of up to 3 copies of data without affecting read ability.
+  - **Self-healing storage system** (Data blocks and disks are continuously scanned for errors and repaired automatically.)
+  - **Autoscaling for storage and computer capacity**
+    - Start with 10Gb, Scales in 10 GB increments to 64 TB (Storage Autoscaling)
+    - Compute resources can scale up tp 32vCPUS and 244GB of Memory
+
+- **Global Database**: For globally distributed applications you can use Global Database, where a single Aurora database can span multiple AWS regions to enable fast local reads and quick disaster recovery. You can use a secondary region as a backup option in case you need to recover quickly from a regional degradation or outage.
+
+![Aurora Global](https://digitalcloud.training/wp-content/uploads/2022/01/aurora-global-database.jpeg)
+
 - Backups (Mix)
   - Backups do not impact performance.
   - Automated Backups are Enabled by default.

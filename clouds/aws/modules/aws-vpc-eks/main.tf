@@ -16,7 +16,8 @@ module "vpc" {
   name = var.name
   cidr = var.cidr
 
-  azs             = local.azs
+  azs = local.azs
+  # Ensure HA by creating different subnets in each AZ and connecting to an Autocaling Group
   public_subnets  = [for k, v in local.azs : cidrsubnet(var.cidr, 8, k)]
   private_subnets = [for k, v in local.azs : cidrsubnet(var.cidr, 8, k + 10)]
 
