@@ -39,4 +39,4 @@ secrets.*
 !*secrets.*.example.enc
 kubeconfig-*.yaml
 !kubeconfig-*.yaml.enc
-*values*.yaml
+#*values*.yaml

@@ -28,12 +28,14 @@ data "aws_route53_zone" "this" {
 }
 
 locals {
-  root             = basename(abspath(path.module))
-  workspace_suffix = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
-  name             = "${var.preffix}${local.workspace_suffix}"
-  vpc_name         = "${local.name}-vpc"
-  cluster_name     = "${local.name}-eks"
-  route53_zone_id  = data.aws_route53_zone.this.id
+  root              = basename(abspath(path.module))
+  workspace_suffix  = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
+  name              = "${var.preffix}${local.workspace_suffix}"
+  vpc_name          = "${local.name}-vpc"
+  cluster_name      = "${local.name}-eks"
+  s3_backup_name    = "${local.name}.backups"
+  oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
+  route53_zone_id   = data.aws_route53_zone.this.id
 
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
@@ -41,7 +43,7 @@ locals {
 
   kubeconfig_file      = "kubeconfig-${module.eks_blueprints.eks_cluster_id}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
-  helm_values_path     = "${path.module}/../../../../libs/k8s/helm/values"
+  helm_values_path     = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
   helm_charts_path     = "${path.module}/../../../../libs/k8s/helm/charts"
 
 }
@@ -283,6 +285,15 @@ module "eks_blueprints_kubernetes_addons" {
   } : null
 
   tags = local.tags
+}
+
+module "velero_aws" {
+  count      = var.enable_velero_backup ? 1 : 0
+  source     = "../../modules/aws-eks-velero"
+  depends_on = [module.eks_blueprints_kubernetes_addons]
+
+  k8s_cluster_oidc_arn = local.oidc_provider_arn
+  bucket_name          = local.s3_backup_name
 }
 
 resource "helm_release" "kube-prometheus-stack-local" {

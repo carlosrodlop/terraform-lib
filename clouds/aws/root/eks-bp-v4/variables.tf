@@ -85,3 +85,9 @@ variable "enable_addon_kube_prometheus_stack" {
   default     = true
   type        = bool
 }
+
+variable "enable_velero_backup" {
+  description = "Enable Velero for Backups."
+  default     = true
+  type        = bool
+}
