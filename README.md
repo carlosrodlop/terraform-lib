@@ -6,9 +6,9 @@ Welcome to the Terraform Library, a storage place for reusable assets related to
 
 - It contains deployments for Kubernetes Cluster and its pre-requisites for different Cloud providers.
 - It uses the [Docker Library](https://github.com/carlosrodlop/docker-lib) to make its content portable.
-- The Helm provider uses the values from the Kubernetes library [K8s-lib](https://github.com/carlosrodlop/K8s-lib)
+- The Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib)
 
-## ![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg) references
+## References ![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
 
 - [Artifact Hub](https://artifacthub.io/)
 - [Awesome Terraform Repos](https://github.com/stars/carlosrodlop/lists/iac-terraform)
