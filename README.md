@@ -8,9 +8,9 @@ Welcome to the Terraform Library, a storage place for reusable assets related to
 - It uses the [Docker Library](https://github.com/carlosrodlop/docker-lib) to make its content portable.
 - The Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib)
 
-## References
+## Awesome
 
-- [Awesome Terraform Repos](https://github.com/stars/carlosrodlop/lists/iac-terraform)
+- [My Terraform Stars](https://github.com/stars/carlosrodlop/lists/iac-terraform)
 - [Terraform Registry](https://registry.terraform.io/)
 - [Documentation | Terraform | HashiCorp Developer](https://developer.hashicorp.com/terraform/docs)
 - [Cómo MANGO aplica DevOps: AWS, Jenkins, Kubernetes… | #laFunción 7x29 - YouTube](https://www.youtube.com/watch?v=61C6wD_y1HA&t=195s)
