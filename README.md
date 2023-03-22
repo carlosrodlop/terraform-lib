@@ -8,6 +8,10 @@ Welcome to the Terraform Library, a storage place for reusable assets related to
 - It uses the [Docker Library](https://github.com/carlosrodlop/docker-lib) to make its content portable.
 - The Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib)
 
+## Releases
+
+Releases follow the [semantic versioning](https://semver.org/). They do not follow a defined train release cadence but the time I need to refer to the code thus the reference does not get lost as the repository evolves.
+
 ## References ![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
 
 - [Artifact Hub](https://artifacthub.io/)
