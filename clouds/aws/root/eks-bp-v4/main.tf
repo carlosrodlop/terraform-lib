@@ -44,7 +44,6 @@ locals {
   kubeconfig_file      = "kubeconfig-${module.eks_blueprints.eks_cluster_id}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
   helm_values_path     = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
-  helm_charts_path     = "${path.module}/../../../../libs/k8s/helm/charts"
 
 }
 
@@ -161,7 +160,7 @@ module "eks_blueprints" {
       desired_size    = 1
       subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
       k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
-    }
+    },
     mg_54xL_agent_spot = {
       node_group_name = "managed-agent-spot"
       instance_types  = ["m5.4xlarge"]
@@ -172,7 +171,6 @@ module "eks_blueprints" {
       subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
       k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
     }
-
   }
   #https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.24.0/node-groups/#windows-self-managed-node-groups
   enable_windows_support = var.windows_nodes
@@ -199,9 +197,10 @@ module "eks_blueprints" {
 resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks_blueprints]
 
-  triggers = var.refresh_kubeconf == true ? {
+  /* triggers = var.refresh_kubeconf == true ? {
     always_run = "${timestamp()}"
-  } : null
+  } : null */
+
   provisioner "local-exec" {
     command = "${module.eks_blueprints.configure_kubectl} --kubeconfig ${local.kubeconfig_file_path}"
   }
@@ -235,7 +234,7 @@ module "eks_blueprints_kubernetes_addons" {
   metrics_server_helm_config = {
     values = [file("${local.helm_values_path}/metric-server.yaml")]
   }
-  enable_cluster_autoscaler = true
+  enable_cluster_autoscaler = var.enable_addon_cluster_autoscaler
   cluster_autoscaler_helm_config = {
     values = [file("${local.helm_values_path}/cluster-autoscaler.yaml")]
   }
@@ -262,49 +261,15 @@ module "eks_blueprints_kubernetes_addons" {
       cert_arn = module.acm.acm_certificate_arn
     })]
   } : null
-  enable_kube_prometheus_stack = var.enable_addon_kube_prometheus_stack
-  kube_prometheus_stack_helm_config = var.enable_addon_kube_prometheus_stack ? {
-    values = [
-      templatefile("${local.helm_values_path}/kube-stack-prometheus.yaml", {
-        alertmanager_to_mail             = var.alertmanager_to_mail
-        alertmanager_from_mail           = var.alertmanager_from_mail
-        alertmanager_from_mail_smarthost = var.alertmanager_from_mail_smarthost
-        alertmanager_from_mail_password  = var.alertmanager_from_mail_password
-      }),
-      templatefile("${local.helm_values_path}/kube-stack-prometheus-grafana-alb.yaml", {
-        hostname = "grafana.${var.domain_name}"
-        cert_arn = module.acm.acm_certificate_arn
-      })
-    ]
-    set_sensitive = [
-      {
-        name  = "grafana.adminPassword"
-        value = var.grafana_admin_password
-      }
-    ]
-  } : null
 
   tags = local.tags
 }
 
-module "velero_aws" {
+module "eks_velero" {
   count      = var.enable_velero_backup ? 1 : 0
   source     = "../../modules/aws-eks-velero"
   depends_on = [module.eks_blueprints_kubernetes_addons]
 
   k8s_cluster_oidc_arn = local.oidc_provider_arn
   bucket_name          = local.s3_backup_name
-}
-
-resource "helm_release" "kube-prometheus-stack-local" {
-  count            = var.enable_addon_kube_prometheus_stack ? 1 : 0
-  depends_on       = [module.eks_blueprints_kubernetes_addons]
-  name             = "kube-prometheus-stack-local"
-  chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"
-  namespace        = "kube-prometheus-stack"
-  create_namespace = true
-  timeout          = 1200
-  wait             = true
-  max_history      = 0
-  version          = "0.1.4"
 }

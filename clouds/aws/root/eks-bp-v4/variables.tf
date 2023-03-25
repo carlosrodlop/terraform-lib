@@ -5,8 +5,9 @@ variable "preffix" {
 
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud
 variable "kubernetes_version" {
-  default = "1.24"
-  type    = string
+  description = "Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24."
+  default     = "1.24"
+  type        = string
 
   validation {
     condition     = contains(["1.23", "1.24"], var.kubernetes_version)
@@ -36,42 +37,16 @@ variable "lb_type" {
   }
 }
 
-variable "refresh_kubeconf" {
+/* variable "refresh_kubeconf" {
   description = "Refresh kubeconfig file."
   default     = false
   type        = bool
-}
+} */
 
 variable "windows_nodes" {
   description = "Enable Windows nodes for Agents Node Pool."
   default     = false
   type        = bool
-}
-
-
-variable "grafana_admin_password" {
-  description = "Grafana admin password."
-  type        = string
-}
-
-variable "alertmanager_to_mail" {
-  description = "Alertmanager to mail."
-  type        = string
-}
-
-variable "alertmanager_from_mail" {
-  description = "Alertmanager from mail."
-  type        = string
-}
-
-variable "alertmanager_from_mail_smarthost" {
-  description = "Alertmanager from mail."
-  type        = string
-}
-
-variable "alertmanager_from_mail_password" {
-  description = "Alertmanager from mail."
-  type        = string
 }
 
 variable "enable_addon_global" {
@@ -80,14 +55,14 @@ variable "enable_addon_global" {
   type        = bool
 }
 
-variable "enable_addon_kube_prometheus_stack" {
-  description = "Enable kube-prometheus-stack."
+variable "enable_velero_backup" {
+  description = "Enable Velero for Backups."
   default     = true
   type        = bool
 }
 
-variable "enable_velero_backup" {
-  description = "Enable Velero for Backups."
+variable "enable_addon_cluster_autoscaler" {
+  description = "Enable cluster-autoscaler. Enabling autoscaling is a good practice. Disable this add-ons is useful to demostrate its consequences."
   default     = true
   type        = bool
 }
