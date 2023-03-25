@@ -1,3 +1,7 @@
+locals {
+  helm_values_path = "${path.module}/../../../../libs/k8s/helm/values/velero"
+}
+
 data "aws_region" "current" {}
 
 module "aws_s3_backups" {
@@ -70,7 +74,7 @@ resource "helm_release" "this" {
   name       = var.release_name
   namespace  = var.namespace
   repository = "https://vmware-tanzu.github.io/helm-charts"
-  values = [templatefile("${path.module}/values.yaml", {
+  values = [templatefile("${local.helm_values_path}/velero.eks.yaml", {
     bucket_name          = module.aws_s3_backups.s3_bucket_id,
     velero_region        = local.aws_region,
     rol_arn              = module.velero_eks_role.iam_role_arn
