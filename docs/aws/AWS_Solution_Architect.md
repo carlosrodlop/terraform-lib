@@ -1023,8 +1023,12 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - `Glacier`: Cheaper choice to Archive Data. Retrival time configurable from minutes to hours
 - `Glacier Deep Archive`: Cheapest choice for Long-term storage of large amount of data for compliance. Retrival time configurable but slower than `Glacier`, strating from 12 hours.
 
-- Use Case: A team are planning to run analytics jobs on log files each day and require a storage solution. The size and number of logs is unknown and data will persist for 24 hours only. What is the MOST cost-effective solution?
-  - S3 standard is the best choice in this scenario for a short term storage solution. In this case the size and number of logs is unknown and it would be difficult to fully assess the access patterns at this stage. Therefore, using S3 standard is best as it is cost-effective, provides immediate access, and there are no retrieval fees or minimum capacity charge per object.
+- Use Case:
+
+  1. A team are planning to run analytics jobs on log files each day and require a storage solution. The size and number of logs is unknown and data will persist for 24 hours only. What is the MOST cost-effective solution?
+     - S3 standard is the best choice in this scenario for a short term storage solution. In this case the size and number of logs is unknown and it would be difficult to fully assess the access patterns at this stage. Therefore, using S3 standard is best as it is cost-effective, provides immediate access, and there are no retrieval fees or minimum capacity charge per object.
+  2. A video production company is planning to move some of its workloads to the AWS Cloud. The company will require around 5 TB of storage for video processing with the maximum possible I/O performance. They also require over 400 TB of extremely durable storage for storing video files and 800 TB of storage for long-term archival. Which combinations of services should a Solutions Architect use to meet these requirements?
+     - Amazon EC2 instance store for maximum performance, Amazon S3 for durable data storage, and Amazon S3 Glacier for archival storage.
 
 #### Sharing S3 buckets Across Accounts
 
@@ -1905,16 +1909,20 @@ There are several methods of connecting to a VPC, including connection from Data
 
 ### AWS Global Accelerator
 
+- KeyWord: Redirecction (Non-cache)
+
 ![global_accelerator](https://d1.awsstatic.com/product-page-diagram_AWS-Global-Accelerator%402x.dd86ff5885ab5035037ad065d54120f8c44183fa.png)
 
 - It Saas which you create accelerators to improve availability and performance of your applications for **global users**.
-  - How? It directs traffic to **optimal endpoints** over the AWS Global network to **avoid congestion**.
+  - How? It **redirects traffic to closest AWS Region to the user** over the AWS Global network to **reduce latency**.
 - Steps:
-  - First you create global accelerator, which provisions two anycast static IP addresses.
+  - First you create global accelerator, which provisions two anycast **static IP addresses**.
+    - Seamless failover is ensured => IP does not change when failing over between regions so there are no issues with client caches having incorrect entries that need to expire
   - Then you register one or more endpoints with Global Accelerator. Each endpoint can have one or more AWS resources such as NLB, ALB, EC2, S3 Bucket or Elastic IP.
-- You can control traffic using traffic dials. This is done within the endpoint group.
-- You can control weighting to individual endpoints using weights (how much traffic is routed to each endpoint)
 - Within endpoint, global accelerator monitor health checks of all AWS resources to send traffic to healthy resources only
+- Adjustment in the Endpoints
+  - You can control traffic using traffic dials. This is done within the endpoint group.
+  - You can control weighting to individual endpoints using weights (how much traffic is routed to each endpoint)
 
 ### Amazon CloudFront
 
@@ -2156,6 +2164,7 @@ Go to [Index](#index)
   - Always use strong and complex passwords on root account.
   - Paying account should be used for billing purposes only. Do not deploy resources into the paying account, into the root account or the master account.
   - Enable and disable AWS services using service control policies (SCPs) either on organisational units or on individual accounts.
+  - Use Case: An AWS Organization has an OU with multiple member accounts in it. The company needs to restrict the ability to launch only specific Amazon EC2 instance types. How can this policy be applied across the accounts with the least effort? => use a Service Control Policy (SCP) in the AWS Organization. The way you would do this is to create a deny rule that applies to anything that does not equal the specific instance type you want to allow.
 
 ### AWS OpsWorks
 
