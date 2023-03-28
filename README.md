@@ -12,6 +12,9 @@
 - It contains deployments for Kubernetes Cluster and its pre-requisites for different Cloud providers.
 - It uses the [Docker Library](https://github.com/carlosrodlop/docker-lib) to make its content portable.
 - The Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib)
+  - Separation of Helm provider from the Cluster Generation per [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
+- [Pre-commits](.pre-commit-config.yaml) for Security, Validations and Documentation
+- Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
 
 ## Awesome
 
