@@ -118,17 +118,17 @@ Go to [Index](#index)
 - Infrastructure as a Service - **IaaS** (Examples: EC2, ELB, VPC)
 
   - Basic building blocks for cloud IT and typically provide access to networking features, computers (virtual or on dedicated hardware), and data storage space.
-  - Highest level of flexibility and management control over your IT resources
+  - Highest level of flexibility and management control over your IT resources.
 
 - Platform as a Service - **PaaS** (Examples: Elastic Beanstalk, Fargate)
 
-  - Platforms as a service remove the need for organizations to manage the underlying infrastructure (usually hardware and operating systems)
+  - Platforms as a service remove the need for organizations to manage the underlying infrastructure (usually hardware and operating systems).
   - This helps you be more efficient as you don’t need to worry about resource procurement, capacity planning, software maintenance, patching, or any of the other undifferentiated heavy lifting involved in running your application.
 
 - Software as a Service - **SaaS** (Examples: ECS, Aurora, ECR)
 
   - It is completed product that is run and managed by the service provider ("end-user applications").
-  - You do not not only need to think about how the underlying infrastructure is managed (PaaS) but also how the service is maintained; you only need to think about how you will use that particular piece of software
+  - You do not not only need to think about how the underlying infrastructure is managed (PaaS) but also how the service is maintained; you only need to think about how you will use that particular piece of software.
 
 #### Deployment Models
 
@@ -231,6 +231,8 @@ Go to [Index](#index)
     - Not to use the root account for anything other than billing (not login)
     - Always setup Multifactor Authentication on your root account.
 - `Power user access` → Access to all AWS services except the management of groups and users within IAM
+- Use Case:
+  1. An application running on an Amazon ECS container instance needs permissions to write data to Amazon DynamoDB. How can you assign these permissions only to the specific ECS task that is running the application? ==> To specify permissions for a specific task on Amazon ECS you should use IAM Roles for Tasks (askRoleArn parameter is used to specify the policy). You should not apply the permissions to the container instance as they will then apply to all tasks running on the instance as well as the instance itself. The best way to grant the permissions using the principle of least privilege.
 
 ### Access AWS
 
@@ -405,7 +407,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
   - Cross-site scripting (XSS) attacks enable attackers to inject client-side scripts into web pages viewed by other users. A cross-site scripting vulnerability may be used by attackers to bypass access controls such as the same-origin policy.
 - You can deploy WAF on CloudFront, Application Load Balancer, API Gateway and AWS AppSync.
 - How? => AWS WAF lets you create **Rules** to **filter web traffic** based on **conditions that include IP addresses, HTTP headers and body, or custom URIs**.
-  - Those rules can allow or block what you specify. It also allows to count the requests that match a certain pattern.
+  - Those rules can **allow or block** what you specify. It also allows to count the requests that match a certain pattern.
   - It offers a set of pre-configured managed rules that you can use to get started quickly. They cover things like the OWASP Top 10 Security risks.
   - Conditions are used in WAFs to specify when you want to allow/block requests. Below are some examples of conditions that you might:
     - Values on the request header
@@ -761,10 +763,14 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
   - Max environment variables size can be 4KB
   - Compressed `.zip` and uncompressed code can’t exceed 50MB and 250MB respectively
 
-Exam tip:
+- Exam tip:
 
 1. If a Lambda function needs to connect to a VPC and needs Internet access, make sure you connect to a private subnet that has a route to a NAT Gateway (the NAT Gateway will be in a public subnet).
 2. Functions can be registered to target groups using the API, AWS Management Console or the CLI.
+
+- Uses Case: A solutions architect is designing a new service that will use an Amazon API Gateway API on the frontend. The service will need to persist data in a backend database using key-value requests. Which combination of AWS services would meet the most cost efective and scalable solution?
+  - Amazon RDS or Dynamo DB => DynamoDB is built for key-value data storage requirements (No-SQL). Moreover, it is serverless and easily scalable.
+  - For EC2, AWS fargate, Lambda => Lambda can perform the computation and store the data in an Amazon DynamoDB table. Lambda can scale concurrent executions to meet demand easily.
 
 ## Containers
 
@@ -793,7 +799,7 @@ Exam tip:
 | “Tasks” are instances of containers that are run on underlying compute but more of less isolated | “Pods” are containers collocated with one another and can have shared access to each other |
 | Limited extensibility | Extensible via a wide variety of third-party and community add-ons. |
 
-- Use Case: EKS is used when organizations need a consistent control plane for managing containers across hybrid clouds and multicloud environments.
+- Use Case: A company runs containerized applications in an on-premise data center (e.g. OpenShift). The company is planning to deploy containers to AWS and the architect has mandated that the same configuration and administrative tools must be used across all containerized environments ==> Applications running on Amazon EKS are fully compatible with applications running on any standard Kubernetes environment, whether running in on-premises data centers or public clouds (or hybrid)
 
 #### Launch types
 
@@ -849,7 +855,8 @@ Go to [Index](#index)
 - Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
 - Use Cases:
   1. A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. The Architect would like to reduce-interdependencies so failures do no impact other components ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages
-  2. A web application allows users to upload photos and add graphical elements to them. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
+  2. A web application allows users to upload photos. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
+  3. A company is working with a strategic partner that has an application that must be able to send messages to one of the company’s Amazon SQS queues. The partner company has its own AWS account. How can a Solutions Architect provide least privilege access to the partner? ==> Amazon SQS supports resource-based policies. The best way to grant the permissions using the **principle of least privilege** is to use a resource-based policy attached to the SQS queue that grants the partner company’s AWS account the `sqs:SendMessage` privilege.
 
 #### Types of Queues
 
@@ -1552,6 +1559,8 @@ Go to [Index](#index)
 
 ![snowmobile](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Snowmobile%402x.4f7215d254697f7cb01d2e7189b81cb660165260.png)
 
+- Exam Tip: Direct Connect Link and Snowball are not compatible to work together.
+
 ### AWS DataSync
 
 - Data transfer service for **moving large amounts of data into AWS**. Has built in **security capabilities** (e.g. encryption in transit)
@@ -1561,9 +1570,6 @@ Go to [Index](#index)
 
 ![on premise](https://d1.awsstatic.com/Digital%20Marketing/House/Editorial/products/DataSync/Product-Page-Diagram_AWS-DataSync_On-Premises-to-AWS%402x.8769b9dea1615c18ee0597b236946cbe0103b2da.png)
 
-  - Use Case: A company runs an application in an on-premises data center that collects environmental data from production machinery. The data consists of JSON files stored on network attached storage (NAS) and around 5 TB of data is collected each day. The company must upload this data to Amazon S3 where it can be processed by an analytics application. The data must be transferred securely ==> The most reliable and time-efficient solution that keeps the data secure is to use AWS DataSync and synchronize the data from the NAS device directly to Amazon S3
-    - Use `AWS Direct Connect` connection to ensure reliability, speed, and security.
-
 **B/** BETWEEN AWS storage services (e.g. to replicate EFS to EFS)
 
 ![between aws](https://d1.awsstatic.com/Digital%20Marketing/House/Editorial/products/DataSync/Product-Page-Diagram_AWS-DataSync-to-AWS-Storage-Services%402x.c9ae72a5d796feed1fd562b968fc133f9e66eec2.png)
@@ -1571,6 +1577,10 @@ Go to [Index](#index)
 **C/** FROM other Public Clouds to AWS Storage Services => Installing AWS Data Sync Agent on a VM
 
 ![different cloud](https://d1.awsstatic.com/Digital%20Marketing/House/Editorial/products/DataSync/AWS-DataSync-CrossCloud-to-AWS-Storage-Services_1%402x.bf8d56bb81dce99407eed06593b961bcb893dc0f.png)
+
+- Use Case:
+  An organization has a large amount of data in their on-premises data center. The organization would like to move data into Amazon S3 => The most reliable and time-efficient solution that keeps the data secure is to use `AWS DataSync` and synchronize the data from on premise to directly to Amazon S3
+  - Use `AWS Direct Connect` connection to ensure reliability, speed, and security.
 
 ### AWS Backup
 
