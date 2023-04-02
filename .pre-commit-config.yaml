@@ -28,12 +28,13 @@ repos:
         files: ^clouds/
       #- id: terraform_validate
       - id: terraform_checkov #https://www.checkov.io/
-        files: ^terraform/
+        files: ^clouds/
         args:
           - --args=--quiet
           - --args=--skip-check CKV2_AWS_8
       - id: terraform_docs
         files: ^clouds/
+        exclude: ^clouds/*/README.md
         args:
           - --hook-config=--path-to-file=README.md # Valid UNIX path. I.e. ../TFDOC.md or docs/README.md etc.
           - --hook-config=--add-to-existing-file=true # Boolean. true or false
