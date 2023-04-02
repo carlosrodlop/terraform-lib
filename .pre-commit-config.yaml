@@ -34,7 +34,7 @@ repos:
           - --args=--skip-check CKV2_AWS_8
       - id: terraform_docs
         files: ^clouds/
-        exclude: ^clouds/*/README.md
+        exclude: ^(clouds/aws/README.md|clouds/gcp/README.md)
         args:
           - --hook-config=--path-to-file=README.md # Valid UNIX path. I.e. ../TFDOC.md or docs/README.md etc.
           - --hook-config=--add-to-existing-file=true # Boolean. true or false
