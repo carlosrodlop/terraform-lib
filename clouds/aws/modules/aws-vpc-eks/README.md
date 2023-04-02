@@ -35,6 +35,7 @@
 | <a name="input_name"></a> [name](#input\_name) | VPC name | `string` | n/a | yes |
 | <a name="input_private_subnet_tags"></a> [private\_subnet\_tags](#input\_private\_subnet\_tags) | value for Private Subnets tags | `map(string)` | n/a | yes |
 | <a name="input_public_subnet_tags"></a> [public\_subnet\_tags](#input\_public\_subnet\_tags) | value for Public Subnets tags | `map(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
 
 ## Outputs
 
