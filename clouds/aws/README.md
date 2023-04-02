@@ -4,6 +4,8 @@
   <img alt="aws-icon" src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" height="100" />
 </p>
 
+---
+
 - Deploy anything on the top of [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
   - Using ![version](https://img.shields.io/badge/version-v4.20.0-blue) NOTE: Potential Breaking Changes in Version 5
   - It focuses more on the deployment and configuration of your target application and 3rd party integrations. It focuses less on the deployment of EKS, its add-ons and well-known cloud applications.
