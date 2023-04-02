@@ -13,7 +13,7 @@ NOTE: Potential Breaking Changes in Version 5
 - [EKS Blueprints outputs](https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/main/outputs.tf)
 - [EKS Examples](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/main/examples)
 
-## References
+## Awesome
 
 - [Awesome AWS/EKS Repos](https://github.com/stars/carlosrodlop/lists/aws-eks)
 - [EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/)
