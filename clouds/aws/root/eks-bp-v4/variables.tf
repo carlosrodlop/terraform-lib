@@ -37,12 +37,6 @@ variable "lb_type" {
   }
 }
 
-/* variable "refresh_kubeconf" {
-  description = "Refresh kubeconfig file."
-  default     = false
-  type        = bool
-} */
-
 variable "windows_nodes" {
   description = "Enable Windows nodes for Agents Node Pool."
   default     = false
@@ -65,4 +59,15 @@ variable "enable_addon_cluster_autoscaler" {
   description = "Enable cluster-autoscaler. Enabling autoscaling is a good practice. Disable this add-ons is useful to demostrate its consequences."
   default     = true
   type        = bool
+}
+
+variable "enable_addon_kube_prometheus_stack" {
+  description = "Enable kube-prometheus-stack."
+  default     = true
+  type        = bool
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password."
+  type        = string
 }

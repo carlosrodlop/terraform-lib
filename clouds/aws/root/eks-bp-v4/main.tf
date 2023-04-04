@@ -27,6 +27,8 @@ data "aws_route53_zone" "this" {
   name = var.domain_name
 }
 
+data "aws_availability_zones" "available" {}
+
 locals {
   root              = basename(abspath(path.module))
   workspace_suffix  = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
@@ -36,6 +38,7 @@ locals {
   s3_backup_name    = "${local.name}.backups"
   oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
   route53_zone_id   = data.aws_route53_zone.this.id
+  azs               = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
@@ -44,6 +47,7 @@ locals {
   kubeconfig_file      = "kubeconfig-${module.eks_blueprints.eks_cluster_id}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
   helm_values_path     = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
+  helm_charts_path     = "${path.module}/../../../../libs/k8s/helm/charts"
 
 }
 
@@ -72,6 +76,7 @@ module "vpc" {
 
   name         = local.vpc_name
   cluster_name = local.cluster_name
+  azs          = local.azs
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
@@ -144,12 +149,15 @@ module "eks_blueprints" {
     mg_58xL = {
       node_group_name = "managed-apps-ondemand"
       #https://aws.amazon.com/ec2/instance-types/
-      instance_types = ["m5.8xlarge"]
-      capacity_type  = "ON_DEMAND"
-      min_size       = 1
-      max_size       = 6
-      desired_size   = 1
-      subnet_ids     = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+      instance_types  = ["m5.8xlarge"]
+      capacity_type   = "ON_DEMAND"
+      create_iam_role = false # Changing `create_iam_role=false` to bring your own IAM Role
+      #Alternative using iam_role_additional_policies https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/19.10.2
+      iam_role_arn = aws_iam_role.managed_ng.arn
+      min_size     = 1
+      max_size     = 6
+      desired_size = 1
+      subnet_ids   = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
       k8s_labels = {
         ci_type = "general"
       }
@@ -208,10 +216,6 @@ module "eks_blueprints" {
 #https://www.bitslovers.com/terraform-null-resource/
 resource "null_resource" "update_kubeconfig" {
   depends_on = [module.eks_blueprints]
-
-  /* triggers = var.refresh_kubeconf == true ? {
-    always_run = "${timestamp()}"
-  } : null */
 
   provisioner "local-exec" {
     command = "${module.eks_blueprints.configure_kubectl} --kubeconfig ${local.kubeconfig_file_path}"
@@ -274,8 +278,49 @@ module "eks_blueprints_kubernetes_addons" {
     })]
   } : null
 
+  enable_kube_prometheus_stack = var.enable_addon_kube_prometheus_stack
+  kube_prometheus_stack_helm_config = var.enable_addon_kube_prometheus_stack ? {
+    values = [
+      file("${local.helm_values_path}/kube-prometheus-stack.yaml"),
+      templatefile("${local.helm_values_path}/kube-prometheus-stack-grafana-alb.yaml", {
+        hostname = "grafana.${var.domain_name}"
+        cert_arn = module.acm.acm_certificate_arn
+      })
+    ]
+    set_sensitive = [
+      {
+        name  = "grafana.adminPassword"
+        value = var.grafana_admin_password
+      }
+    ]
+  } : null
+
+  enable_vault = false
+
   tags = local.tags
 }
+
+################################################################################
+# Kubestack
+################################################################################
+
+resource "helm_release" "kube_prometheus_stack_local" {
+  count            = var.enable_addon_kube_prometheus_stack ? 1 : 0
+  depends_on       = [module.eks_blueprints_kubernetes_addons]
+  name             = "kube-prometheus-stack-local"
+  chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"
+  namespace        = "kube-prometheus-stack"
+  create_namespace = true
+  timeout          = 1200
+  wait             = true
+  max_history      = 0
+  version          = "0.1.4"
+}
+
+################################################################################
+# Velero
+################################################################################
+
 
 module "eks_velero" {
   count      = var.enable_velero_backup ? 1 : 0
@@ -284,4 +329,192 @@ module "eks_velero" {
 
   k8s_cluster_oidc_arn = local.oidc_provider_arn
   bucket_name          = local.s3_backup_name
+}
+
+################################################################################
+# Storage Classes
+################################################################################
+
+resource "kubernetes_annotations" "gp2" {
+  api_version = "storage.k8s.io/v1"
+  kind        = "StorageClass"
+  force       = "true"
+
+  metadata {
+    name = "gp2"
+  }
+
+  annotations = {
+    # Modify annotations to remove gp2 as default storage class still reatain the class
+    "storageclass.kubernetes.io/is-default-class" = "false"
+  }
+
+  depends_on = [
+    module.eks_blueprints_kubernetes_addons
+  ]
+}
+
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+
+    annotations = {
+      # Annotation to set gp3 as default storage class
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  allow_volume_expansion = true
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+
+  parameters = {
+    encrypted = true
+    fsType    = "ext4"
+    type      = "gp3"
+  }
+
+  depends_on = [
+    module.eks_blueprints_kubernetes_addons
+  ]
+}
+
+resource "kubernetes_storage_class_v1" "efs" {
+  metadata {
+    name = "efs"
+  }
+
+  storage_provisioner = "efs.csi.aws.com"
+  parameters = {
+    provisioningMode = "efs-ap" # Dynamic provisioning
+    fileSystemId     = module.efs.id
+    directoryPerms   = "700"
+  }
+
+  mount_options = [
+    "iam"
+  ]
+
+  depends_on = [
+    module.eks_blueprints_kubernetes_addons
+  ]
+}
+
+module "efs" {
+  source  = "terraform-aws-modules/efs/aws"
+  version = "~> 1.0"
+
+  creation_token = local.name
+  name           = local.name
+
+  # Mount targets / security group
+  mount_targets = {
+    for k, v in zipmap(local.azs, module.vpc.private_subnets) : k => { subnet_id = v }
+  }
+  security_group_description = "${local.name} EFS security group"
+  security_group_vpc_id      = module.vpc.vpc_id
+  security_group_rules = {
+    vpc = {
+      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
+      description = "NFS ingress from VPC private subnets"
+      cidr_blocks = module.vpc.private_subnets_cidr_blocks
+    }
+  }
+
+  tags = local.tags
+}
+
+#---------------------------------------------------------------
+# Custom IAM roles for Node Groups
+#---------------------------------------------------------------
+
+data "aws_iam_policy_document" "managed_ng_assume_role_policy" {
+  statement {
+    sid = "EKSWorkerAssumeRole"
+
+    actions = [
+      "sts:AssumeRole",
+    ]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "managed_ng" {
+  name                  = "managed-node-role"
+  description           = "EKS Managed Node group IAM Role"
+  assume_role_policy    = data.aws_iam_policy_document.managed_ng_assume_role_policy.json
+  path                  = "/"
+  force_detach_policies = true
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  ]
+  inline_policy {
+    name = "CloudBees_CI"
+    policy = jsonencode(
+      {
+        "Version" : "2012-10-17",
+        "Statement" : [
+          {
+            "Sid" : "BackupPolicy1",
+            "Effect" : "Allow",
+            "Action" : [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject"
+            ],
+            "Resource" : "arn:aws:s3:::crodriguezlopez-v3.backups/cbci/*"
+          },
+          {
+            "Sid" : "BackupPolicy2",
+            "Effect" : "Allow",
+            "Action" : "s3:ListBucket",
+            "Resource" : "arn:aws:s3:::crodriguezlopez-v3.backups"
+          },
+          {
+            "Sid" : "AllowListingOfFolder",
+            "Effect" : "Allow",
+            "Action" : "s3:ListBucket",
+            "Resource" : "arn:aws:s3:::crodriguezlopez-v3.backups",
+            "Condition" : {
+              "StringLike" : {
+                "s3:prefix" : "cbci/artifacts/*"
+              }
+            }
+          },
+          {
+            "Sid" : "AllowS3ActionsInFolder",
+            "Effect" : "Allow",
+            "Action" : [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject",
+              "s3:ListObjects"
+            ],
+            "Resource" : "arn:aws:s3:::crodriguezlopez-v3.backups/cbci/artifacts/*"
+          }
+        ]
+      }
+    )
+  }
+
+  tags = local.tags
+}
+
+resource "aws_iam_instance_profile" "managed_ng" {
+  name = "managed-node-instance-profile"
+  role = aws_iam_role.managed_ng.name
+  path = "/"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = local.tags
 }
