@@ -7,3 +7,8 @@ output "private_subnets" {
   description = "The private subnets of the VPC"
   value       = module.vpc.private_subnets
 }
+
+output "private_subnets_cidr_blocks" {
+  description = "The private subnets of the VPC"
+  value       = module.vpc.private_subnets_cidr_blocks
+}

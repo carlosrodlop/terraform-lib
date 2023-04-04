@@ -1,9 +1,4 @@
-data "aws_availability_zones" "available" {}
-
 locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
-  #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
-
   tags = merge(var.tags, {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   })
@@ -16,10 +11,10 @@ module "vpc" {
   name = var.name
   cidr = var.cidr
 
-  azs = local.azs
+  azs = var.azs
   # Ensure HA by creating different subnets in each AZ and connecting to an Autocaling Group
-  public_subnets  = [for k, v in local.azs : cidrsubnet(var.cidr, 8, k)]
-  private_subnets = [for k, v in local.azs : cidrsubnet(var.cidr, 8, k + 10)]
+  public_subnets  = [for k, v in var.azs : cidrsubnet(var.cidr, 8, k)]
+  private_subnets = [for k, v in var.azs : cidrsubnet(var.cidr, 8, k + 10)]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
