@@ -40,14 +40,13 @@ Go to [Index](#index)
 - All AZs in an AWS Region are interconnected with high-bandwidth, low-latency networking.
 - Customer deploy applications across multiple AZs in same region for high-availability, scalability, fault-tolerant and low-latency.
 - AZs in a region are usually 3, min is 2 and max is 6 for e.g. 3 AZs in Ohio are us-east-2a, us-east-2b, and us-east-2c.
-- For high availability in us-east-2 region with min 6 instances required either place 3 instances in each 3 AZs or place 6 instances in each 2 AZs (choose any 2 AZs out of 3) so that it works normal when 1 AZ goes down.
 
 ### Tags
 
 - Key/Value pairs attached to AWS resources
 - Metadata (data about data)
 - Sometimes can be inherited (Auto-scaling, CloudFormation, Elastic Beanstalk can create other resources)
-- Resource Groups make it easy to group your resources using the tags that are assigned to them
+- `Resource Groups` make it easy to group your resources using the tags that are assigned to them
   - You can group resources that share one or more tags
   - Resource groups contain info such as region, name, health checks
 
@@ -64,14 +63,12 @@ Go to [Index](#index)
 
 ### Consolidated Billing
 
-- Accounts roll for customers:
-  - Paying account is independent, can not access resources of the other accounts
-  - Linked accounts are independent from one another
-  - Currently there is a limit of 20 linked accounts for consolidated billing (soft limit)
-  - One bill per AWS account
-  - Easy to track charges and allocate costs between linked accounts
-  - Volume pricing discount
-  - Resources across all linked accounts are tallied, and billing is applied collectively to allow bigger discounts
+- You can use the consolidated billing feature in AWS Organizations to consolidate billing and payment for multiple AWS accounts.
+- Consolidated billing has the following benefits:
+  - One bill – You get one bill for multiple accounts.
+  - Easy tracking – You can track the charges across multiple accounts and download the combined cost and usage data.
+  - Combined usage – You can combine the usage across all accounts in the organization to share the volume pricing discounts, Reserved Instance discounts, and Savings Plans. This can result in a lower charge for your project, department, or company than with individual standalone accounts. For more information, see Volume discounts.
+  - No extra fee – Consolidated billing is offered at no additional cost.
 
 ### Best Practices
 
@@ -104,8 +101,8 @@ Go to [Index](#index)
   - Assume that with time your application software will fail too
 
 - Decouple your components:
-  - Think SQS
-  - Build components that do not have tight dependencies on each other so that if one component dies, fails, sleeps, or becomes busy, the other components are built so they can continue to work as if no failure is happening. Build each component as a black box
+
+  - Build components that do not have tight dependencies on each other so that if one component dies, fails, sleeps, or becomes busy, the other components are built so they can continue to work as if no failure is happening. Build each component as a `black box`. For exmaple: Think on SQS
 
 ### [Service Quotas](https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html) (known before as Service Limits)
 
@@ -115,15 +112,15 @@ Go to [Index](#index)
 
 #### Services Models
 
-- Infrastructure as a Service - **IaaS** (Examples: EC2, ELB, VPC)
-
-  - Basic building blocks for cloud IT and typically provide access to networking features, computers (virtual or on dedicated hardware), and data storage space.
-  - Highest level of flexibility and management control over your IT resources.
-
 - Platform as a Service - **PaaS** (Examples: Elastic Beanstalk, Fargate)
 
   - Platforms as a service remove the need for organizations to manage the underlying infrastructure (usually hardware and operating systems).
   - This helps you be more efficient as you don’t need to worry about resource procurement, capacity planning, software maintenance, patching, or any of the other undifferentiated heavy lifting involved in running your application.
+
+- Infrastructure as a Service - **IaaS** (Examples: EC2, ELB, VPC)
+
+  - Basic building blocks for cloud IT and typically provide access to networking features, computers (virtual or on dedicated hardware), and data storage space.
+  - Highest level of flexibility and management control over your IT resources.
 
 - Software as a Service - **SaaS** (Examples: ECS, Aurora, ECR)
 
@@ -157,45 +154,49 @@ Go to [Index](#index)
 ![IAM](https://d1.awsstatic.com/product-marketing/IAM/iam-how-it-works-diagram.04a2c4e4a1e8848155840676fa97ff2146d19012.png)
 
 - IAM is global (so region isn’t a factor)
-- It offers centralized control over your AWS account. It enables shared access to your AWS account.
+- It offers centralized control over your AWS account, enabling shared access to your AWS account (e.g. 1 account - multiple users)
 - Granular Permissions (can set different permissions for different people/ different resources)
+- It allows configuration of temporary access for users, devices and services
 - Includes Federation Integration which taps into Active Directory, Facebook, Linkedin, etc. for authentication
 - Multi-factor authentication support
-- Allows configuration of temporary access for users, devices and services
-- It supports PCI DSS compliance. PCI DSS compliance just is basically a compliant framework that if you're taking credit card details, you need to be compliant with the framework. So IAM supports PCI DSS.
+- It supports PCI DSS compliance.
+  - PCI DSS compliance is a security compliant framework for taking credit card details.
 - Access entities:
-  - `Users` End users such as people, employees of an organisation ... etc
+  - `Users` End users such as people or employees of an organisation.
     - IAM users are individuals who have been granted access to an AWS account.
     - New Users
-      - They have NO permissions when first created, NO have access to any AWS services (they can only login to the AWS console) ==> Permission must be explicitly granted to allow a user to access an AWS service.
-      - They are assigned Access Key ID & Secret Access Keys when first created => You can get to view these once. If you lose them, you have to regenerate them.
+      - They have **NO permissions when first created** (they can only login to the AWS console) ==> Permissions must be explicitly granted to allow an user to access an AWS service.
+      - They are assigned **Access Key ID & Secret Access Keys** when first created => You can get to view these once. If you lose them, you have to regenerate them.
       - In order for a new IAM user to be able to log into the console, the user must have a password set
-  - `Groups` are a collection of users, and can not have other groups. Groups allow you to define permissions for all the users within it.
+  - `Groups` are a collection of users, and cannot contains other groups. Groups allow you to define permissions for all the users within it.
   - `Roles`
     - Types of Roles
-      - Service Roles (To assign permission to AWS Resources), specifying what the resource (such as EC2) is allowed to access on another resource (S3)
-      - Cross account access roles: Used when you have multiple AWS accounts and another AWS account must interact with the current AWS account
-      - Identity provider access roles : Identity Federation (including AD, Facebook etc) can be configured to allow secure access to resources in an AWS account without creating an IAM user account.
+      - `Service Roles` (To assign permission to AWS Resources), specifying what the resource (such as EC2) is allowed to access on another resource (S3).
+      - `Cross account access roles`: Used when you have multiple AWS accounts and another AWS account must interact with the current AWS account
+      - `Identity provider access roles`: Identity Federation (including AD, Facebook etc) can be configured to allow secure access to resources in an AWS account without creating an IAM user account.
     - Adventanges
       - Roles are more secure than storing your access key and secret access key on individual EC2 instances.
       - Roles are easier to manage.
       - Roles can be assigned to an EC2 instance after it is created using both the console & command line.
 - `Policies` JSON Document that defines permissions (`Allow` or `Deny` access to an action that can be performed on AWS resources) for Access Entities (user, group or role)
   - Each statement matches an AWS API request
-  - Anything that is not explicitly allowed is implicitly denied
-    - **IAM Policy Evaluation Logic** ➔ Explicit Deny ➯ Organization SCPs ➯ Resource-based Policies (optional) ➯ IAM Permission Boundaries ➯ Identity-based Policies
-  - If a resource has multiple policies — AWS joins them
+  - If a resource has multiple policies — AWS joins them.
   - The **Least Privilege Principle** should be followed in AWS, don’t give more permission than a user needs.
-  - **IAM Permission Boundaries** to set at individual user or role for maximum allowed permissions
-  - **Resource Based Policies** are supported by S3, SNS, and SQS.
-  - Sections:
+  - **IAM Policy Evaluation Logic** ➔ Explicit Deny ➯ Organization SCPs ➯ Resource-based Policies (optional) ➯ IAM Permission Boundaries ➯ Identity-based Policies.
+    - Anything that is not explicitly allowed is implicitly denied
+    - `Service control policies (SCPs)` are a type of organization policy that you can use to manage permissions in your organization.
+      - It offers central control over the maximum available permissions for all accounts in your organization.
+      - It helps you to ensure your accounts stay within your organization’s access control guidelines.
+    - **Resource Based Policies** are supported by S3, SNS, and SQS.
+    - **IAM Permission Boundaries** to set at individual user or role for maximum allowed permissions.
+  - Policies Sections:
     - `Version` policy language version. `2012-10-17` is the latest version.
     - `Statement` container for one or more policy statements
     - `Sid` (optional) a way of labeling your policy statement
-    - `Effect` set whether the policy Allows or Deny
-    - `Principal` user, group, role, or federated user to which you would like to allow or deny access
-    - `Action` one or more actions that can be performed on AWS resources
-    - `Resource` one or more AWS resources to which actions apply
+    - `Effect` set whether the policy **Allows or Deny**
+    - `Principal` (WHO) user, group, role, or federated user to which you would like to allow or deny access
+    - `Action` (WHAT) one or more actions that can be performed on AWS resources
+    - `Resource` (WHERE) one or more AWS resources to which actions apply
     - `Condition` (optional) one or more conditions to satisfy for policy to be applicable, otherwise ignore the policy.
 
 ```json
@@ -226,71 +227,71 @@ Go to [Index](#index)
 }
 ```
 
-- `Root account` is created by default with full administrator. Root account is email address that you used to register your account
+- `Root account` is created by default with full administration powers. Root account is email address that you used to register your account
   - Best practices
     - Not to use the root account for anything other than billing (not login)
     - Always setup Multifactor Authentication on your root account.
 - `Power user access` → Access to all AWS services except the management of groups and users within IAM
 - Use Case:
   1. An application running on an Amazon ECS container instance needs permissions to write data to Amazon DynamoDB. How can you assign these permissions only to the specific ECS task that is running the application? ==> To specify permissions for a specific task on Amazon ECS you should use IAM Roles for Tasks. The permissions policy can be applied to tasks when creating the task definition, or by using an IAM task role override using the AWS CLI or SDKs. The taskRoleArn parameter is used to specify the policy.
-  2. A company requires that all AWS IAM user accounts have specific complexity requirements and minimum password length. How should a Solutions Architect accomplish this? ==> Update the password policy that applies to the entire AWS account.
+  2. A company requires that all AWS IAM user accounts have specific complexity requirements and minimum password length. How to accomplish this? ==> Update the password policy that applies to the entire AWS account.
 
 ### Access AWS
 
-- Temporary security credentials/access consist of the AWS access key ID, secret access key, and `security token` (temporal/expire).
-  - AWS Security Token Service (AWS STS) as a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users you authenticate (federated users)
 - Types of Access
   - IAM Users
   - None IAM Users
 
-#### IAM Users
+#### IAM Users: Access Key
 
-- Options:
-
-  - AWS Management Console - Use password + MFA (multi factor authentication)
-  - AWS CLI or SDK - Use Access Key ID (~username) and Secret Access Key (~password)
-  - AWS CloudShell - CLI tool from AWS browser console - Require login to AWS
-
-- When creating a user's credentials, you can only see/download the credentials at the time of creation not after.
-- Access Keys can be retired, and new ones can be created in the event that secret access keys are lost
-- To create an user password (loging in AWS console), once the users have been created,  you can opt to create a generated or custom password.
-  - If generated, there is an option to force the user to set a custom password on next login.
-  - Once a generated password has been issued, you can see the password which is the same as the access keys. Its shown once only.
+- Ways to Autheticate Request on AWS
+  - AWS Management Console - Use Password (+ MFA - best practice)
+  - AWS CLI or SDK - Use Access Keys
+  - AWS CloudShell - CLI tool from AWS browser console (Require login to AWS)
+- Access keys consist of two parts: an `Access key ID` and a `Secret access key`. You must use both the access key ID and secret access key together to authenticate your requests.
+- When creating new IAM Users from an AWS account
+  - User's password: Once the users have been created, you can opt to create a generated or custom password.
+    - If generated, there is an option to force the user to set a custom password on next login.
+    - Once a generated password has been issued, you can see the password (which is the same as the access keys). Its shown once only.
+  - User's credentials, you can only see/download the credentials at the time of creation not after.
+  - Access Keys can be retired, and new ones can be created in the event that secret access keys are lost.
 
 #### None IAM Users
 
 - Non-IAM user first authenticates from Identity Federation ==> Then provide a temporary token (IAM Role attached) generated by calling a AssumeRole API of `STS (Security Token Service)` ==> Non-IAM user access the AWS resource by **assuming IAM Role attached with token**.
+  - AWS Security Token Service (AWS STS) as a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users you authenticate (federated users)
 
 ##### Identity Federation
 
-- SAML 2.0 (old) to integrate Active Directory/ADFS, use AssumeRoleWithSAML STS API
-- Custom Identity Broker used when identity provider is not compatible to SAML 2.0, use AssumeRole or GetFederationToken STS API
-- Web Identity Federation is used to sign in using well-known external identity provider (IdP), such as login with Amazon, Facebook, Google, or any OpenID Connect (OIDC)-compatible IdP. Get the ID token from IdP, use AWS Cognito api to exchange ID token with cognito token, use AssumeRoleWithWebIdentity STS API to get temp security credential to access AWS resources
-- AWS Cognito (`Amazon Cognito Federated Identities`) is recommended identity provider by Amazon
-- Amazon Single Sign On gives single sign on token to access AWS, no need to call STS API
+- SAML 2.0 (old) to integrate Active Directory/ADFS, use `AssumeRoleWithSAML` STS API.
+- Custom Identity Broker used when identity provider is not compatible to SAML 2.0, use `AssumeRole` or `GetFederationToken` STS API.
+- Web Identity Federation is used to sign in using well-known external identity provider (IdP), such as login with Amazon, Facebook, Google, or any OpenID Connect (OIDC)-compatible IdP. Get the ID token from IdP, use AWS Cognito api to exchange ID token with cognito token, use AssumeRoleWithWebIdentity STS API to get temp security credential to access AWS resources.
+- AWS Cognito (`Amazon Cognito Federated Identities`) is recommended identity provider by Amazon.
+- Amazon Single Sign On gives single sign on token to access AWS, no need to call STS API.
 
 ##### AWS Directory Service
 
 - Directories store information about users, groups, and devices, and administrators use them to manage access to information and resources. **Hierarchical database of users, groups, computers - trees and forests**.
 
-###### Compatible with Microsft Active Directory
+###### Compatible with Microsoft Active Directory
 
 - `Managed Microsoft Active Directory`
 
-  - It is managed Microsoft Windows Server AD with trust connection to on-premise Microsoft AD.
+  - It is managed Microsoft Windows Server AD with **trust connection to on-premise Microsoft AD**.
   - Best choice when you need all AD features to support AWS applications or Windows workloads.
   - Easily migrate on-premise workloads as it is built on actual Microsoft AD, so does not require any replication of existing directory to the cloud.
   - Highly available as directories are deployed across multiple Availability Zones and failovers are detected automatically.
-  - A common use case would be to extend your on-premise using AD Trust with AWS Managed Microsoft AD so that both your on-premises and cloud directories remain separated, but it allows your users access AWS as needed.
+  - Use case: Extend your on-premise using AD Trust with AWS Managed Microsoft AD so that both your on-premises and cloud directories remain separated, but it allows your users access AWS as needed.
 
 - `Simple AD`
 
-  - Use Simple AD is standalone AWS managed compatible AD powered by Samba 4 with basic directory features (Enables a subset of the features Managed Microsoft AD)
+  - Use Simple AD in standalone AWS managed compatible AD powered by `Samba 4` with basic directory features (Enables a subset of the features Managed Microsoft AD).
   - You cannot connect it to on-premise AD.
   - Best choice for basic directory features.
-  - Can be used for Linux workloads that need LDAP
+  - Can be used for Linux workloads that need LDAP.
 
 - `AD Connector`
+
   - It is proxy service to redirect requests to on-premise Microsoft AD, without caching information in the cloud.
   - Best choice to use existing on-premise AD with compatible AWS services.
   - Can use multiple AD Connectors to spread the load to match performance needs.
@@ -305,7 +306,8 @@ Go to [Index](#index)
   - Some common use cases include: directories for organisational charts, course catalogs, and device registries.
 
 - `Amazon Cognito`
-  - It control uses authentication (sign-up and sign-in) + access (premissions) for **mobile and web applications**. Supports guest users.
+
+  - It controls use authentication (sign-up and sign-in) + access (premissions) for **mobile and web applications**. Supports guest users.
   - The two main components of Amazon Cognito are:
 
 a. `User pools`: User directories in Amazon Cognito. Options for authetication
@@ -325,81 +327,92 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS Key Management Service (KMS)
 
+- Keywords: AWS Managed encription Keys store, Used by AWS services
+
 ![AWS Key Management Service (KMS)](https://d1.awsstatic.com/Security/aws-kms/Group%2017aws-kms.6dc3dbbbe5b75b46c4f62218d0531e5bed7276ce.png)
 
-- AWS managed centralized key management service to create, manage and rotate customer master keys (CMKs) for encryption at REST. Provides you with a central place to manage all keys.
+- AWS managed **centralized key management** service to create, manage and rotate customer master keys (CMKs) for **encryption at REST**.
 - Can integrate with most other AWS services to increase security and make it easier to encrypt your data.
 - You can enable automatic master key rotation once per year. Service keeps the older version of master key to decrypt old encrypted data.
 - Allows you to control access to the keys using things like IAM policies or key policies.
 - Encrypt/decrypt up to 4KB.
 - Pay per API call.
-- Validated under FIPS 140–2 (**Level 2**) security standard.
-- Types of Customer Master Keys (CMKs)
-  - `Customer Managed CMKs` (Dedicated to my account) → Keys that you have created in AWS, that you own and manage. You are responsible for managing their key policies, rotating them and enabling/disabling them.
+- Validated under `FIPS 140–2 (Level 2)` security standard.
+- Types of `Customer Master Keys` (CMKs)
+  - `Customer Managed` CMKs (Dedicated to my account) → Keys that you have created in AWS, that you own and manage. You are responsible for managing their key policies, rotating them and enabling/disabling them.
     - You can create customer-managed `Symmetric` (single key for both encrypt and decrypt operations) or `Asymmetric` (public/private key pair for encrypt/decrypt or sign/verify operations) master keys
     - Symmetric CMKs
       - With symmetric keys, the same key is used to encrypt and decrypt
       - The key never leaves AWS unencrypted
       - Must call the KMS API to use a symmetric key
-      - The AWS services that integrate with KMS use symmetric CMKs
+      - **The AWS services that integrate with KMS use symmetric CMKs**
     - Asymmetric CMKs
       - Asymmetric keys are mathematically related public and private key pairs.
       - The private key never leaves AWS unencrypted.
       - You can call the KMS API with the public key, which can be downloaded and used outside of AWS.
       - AWS services that integrate with KMS DO NOT support asymmetric keys.
-  - `AWS Managed CMKs` (Dedicated to my account) → These are free and are created by an AWS service on your behalf and are managed for you. However, only that service can use them. Used by default if you pick encryption in most AWS services
-  - `AWS Owned CMKs` (No Dedicated to my account) → owned and managed by AWS and shared across many accounts.
+  - `AWS Managed` CMKs (Dedicated to my account) → These are free and are created by an AWS service on your behalf and are managed for you. However, only that service can use them. Used by default if you pick encryption in most AWS services.
+  - `AWS Owned` CMKs (No Dedicated to my account) → owned and managed by AWS and shared across many accounts.
 
 **Exam Tip :** Encryption keys are regional.
 
 ### AWS CloudHSM
 
+- Keywords: Own encription Keys store
+
 ![AWS CloudHSM](https://d1.awsstatic.com/whiteboard-graphics/products/CloudHSM/product-page-diagram_AWS-CloudHSM_HIW.76ce14889e22d8861a6a9fff0b5664516ed1bddd.png)
 
-- Dedicated cloud-based Hardware Security Module (HSM) for creating, using and managing your own encryption keys (cryptographic keys) in AWS.
-- Conforms to FIPS 140–2 (**Level 3**) security standard
+- Dedicated cloud-based Hardware Security Module (HSM) for creating, using and managing **your own encryption keys (cryptographic keys) in AWS**
+  - Integrate with your application using industry-standard APIs (No AWS APIs), such as PKCS#11, Java Cryptography Extensions (JCE), and Microsoft CryptoNG (CNG) libraries (there are no AWS APIs for HSM)
 - No access to the AWS managed component and AWS does not have visibility or access to your keys.
-- Integrate with your application using industry-standard APIs (No AWS APIs), such as PKCS#11, Java Cryptography Extensions (JCE), and Microsoft CryptoNG (CNG) libraries (there are no AWS APIs for HSM)
+- Conforms to `FIPS 140–2 (Level 3)` security standard
 - CloudHSM runs within a VPC in your account
   - CloudHSM will operate inside its own VPC dedicated to CloudHSM
   - CloudHSM will project to ENI of customer VPC
-- Keys are irretrievable if lost and can not be recovered.
+- Keys are irretrievable if lost and can not be recovered
 - Use case: Use KMS to create a CMKs in a custom key store and store non-extractable key material in AWS CloudHSM to get a full control on encryption keys
 - Difference between KMS and CloudHSM
-  - FIPS 140–2 Level 2 vs Level 3
-  - We manage our keys
-    - KMS (Multi Tenant) and CloudHSM (Single Tenant, dedicate h/w, Mutli-AZ cluster)
+  - FIPS 140–2 KMS (Level 2) vs CloudHSM (Level 3)
+  - KMS (Multi Tenant) and CloudHSM (Single Tenant, dedicate h/w, Mutli-AZ cluster)
 
 ### AWS Systems Manager
+
+- Keywords: Configueration and Secrets store
 
 ![AWS Systems Manager](https://d1.awsstatic.com/AWS%20Systems%20Manager/Product-Page-Diagram_AWS-Systems-Manager.9184df66edfbc48285d16c810c3f2d670e210479.png)
 
 - `Parameter Store` is Secure and centralized serverless storage of configuration and secrets: passwords, database details, and license code, API Keys
-  - `Parameter` value can be type String (plain text), StringList (comma separated) or SecureString (KMS encrypted data)
-  - `Use case`: Centralized configuration for dev/uat/prod environment to be used by CLI, SDK, and Lambda function
+  - Use case: Centralized configuration for dev/uat/prod environment to be used by CLI, SDK, and Lambda function
 - `Run Command` allows you to automate common administrative tasks and perform one-time configuration changes on EC2 instances at scale
 - `Session Manager` replaces the need for Bastions to access instances in private subnet
 
 ### AWS Secrets Manager
 
+- Keywords: Secrets store
+
 ![AWS Secrets Manager](https://d1.awsstatic.com/diagrams/Secrets-HIW.e84b6533ffb6bd688dad66cfca36622c2fa7c984.png)
 
-- Secret Manager is mainly used to store, manage, and rotate secrets (passwords) such as database credentials, API keys, and OAuth tokens.
-- Apply the new key/passwords in RDS for you. Generate random secrets.
-- Secret Manager has **native support to rotate database credentials of RDS databases** - MySQL, PostgreSQL and Amazon Aurora. Automatically rotate secrets.
-- For other secrets such as API keys or tokens, you need to use the **lambda for customized rotation function**.
+- Secret Manager is mainly used to store, manage, and rotate **secrets (passwords)** such as database credentials, API keys, and OAuth tokens.
+- Generate random secrets: Apply the new key/passwords in RDS for you.
+- Secret rotation
+  - It has **native support to rotate database credentials of RDS databases** - MySQL, PostgreSQL and Amazon Aurora. Automatically rotate secrets.
+  - For other secrets such as API keys or tokens, you need to use the **lambda for customized rotation function**.
 
 ### AWS Shield
 
+- Keywords: Protection for DDoS attacks, Layers 3,4 and 7
+
 ![AWS Shield](https://d1.awsstatic.com/AWS%20Shield%402x.1d111b296bfd0dd864664b682217bc7610453808.png)
 
-- AWS Shield provide protections against **Distributed Denial of Service (DDoS) attacks** for AWS resources at the network and transport layers (layer 3 and 4) and the application layer (layer 7)
+- AWS Shield provide protections against **Distributed Denial of Service (DDoS) attacks** for AWS resources at the network and transport layers (**layer 3 and 4**) and the application layer (**layer 7**)
   - Denial-of-service attack (DoS attack) is a cyber-attack in which the perpetrator seeks to make a machine or network resource unavailable to its intended users by temporarily or indefinitely disrupting services of a host connected to a network. Denial of service is typically accomplished by flooding the targeted machine or resource with superfluous requests in an attempt to overload systems and prevent some or all legitimate requests from being fulfilled
 - Types
   - `AWS Shield Standard` is automatic and free DDoS protection service for all AWS customers for CloudFront and Route 53 resources.
-  - `AWS Shield Advanced` is paid service (Advanced costs $3K per month per org) for enhanced DDoS protection for EC2, ELB, CloudFront, and Route 53 resources.
+  - `AWS Shield Advanced` is paid service ($3K per month per org) for enhanced DDoS protection for EC2, ELB, CloudFront, and Route 53 resources.
 
 ### AWS WAF
+
+- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
@@ -419,32 +432,39 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
     - Presence of SQL code
     - Presence of a script
 - Pay for what you use, based on the number of rules you have and requests your applications receive.
-- Use Case: A website runs on Amazon EC2 instances in an Auto Scaling group behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. What should a solutions architect do to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
+- Use Case: A website runs on Amazon EC2 instances behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. How to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
 
 ### AWS Firewall Manager
 
 ![AWS Firewall Manager](https://d1.awsstatic.com/products/firewall-manager/product-page-diagram_AWS-Firewall-Manager%402x%20(1)1.ad6bf5281dc2c33c0493e9988e3504dd1590eaa2.png)
 
-- Use AWS Firewall Manager to centrally configure and manage Firewall Rules across an Organization: AWS WAF rules, AWS Shield Advanced, Network Firewall rules, and Route 53 DNS Firewall Rules
+- Use AWS Firewall Manager to **centrally configure and manage Firewall Rules across an Organization**: AWS WAF rules, AWS Shield Advanced, Network Firewall rules, and Route 53 DNS Firewall Rules
 - Use case: Meet Gov regulations to deploy AWS WAF rule to block traffic from embargoed countries across accounts and resources
 
 ### AWS GuardDuty
 
+- Keywords: Protection for Anomalous Behaviour
+
 ![AWS GuardDuty](https://d1.awsstatic.com/Security/Amazon-GuardDuty/Amazon-GuardDuty_HIW.057a144483974cb73ab5f3f87a50c7c79f6521fb.png)
 
-- Read VPC Flow Logs, DNS Logs, and CloudTrail events. Apply machine learning algorithms and anomaly detections to discover threats
-- Can protect against CryptoCurrency attacks
+- A treat detection service that applys **machine learning** that monitors for compromised accounts, anomalous baheviour and malware
+- Once it is activated, it monitors continously: VPC Flow Logs, DNS Logs, and CloudTrail events.
+- Use case: CryptoCurrency attacks protection.
 
 ### Amazon Inspector
 
+- Keywords: Protection for Software vulnerabilities and Network Exposure
+
 ![Amazon Inspector](https://d1.awsstatic.com/reInvent/re21-pdp-tier1/amazon-inspector/Amazon-Inspector_HIW%402x.c26d455cb7e4e947c5cb2f9a5e0ab0238a445227.png)
 
-- Automated Security Assessment service for **EC2 instances** by installing an agent in the OS of EC2 instance.
-- Inspector comes with pre-defined rules packages:
+- Automated Security Assessment service running **EC2 instances** (via agent) that evalus resources for software vulnerabilities and uninteded network exposure.
+- The inspector comes with pre-defined rules packages:
   - `Network Reachability` rules package checks for unintended network accessibility of EC2 instances
   - `Host Assessment rules` package checks for vulnerabilities and insecure configurations on EC2 instance. Includes Common Vulnerabilities and Exposures (CVE), Center for Internet Security (CIS) Operating System configuration benchmarks, and security best practices.
 
 ### Amazon Macie
+
+- Keywords: Protect sensitive data
 
 ![Amazon Macie](https://d1.awsstatic.com/reInvent/reinvent-2022/macie/Product-Page-Diagram_Amazon-Macie.a51550cca0a731ba2e4a26e8463ed5f5a81202e3.png)
 
@@ -460,9 +480,11 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS Config
 
+- Keywords: Security Governance
+
 ![AWS Config](https://d1.awsstatic.com/config-diagram-092122.974fe2a4cb6aae1fe564fdbbe30ab55841a9858e.png)
 
-- Managed service that provides you with an AWS resource inventory, configuration history, and configuration change notifications to enable security and governance. Assess, audit, and evaluate configurations of your AWS resources in multi-region, multi-account
+- Managed service that provides you with an AWS resource inventory, configuration history, and configuration change notifications to enable **security and governance**. **Assess, audit, and evaluate configurations of your AWS resources** in multi-region, multi-account
 - You are notified via SNS for any configuration change
 - Integrated with CloudTrail, provide resource configuration history
 - Use case: Customers need to comply with standards like PCI-DSS (Payment Card Industry Data Security Standard) or HIPAA (U.S. Health Insurance Portability and Accountability Act) can use this service to assess compliance of AWS infra configurations
