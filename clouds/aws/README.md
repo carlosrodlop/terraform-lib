@@ -22,6 +22,6 @@
 - [EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/)
 - [AWS Observability Best Practices](https://aws-observability.github.io/observability-best-practices/)
 - [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
-- [Amazon EKS Workshop :: Amazon EKS Workshop](https://www.eksworkshop.com/)
+- [Amazon EKS Workshop](https://www.eksworkshop.com/)
 - [Digital Cloud AWS Cheat Sheets](https://digitalcloud.training/aws-cheat-sheets/)
 - [IAM Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp?#)
