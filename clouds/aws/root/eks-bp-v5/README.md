@@ -15,9 +15,9 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.50.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | 2.8.0 |
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.16.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.62.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 2.9.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.19.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 
 ## Modules
@@ -29,6 +29,7 @@
 | <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | github.com/aws-ia/terraform-aws-eks-blueprints | v4.24.0 |
 | <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.24.0 |
 | <a name="module_eks_velero"></a> [eks\_velero](#module\_eks\_velero) | ../../modules/aws-eks-velero | n/a |
+| <a name="module_node_problem_detector"></a> [node\_problem\_detector](#module\_node\_problem\_detector) | ../../modules/k8s-node-problem-detector | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ../../modules/aws-vpc-eks | n/a |
 
 ## Resources
@@ -55,6 +56,7 @@
 | <a name="input_enable_addon_cluster_autoscaler"></a> [enable\_addon\_cluster\_autoscaler](#input\_enable\_addon\_cluster\_autoscaler) | Enable cluster-autoscaler. Enabling autoscaling is a good practice. Disable this add-ons is useful to demostrate its consequences. | `bool` | `true` | no |
 | <a name="input_enable_addon_global"></a> [enable\_addon\_global](#input\_enable\_addon\_global) | Enable Kubernetes addons for EKS Blueprints. Helm provider. | `bool` | `true` | no |
 | <a name="input_enable_addon_kube_prometheus_stack"></a> [enable\_addon\_kube\_prometheus\_stack](#input\_enable\_addon\_kube\_prometheus\_stack) | Enable kube-prometheus-stack. | `bool` | `true` | no |
+| <a name="input_enable_node_problem_detector"></a> [enable\_node\_problem\_detector](#input\_enable\_node\_problem\_detector) | Enable enable\_node\_problem\_detector. | `bool` | `true` | no |
 | <a name="input_enable_velero_backup"></a> [enable\_velero\_backup](#input\_enable\_velero\_backup) | Enable Velero for Backups. | `bool` | `true` | no |
 | <a name="input_grafana_admin_password"></a> [grafana\_admin\_password](#input\_grafana\_admin\_password) | Grafana admin password. | `string` | n/a | yes |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24. | `string` | `"1.24"` | no |

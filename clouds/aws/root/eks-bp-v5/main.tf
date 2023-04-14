@@ -51,6 +51,9 @@ locals {
 
 }
 
+################################################################################
+# EKS Pre-requisites
+################################################################################
 
 module "acm" {
   source  = "terraform-aws-modules/acm/aws"
@@ -90,9 +93,9 @@ module "vpc" {
   tags = local.tags
 }
 
-#---------------------------------------------------------------
-# EKS Blueprints
-#---------------------------------------------------------------
+################################################################################
+# EKS Cluster
+################################################################################
 
 module "eks_blueprints" {
   source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.24.0"
@@ -146,8 +149,18 @@ module "eks_blueprints" {
   }
 
   managed_node_groups = {
-    mg_58xL = {
-      node_group_name = "managed-apps-ondemand"
+    mg_k8sApps = {
+      node_group_name = "managed-k8s-apps"
+      #https://aws.amazon.com/ec2/instance-types/
+      instance_types = ["m5d.4xlarge"]
+      capacity_type  = "ON_DEMAND"
+      min_size       = 1
+      max_size       = 6
+      desired_size   = 1
+      subnet_ids     = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+    },
+    mg_cbApps = {
+      node_group_name = "managed-cb-apps"
       #https://aws.amazon.com/ec2/instance-types/
       instance_types  = ["m5.8xlarge"]
       capacity_type   = "ON_DEMAND"
@@ -158,16 +171,17 @@ module "eks_blueprints" {
       max_size     = 6
       desired_size = 1
       subnet_ids   = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+      k8s_taints   = [{ key = "dedicated", value = "cb-apps", effect = "NO_SCHEDULE" }]
       k8s_labels = {
-        ci_type = "general"
+        ci_type = "cb-apps"
       }
-    },
-    mg_54xL_agent = {
+    }
+    mg_cbAgents = {
       node_group_name = "managed-agent"
       instance_types  = ["m5.4xlarge"]
       capacity_type   = "ON_DEMAND"
       min_size        = 1
-      max_size        = 1
+      max_size        = 3
       desired_size    = 1
       subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
       k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
@@ -175,12 +189,12 @@ module "eks_blueprints" {
         ci_type = "build-linux"
       }
     },
-    mg_54xL_agent_spot = {
+    mg_cbAgents_spot = {
       node_group_name = "managed-agent-spot"
       instance_types  = ["m5.4xlarge"]
       capacity_type   = "SPOT"
       min_size        = 1
-      max_size        = 6
+      max_size        = 3
       desired_size    = 1
       subnet_ids      = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
       k8s_taints      = [{ key = "dedicated", value = "build-linux", effect = "NO_SCHEDULE" }]
@@ -192,8 +206,8 @@ module "eks_blueprints" {
   #https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.24.0/node-groups/#windows-self-managed-node-groups
   enable_windows_support = var.windows_nodes
   self_managed_node_groups = var.windows_nodes == true ? {
-    ng_od_windows = {
-      node_group_name    = "ng-od-windows"
+    smg_cbAgents_windows = {
+      node_group_name    = "ng-agent-windows"
       launch_template_os = "windows"
       instance_type      = "m5.large"
       subnet_ids         = [] # Defaults to private subnet-ids used by EKS Control plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
@@ -213,127 +227,10 @@ module "eks_blueprints" {
 
 }
 
-#https://www.bitslovers.com/terraform-null-resource/
-resource "null_resource" "update_kubeconfig" {
-  depends_on = [module.eks_blueprints]
-
-  provisioner "local-exec" {
-    command = "${module.eks_blueprints.configure_kubectl} --kubeconfig ${local.kubeconfig_file_path}"
-  }
-}
 
 #---------------------------------------------------------------
-# EKS Blueprints Add-ons
-#---------------------------------------------------------------
-
-module "eks_blueprints_kubernetes_addons" {
-  count  = var.enable_addon_global ? 1 : 0
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.24.0"
-
-  eks_cluster_id       = module.eks_blueprints.eks_cluster_id
-  eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
-  eks_oidc_provider    = module.eks_blueprints.oidc_provider
-  eks_cluster_version  = module.eks_blueprints.eks_cluster_version
-
-  #Used by `ExternalDNS` to create DNS records in this Hosted Zone.
-  eks_cluster_domain = var.domain_name
-
-  # EKS Managed Add-ons
-  # https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/v4.24.0/docs/add-ons/managed-add-ons.md
-  enable_amazon_eks_vpc_cni            = true
-  enable_amazon_eks_coredns            = true
-  enable_amazon_eks_kube_proxy         = true
-  enable_amazon_eks_aws_ebs_csi_driver = true
-
-  # Add-ons
-  enable_metrics_server = true
-  metrics_server_helm_config = {
-    values = [file("${local.helm_values_path}/metric-server.yaml")]
-  }
-  enable_cluster_autoscaler = var.enable_addon_cluster_autoscaler
-  cluster_autoscaler_helm_config = {
-    values = [file("${local.helm_values_path}/cluster-autoscaler.yaml")]
-  }
-  enable_aws_load_balancer_controller = true
-  aws_load_balancer_controller_helm_config = {
-    #NOTE: Template not working
-    set = [
-      {
-        name  = "nodeSelector.kubernetes\\.io/os"
-        value = "linux"
-      }
-    ]
-  }
-  enable_external_dns = true
-  external_dns_helm_config = {
-    values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
-      zoneIdFilter = local.route53_zone_id
-    })]
-  }
-  enable_ingress_nginx = var.lb_type == "nlb" ? true : false
-  ingress_nginx_helm_config = var.lb_type == "nlb" ? {
-    values = [templatefile("${local.helm_values_path}/aws-nginx-nlb.yaml", {
-      hostname = var.domain_name
-      cert_arn = module.acm.acm_certificate_arn
-    })]
-  } : null
-
-  enable_kube_prometheus_stack = var.enable_addon_kube_prometheus_stack
-  kube_prometheus_stack_helm_config = var.enable_addon_kube_prometheus_stack ? {
-    values = [
-      file("${local.helm_values_path}/kube-prometheus-stack.yaml"),
-      templatefile("${local.helm_values_path}/kube-prometheus-stack-grafana-alb.yaml", {
-        hostname = "grafana.${var.domain_name}"
-        cert_arn = module.acm.acm_certificate_arn
-      })
-    ]
-    set_sensitive = [
-      {
-        name  = "grafana.adminPassword"
-        value = var.grafana_admin_password
-      }
-    ]
-  } : null
-
-  enable_vault = false
-
-  tags = local.tags
-}
-
-################################################################################
-# Kubestack
-################################################################################
-
-resource "helm_release" "kube_prometheus_stack_local" {
-  count            = var.enable_addon_kube_prometheus_stack ? 1 : 0
-  depends_on       = [module.eks_blueprints_kubernetes_addons]
-  name             = "kube-prometheus-stack-local"
-  chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"
-  namespace        = "kube-prometheus-stack"
-  create_namespace = true
-  timeout          = 1200
-  wait             = true
-  max_history      = 0
-  version          = "0.1.4"
-}
-
-################################################################################
-# Velero
-################################################################################
-
-
-module "eks_velero" {
-  count      = var.enable_velero_backup ? 1 : 0
-  source     = "../../modules/aws-eks-velero"
-  depends_on = [module.eks_blueprints_kubernetes_addons]
-
-  k8s_cluster_oidc_arn = local.oidc_provider_arn
-  bucket_name          = local.s3_backup_name
-}
-
-################################################################################
 # Storage Classes
-################################################################################
+#---------------------------------------------------------------
 
 resource "kubernetes_annotations" "gp2" {
   api_version = "storage.k8s.io/v1"
@@ -352,6 +249,7 @@ resource "kubernetes_annotations" "gp2" {
   depends_on = [
     module.eks_blueprints_kubernetes_addons
   ]
+
 }
 
 resource "kubernetes_storage_class_v1" "gp3" {
@@ -378,6 +276,7 @@ resource "kubernetes_storage_class_v1" "gp3" {
   depends_on = [
     module.eks_blueprints_kubernetes_addons
   ]
+
 }
 
 resource "kubernetes_storage_class_v1" "efs" {
@@ -399,6 +298,7 @@ resource "kubernetes_storage_class_v1" "efs" {
   depends_on = [
     module.eks_blueprints_kubernetes_addons
   ]
+
 }
 
 module "efs" {
@@ -426,7 +326,7 @@ module "efs" {
 }
 
 #---------------------------------------------------------------
-# Custom IAM roles for Node Groups
+# Custom IAM roles for Node Group Cloudbees Apps
 #---------------------------------------------------------------
 
 data "aws_iam_policy_document" "managed_ng_assume_role_policy" {
@@ -517,4 +417,124 @@ resource "aws_iam_instance_profile" "managed_ng" {
   }
 
   tags = local.tags
+}
+
+#---------------------------------------------------------------
+# Generating kubeconfig file
+#---------------------------------------------------------------
+
+#https://www.bitslovers.com/terraform-null-resource/
+resource "null_resource" "update_kubeconfig" {
+  depends_on = [module.eks_blueprints]
+
+  provisioner "local-exec" {
+    command = "${module.eks_blueprints.configure_kubectl} --kubeconfig ${local.kubeconfig_file_path}"
+  }
+}
+
+################################################################################
+# EKS Add-ons. Helm Charts
+################################################################################
+
+module "eks_blueprints_kubernetes_addons" {
+  count  = var.enable_addon_global ? 1 : 0
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.24.0"
+
+  eks_cluster_id       = module.eks_blueprints.eks_cluster_id
+  eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
+  eks_oidc_provider    = module.eks_blueprints.oidc_provider
+  eks_cluster_version  = module.eks_blueprints.eks_cluster_version
+
+  #Used by `ExternalDNS` to create DNS records in this Hosted Zone.
+  eks_cluster_domain = var.domain_name
+
+  # EKS Managed Add-ons
+  # https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/v4.24.0/docs/add-ons/managed-add-ons.md
+  enable_amazon_eks_vpc_cni            = true
+  enable_amazon_eks_coredns            = true
+  enable_amazon_eks_kube_proxy         = true
+  enable_amazon_eks_aws_ebs_csi_driver = true
+
+  # Add-ons
+  enable_metrics_server     = true
+  enable_kube_state_metrics = true
+  metrics_server_helm_config = {
+    values = [file("${local.helm_values_path}/metric-server.yaml")]
+  }
+  enable_cluster_autoscaler = var.enable_addon_cluster_autoscaler
+  cluster_autoscaler_helm_config = {
+    values = [file("${local.helm_values_path}/cluster-autoscaler.yaml")]
+  }
+  enable_aws_load_balancer_controller = true
+  aws_load_balancer_controller_helm_config = {
+    #NOTE: Template not working
+    set = [
+      {
+        name  = "nodeSelector.kubernetes\\.io/os"
+        value = "linux"
+      }
+    ]
+  }
+  enable_external_dns = true
+  external_dns_helm_config = {
+    values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
+      zoneIdFilter = local.route53_zone_id
+    })]
+  }
+  enable_ingress_nginx = var.lb_type == "nlb" ? true : false
+  ingress_nginx_helm_config = var.lb_type == "nlb" ? {
+    values = [templatefile("${local.helm_values_path}/aws-nginx-nlb.yaml", {
+      hostname = var.domain_name
+      cert_arn = module.acm.acm_certificate_arn
+    })]
+  } : null
+
+  enable_kube_prometheus_stack = var.enable_addon_kube_prometheus_stack
+  kube_prometheus_stack_helm_config = var.enable_addon_kube_prometheus_stack ? {
+    values = [
+      file("${local.helm_values_path}/kube-prometheus-stack.yaml"),
+      templatefile("${local.helm_values_path}/kube-prometheus-stack-grafana-alb.yaml", {
+        hostname = "grafana.${var.domain_name}"
+        cert_arn = module.acm.acm_certificate_arn
+      })
+    ]
+    set_sensitive = [
+      {
+        name  = "grafana.adminPassword"
+        value = var.grafana_admin_password
+      }
+    ]
+  } : null
+
+  enable_vault = false
+
+  tags = local.tags
+}
+
+resource "helm_release" "kube_prometheus_stack_local" {
+  count            = var.enable_addon_global && var.enable_addon_kube_prometheus_stack ? 1 : 0
+  depends_on       = [module.eks_blueprints_kubernetes_addons]
+  name             = "kube-prometheus-stack-local"
+  chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"
+  namespace        = "kube-prometheus-stack"
+  create_namespace = true
+  timeout          = 1200
+  wait             = true
+  max_history      = 0
+  version          = "0.1.4"
+}
+
+module "eks_velero" {
+  count      = var.enable_addon_global && var.enable_velero_backup ? 1 : 0
+  source     = "../../modules/aws-eks-velero"
+  depends_on = [module.eks_blueprints_kubernetes_addons]
+
+  k8s_cluster_oidc_arn = local.oidc_provider_arn
+  bucket_name          = local.s3_backup_name
+}
+
+module "node_problem_detector" {
+  count      = var.enable_addon_global && var.enable_node_problem_detector ? 1 : 0
+  source     = "../../modules/k8s-node-problem-detector"
+  depends_on = [module.eks_blueprints_kubernetes_addons]
 }

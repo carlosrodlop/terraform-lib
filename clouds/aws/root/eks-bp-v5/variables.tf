@@ -71,3 +71,9 @@ variable "grafana_admin_password" {
   description = "Grafana admin password."
   type        = string
 }
+
+variable "enable_node_problem_detector" {
+  description = "Enable enable_node_problem_detector."
+  default     = true
+  type        = bool
+}
