@@ -493,12 +493,13 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 Go to [Index](#index)
 
-### EC2 (IaaS)
+### EC2
 
 - Infrastructure as a Service (IaaS) - Re-sizable (elastic) and secure virtual machine on the cloud.
   - Amazon EC2 reduces the time required to obtain and boot new server instances to minutes, allowing you to quickly scale capacity, both up and down, as your computing requirements change.
   - Gives you complete control of your computing resources including choice of storage, processor, networking and operating system.
-- When you restart an EC2 instance, its public IP can change. Use `Elastic IP` to assign a fixed public IPv4 to your EC2 instance. By default, all AWS accounts are limited to five (5) Elastic IP addresses per Region.
+- When you restart an EC2 instance, its public IP can change. Use `Elastic IP` to assign a fixed public IPv4 to your EC2 instance.
+  - By default, all AWS accounts are limited to five (5) Elastic IP addresses per Region.
 - The EC2 Root volume is a virtual disk where the OS is installed, it can only be launched on SSD or Magnetic.
 - Bootstrap scripts are code that gets ran as soon as your EC2 instance first boots up.
 - EC2 Information Endpoints (can be obteined via `curl`):
@@ -506,11 +507,10 @@ Go to [Index](#index)
   - `http://169.254.169.254/latest/user-data` ==> user-defined data
 - Use VM Import/Export to import virtual machine image and convert to Amazon EC2 AMI to launch EC2 instances
 - Termination protection is turned off by default.
-- On an EBS-backed instance, the default action is for the root EBS volume to be deleted when the instance is terminated. Any additional EBS volumes by default won't be deleted.
+- On an EBS-backed instance, the default action is for **the root EBS volume to be deleted when the instance is terminated**. Any additional EBS volumes by default won't be deleted.
 - Encryption
   - You need to create a key pair — public & private for asymmetric encryption.
-  - Root device volumes can be encrypted now (a popular exam topic)
-  - EBS Root volumes of your DEFAULT AMI's CAN be encrypted. You can also use a third party tool (such as bit locker etc) to encrypt the root volume, or this can be done when creating AMI's in the AWS console or using the API.
+  - Root device volumes can be encrypted. You can also use a third party tool (such as bit locker etc) to encrypt the root volume, or this can be done when creating AMI's in the AWS console or using the API.
   - Additional volumes can be encrypted as well.
 - You must provision nitro-based EC2 instance to achieve 64000 EBS IOPS. Max 32000 EBS IOPS with Non-Nitro EC2.
 - EC2 Design
@@ -525,12 +525,12 @@ Exam tip: You can stop and start an EC2 instance to move it to a different physi
   - The EBS root volume is restored to its previous state
   - The RAM contents are reloaded
   - The processes that were previously running on the instance are resumed
-  - Previously attached data volumes are reattached and the instance retains its instance
-- In comparison with EBS snapshot restore ==> Boots up a lot faster after hibernation as it does not need to reload the operating system.
+  - Previously attached data volumes are reattached to the instance
+- **In comparison with EBS snapshot restore ==> Boots up a lot faster after hibernation as it does not need to reload the operating system**.
 - You can hibernate an instance only if it’s enabled for hibernation and it meets the hibernation prerequisites.
   - Can’t hibernate for more than 60 days.
-- Use case: For long running services and services that take long to boot. You can stop them and pick back up where you left off again.
 - Once in hibernation mode there is no hourly charge — you only pay for the elastic IP Address & other attached volumes.
+- Use case: For long running services and services that take long to boot. You can stop them and pick back up where you left off again.
 
 #### EC2 Instance Types
 
@@ -546,33 +546,33 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 
 #### EC2 Pricing Types
 
-- `On-Demand` - Pay a fixed rate by the hour (or by the second) with no commitment. Pay as you use, costly.
+- `On-Demand` - Pay a fixed rate by the hour (or by the second) with no commitment. **Pay as you use, costly**.
   - Use Cases:
     - **Non-Production Enviroment**
       - Applications being developed or tested on Amazon EC2 for the first time.
       - Applications with short term, spiky or unpredictable workloads that cannot be interrupted.
     - Users that want the low cost and flexibility of Amazon EC2 without any up-front payment for long-term commitment.
-- `Reserved` - Provides you with a `Capacity Reservation`, and offer significant discount on the hourly charge for an instance, but it requires to have a **Contracts for 1 - 3 year terms**. Higher discount with upfront payments and longer contracts. However, you can't move between regions.
+- `Reserved` - Provides you with a `Capacity Reservation`, and **offer discount on the hourly charge** for an instance, but it requires to have a **Contracts for 1 - 3 year terms**. Higher discount with upfront payments and longer contracts. However, you can't move between regions.
   - Uses Cases:
     - **Production Environment**
       - Applications with steady or predictable usage.
       - Applications that require reserved capacity.
     - Users able to make upfront payments to reduce their total computing costs even further.
   - Types:
-    - `Standard Reserved Instances` Provides the most discount (up to 75% off). Unused instanced can be sold in AWS reserved instance marketplace
+    - `Standard Reserved Instances` Provides the **most discount** (up to 75% off). Unused instanced can be sold in AWS reserved instance marketplace
     - `Convertible Reserved Instances` up to 54% off. It can be exchanged for another Convertible Reserved Instance with different instance attributes e.g. you to change between instance types e.g. t1-t4 as long as its of greater or equal value
     - `Scheduled Reserved Instances` - reserve capacity that is scheduled to recur daily, weekly, or monthly, with a specified start time and duration, for a one-year term.
-- `Spot Instances` - Enables you to bid whatever price you want for instance capacity. when AWS has excess capacity it drops the price so people can use that capacity —but they can take it back at any time. You can set the price you are willing to pay and it will run when its below or at that price — if it goes above that price you lose it.
-  - It provides up to 90% discount and typically used for apps with flexible start/end times, But don’t use for anything critical that needs to be online all the time. It can handle interruptions and recover gracefully.
+- `Spot Instances` - You can set the price you are willing to pay ("budget") and it will run when its below or at that price — if it goes above that price you lose it without any acknowledgement.
+  - It provides up to **90% discount** and typically used for apps with flexible start/end times. But **don’t use for anything critical that needs to be online all the time**. It can handle interruptions and recover gracefully.
   - Imp Note: If the spot instance is terminated by Amazon EC2, you will not be charged for a partial hour of usage. However, if you terminate the instance yourself, you will be charged for any hour in which the instance ran.
   - Uses Cases
     - Applications that have flexible start and end times.
     - Applications that are only feasible at very low compute prices.
     - Users with urgent computing needs for large amounts of additional capacity.
   - Types
-    - `Spot Blocks` can also be launched with a required duration, which are not interrupted due to changes in the Spot price.
+    - `Spot Blocks` can also be **launched with a required duration**, which are not interrupted due to changes in the Spot price.
     - `Spot Fleet`
-      - Collection of spot instances and optionally on-demand instances. Attempts to launch a number of them together to meet a certain capacity within your price budget.
+      - Collection of spot instances and optionally on-demand instances. Attempts to **launch a number of them together to meet a certain capacity within your price budget**.
       - The allocation of spot instances depends on how they fulfil your spot fleet request from the possible pool of instances.
       - Strategies:
         - Lowest Price → This is the default strategy. Chooses the fleet pool with the lowest price.
