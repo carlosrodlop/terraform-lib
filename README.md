@@ -7,7 +7,7 @@
 
 ---
 
-![GitHub Latest Release)](https://img.shields.io/github/v/release/carlosrodlop/terraform-lib?logo=github) ![GitHub Issues](https://img.shields.io/github/issues/carlosrodlop/terraform-lib?logo=github) [![gitleaks badge](https://img.shields.io/badge/protected%20by-gitleaks-blue)](https://github.com/zricethezav/gitleaks#pre-commit) [![gitsecrets](https://img.shields.io/badge/protected%20by-gitsecrets-blue)](https://github.com/awslabs/git-secrets) [![terraform_checkov](https://img.shields.io/badge/protected%20by-checkov-blue)](https://github.com/bridgecrewio/checkov) [![terraform docs](https://img.shields.io/badge/docs%20by-terraformdocs-blue)](https://github.com/terraform-docs/terraform-docs/) [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](#awesome)
+![GitHub Latest Release)](https://img.shields.io/github/v/release/carlosrodlop/terraform-lib?logo=github) ![GitHub Issues](https://img.shields.io/github/issues/carlosrodlop/terraform-lib?logo=github) [![gitleaks badge](https://img.shields.io/badge/protected%20by-gitleaks-blue)](https://github.com/zricethezav/gitleaks#pre-commit) [![gitsecrets](https://img.shields.io/badge/protected%20by-gitsecrets-blue)](https://github.com/awslabs/git-secrets) [![terraform_checkov](https://img.shields.io/badge/protected%20by-checkov-blue)](https://github.com/bridgecrewio/checkov) [![terraform docs](https://img.shields.io/badge/docs%20by-terraformdocs-blue)](https://github.com/terraform-docs/terraform-docs/)
 
 - It contains deployments for Kubernetes Cluster and its pre-requisites for different Cloud providers.
 - It uses the [Docker Library](https://github.com/carlosrodlop/docker-lib) to make its content portable.
@@ -17,6 +17,8 @@
 - Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
 
 ## Awesome
+
+![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)
 
 - [My Terraform Stars](https://github.com/stars/carlosrodlop/lists/iac-terraform)
 - [Terraform Registry](https://registry.terraform.io/)
