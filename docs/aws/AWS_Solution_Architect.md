@@ -562,6 +562,8 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
     - `Standard Reserved Instances` Provides the **most discount** (up to 75% off). Unused instanced can be sold in AWS reserved instance marketplace
     - `Convertible Reserved Instances` up to 54% off. It can be exchanged for another Convertible Reserved Instance with different instance attributes e.g. you to change between instance types e.g. t1-t4 as long as its of greater or equal value
     - `Scheduled Reserved Instances` - reserve capacity that is scheduled to recur daily, weekly, or monthly, with a specified start time and duration, for a one-year term.
+  - Exam Question: A company runs a large batch processing job at the end of every quarter. The processing job runs for 5 days and uses 15 Amazon EC2 instances. The processing must run uninterrupted for 5 hours per day. The company is investigating ways to reduce the cost of the batch processing job. Which pricing model should the company choose?
+    - Each EC2 instance runs for 5 hours a day for 5 days per quarter or 20 days per year. This is time duration is insufficient to warrant `Reserved` instances as these require a commitment of a minimum of 1 year. In this case, there are no options presented that can reduce the cost and therefore on-demand instances should be used. ==> Only option is `On-Demand`.
 - `Spot Instances` - You can set the price you are willing to pay ("budget") and it will run when its below or at that price — if it goes above that price you lose it without any acknowledgement.
   - It provides up to **90% discount** and typically used for apps with flexible start/end times. But **don’t use for anything critical that needs to be online all the time**. It can handle interruptions and recover gracefully.
   - Imp Note: If the spot instance is terminated by Amazon EC2, you will not be charged for a partial hour of usage. However, if you terminate the instance yourself, you will be charged for any hour in which the instance ran.
@@ -580,39 +582,36 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
         - Capacity Optimised → Pool for optimal capacity for the number of instances launching.
         - InstancePoolsToUseCount → Distributed across the number of pools you specify — this can only be used with the lowest price option.
 
-- `Dedicated Instance` - Your instance runs on a dedicated hardware provide physical isolation, single-tenant
-- `Dedicated Hosts` - Your instances run on a dedicated physical server. More visibility how instances are placed on server. Dedicated Hosts can help reduce costs by letting you use existing server-bound software licenses and address corporate compliance and regulatory requirements.
+- `Dedicated Instance` - Your instance runs on a **dedicated hardware provide physical isolation**, single-tenant
+- `Dedicated Hosts` - Your instances run on a **dedicated physical server**. More visibility how instances are placed on server. Dedicated Hosts can help reduce costs by letting you use existing server-bound software licenses and address **corporate compliance and regulatory requirements**.
   - Can be purchased On-Demand (hourly)
   - Can be purchased as a Reservation for up to 70% off the On-Demand price.
   - Uses Cases
     - Useful for regulatory requirements that may not support multi-tenant virtualisation.
     - Great for licensing which doesn't support multi-tenancy or cloud.
 
-Exam Question: A company runs a large batch processing job at the end of every quarter. The processing job runs for 5 days and uses 15 Amazon EC2 instances. The processing must run uninterrupted for 5 hours per day. The company is investigating ways to reduce the cost of the batch processing job. Which pricing model should the company choose?
-  - Each EC2 instance runs for 5 hours a day for 5 days per quarter or 20 days per year. This is time duration is insufficient to warrant `Reserved` instances as these require a commitment of a minimum of 1 year. In this case, there are no options presented that can reduce the cost and therefore on-demand instances should be used. ==> Only option is `On-Demand`.
-
 #### Security Groups
 
-- A security group acts as a virtual firewall for your EC2 instances to control incoming and outgoing traffic.
+- A security group acts as a **virtual firewall for your EC2 instances** to control incoming and outgoing traffic.
 - If you don't specify a Security Group, the EC2 instance is linked to the default Security Group.
 - Changes to a security groups rules take effect immediately and are automatically applied to all instances associated with that group.
 - When you create a New Security Group
-  - All inbound traffic is blocked by default - so we enable some IP and ports using Security Groups.
+  - **All inbound traffic is blocked by default** - so we enable some IP and ports using Security Groups.
     - To let All IPs in `0.0.0.0/0`. To let a single IP address in `X.X.X.X/32` (32 means this ip address)
     - Common Ports: Linux (port 22) and Microsoft - RDP (port 3389)
-  - All outbound traffic is allowed.
+  - **All outbound traffic is allowed**.
     - Common Ports: HTTP (80) and HTTPS (443)
 - Cardinality: N Security Group <-> N EC2 Instance
   - You can have any number of EC2 instances within a security group.
   - You can have multiple Security Groups attached/assigned to EC2 instances.
 - Security Groups vs ACL
-  - Security Groups are STATEFUL, when you create an inbound rule and an outbound rule is automatically created. However, NACL's are STATELESS, when you create an inbound rule and an outbound rule is not automatically created.
-  - Security Groups are only permisse, you can specify allows rule, but not deny rules. You CANNOT block specific IP's/Port's using Security Groups instead use Network Access Control Lists.
+  - **Security Groups are STATEFUL, when you create an inbound rule and an outbound rule is automatically created**. However, NACL's are STATELESS, when you create an inbound rule and an outbound rule is not automatically created.
+  - **Security Groups are only permisse**, you can specify allows rule, but **not deny rules**. You CANNOT block specific IP's/Port's using Security Groups instead use Network Access Control Lists.
 
 #### EC2 Enhanced Networking
 
-- Elastic Network Interface (ENI) is a virtual network card, which you attach to EC2 instance in same AZ which is used to ensure a good network performance.
-  - Enhanced Networking provides higher bandwidth, higher packets per second performance consistently lower it into instance latencies, and there's no additional charge for using
+- Elastic Network Interface (ENI) is a virtual network card, which you attach to EC2 instance in same AZ which is used to **ensure a good network performance**.
+  - It provides higher bandwidth, higher packets per second performance consistently lower it into instance latencies, and there's no additional charge for using.
 - Types:
   - `Elastic Network Adapter (ENA)` for C4, D2, and M4 EC2 instances, Upto 100 Gbps network speed.
   - `Intel 82599 Virtual Function (VF)` Interface for C3, C4, D2, I2, M4, and R3 EC2 instances, Upto 10 Gbps network speed. Old instance types.
@@ -620,58 +619,56 @@ Exam Question: A company runs a large batch processing job at the end of every q
 
 #### EC2 Placement Groups Strategy
 
-- A way of placing EC2 Instances so that instances are spread across the underlying hardware to minimise failures.
+- A way of **placing EC2 Instances** so that instances are spread **across the underlying hardware to minimise failures**.
 - AWS recommend homogeneous instances within clustered placement groups.
-- Placement group names need to be unique within your account
+- Placement group names need to be unique within your account.
 - Only certain types of instances can be launched in a placement group (Compute Optimised, GPU, Memory Optimised, Storage Optimised)
-- You can’t merge placement groups, but you can move an existing instance into a placement group (the instance must be in the stopped state befpre moving it)
+- You can’t merge placement groups, but you can move an existing instance into a placement group (the instance must be in the stopped state before moving it)
   - Move or remove can only be done via AWS Console (an instance using the AWS CLI or AWS SDK).
 - There is no charge associated with creating placement groups
 - Types (A Clustered placement group can't span multiple AZ's, others can)
-  - **Cluster** - Grouping instances close together within a **single Availability Zone**, Same Rack. It is used to achieve low Network latency & high throughput, High Performance Computing (HPC). Recommended you have the same type on instances in the cluster.
-  - **Spread** - Opposite to clustered placement group. Instance are placed o Different AZ, Distinct Rack. It used for Critical Applications that requires to be seperated on each other to ensure High Availability in case of failure. Spread placement groups can span multiple Availability Zones.
-  - **Partition** - EC2 creates partitions by dividing each group into logical segments. Each partition has its own set of racks, network and power source to help isolate the impact of a hardware failure. Same or Different AZ, Different Rack (or Partition), Distributed Applications like Hadoop, Cassandra, Kafka etc
+  - **Cluster** - Grouping instances close together within a **single Availability Zone, Same Rack**. It is used to achieve **low Network latency & high throughput, High Performance Computing (HPC)**. Recommended you have the same type on instances in the cluster.
+  - **Spread** - Opposite to clustered placement group. Instance are placed on **Different AZ, Distinct Rack**. It used for Critical Applications that requires to be seperated on each other to ensure **High Availability** in case of failure. Spread placement groups can span multiple Availability Zones.
+  - **Partition** - EC2 creates partitions by dividing each group into logical segments. Each partition has its own set of racks, network and power source to help isolate the impact of a hardware failure. Same or Different AZ, Different Rack (or Partition), Distributed Applications like Hadoop, Cassandra, Kafka, etc.
 
 #### AMI (Amazon Machine Image)
 
-- Customized image of an EC2 instance, having built-in OS, softwares, configurations, etc.
+- **Customized image of an EC2 instance**, having built-in OS, softwares, configurations, etc.
 - AMI's can be created from both Volumes and Snapshots.
   - You can create an AMI from EC2 instance and launch a new EC2 instance from AMI.
-- AMI are built for a specific region and **can be copied across regions**
-- Use Cases: A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, a solutions architect needs to ensure that the resources can also be deployed to a second Region.
+- AMI **are built for a specific region and can be copied across regions** (Important for Disaster Recovery)
+- Use Case: A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, how do you ensure that the resources can also be deployed to a second Region?
   - Copy an Amazon Machine Image (AMI) of an EC2 instance and specify the second Region for the destination
   - Launch a new EC2 instance from an Amazon Machine Image (AMI) in the second Region
 
 ### Elastic Load Balancing (ELB)
 
-- Designed to help balance the load of incoming traffic by distributing it across multiple targets/destinations.
+- Designed to help **balance the load of incoming traffic** by distributing it across multiple targets/destinations.
   - Target group (ALB o CLB) can have one or more EC2 instances, IP Addresses, lambda functions.
-- It makes the traffic Scale and Fault Tolerant (It can balance load across one or more Availability Zones)
+- It makes the **traffic Scale and Fault Tolerant** (It can balance load **across one or more Availability Zones**)
 - Internal Load Balancers are load balancers that are inside private subnets
 - Load Balancers have their own static DNS name (e.g. <http://myalb-123456789.us-east-1.elb.amazonaws.com>) — you will NEVER be given an IP address
 - If you need the IPv4 address of your end user, look for the `X-Forwarded-For` header.
 - `Health Checks`
   - Instances monitored by ELB are reported as; InService, or OutofService
-  - Health Checks check the instance health by talking to it.
+  - Health Checks checks the instance health by talking to it.
   - `504 Error` means that the gateway has timed out. This means that the application not responding within the idle timeout period.
 - Advanced Load Balancers Theory
   - `Stickiness` (a.k.a. Session Affinity):
-    - Allows you to bind a users session to a specific instance, ensuring all requests in that specific session are sent to the same instance.
-    - Use Cases:
-      - A user trying to visit a website behind a classic load balancer and essentially what's happening is it's just sending all the traffic to one EC2 instance. Answer: Disable Sticky session.
-      - If you have got an EC2 instance or an application, where you're writing to an EC2 instance like local disk, then of course you would want to enable Sticky.
+    - Allows you to **bind a users session to a specific instance**, ensuring all requests in that specific session are sent to the same instance.
+    - Use Cases: If you have got an EC2 instance or an application, where you're writing to an EC2 instance like local disk, then of course you would want to enable Sticky.
+    - Exam Question: A user trying to visit a website behind a classic load balancer and essentially what's happening is it's just sending all the traffic to one EC2 instance. Answer: Disable Sticky session.
     - It works in CLB and ALB. (It doesn’t work with NLB)
   - `Cross Zone load Balancing`
-    - It enables EC2 instances to get equal share of traffic/load across multiple AZs
+    - It enables **EC2 instances to get equal share of traffic/load across multiple AZs**
     - Use Cases:
-      - With No Cross Zone Load Balancing, we got a user and we are using Route 53 for our DNS, which is splitting of our traffic 50/50 and sending the requests to EC2's in two diff AZ's.
-        Each AC has a Load Balancer, The first AZ has 4 EC2 instances and the second has only one EC2 instance.
+      - With No Cross Zone Load Balancing, we got a user and we are using Route 53 for our DNS, which is splitting of our traffic 50/50 and sending the requests to EC2's in two diff AZ's. Each AZ has a Load Balancer, The first AZ has 4 EC2 instances and the second has only one EC2 instance.
         - Because we don't have Cross Zone Load Balancing enabled - First AZ will split 50% to 4 instances and the second AZ receives 50% on 1 instance.
         - When we enable Cross Zone Load Balancing: The Load balancer will distribute the load evenly among instances on both AZ's.
       - We got a user and we are using Route 53 for our DNS, which is sending all the requests (100%) to a Load Balancer in AZ1, The first AZ1 has 4 EC2 instances and the second has only one EC2 instance.
         - Route 53's 100% traffic is sent to the only load balancer in US-EAST-1A and no traffic is being sent to US-EAST-1B.
         - In this scenario, we enable Cross Zone Load Balancing to distribute the traffic evenly between US-EAST-1A and US-EAST-1B
-  - `Path Patterns` (path-based routing) → can direct traffic to different EC2 instances based on request URL (path). For Example: you can route general requests to one target group and requests to render images to another target group
+  - `Path Patterns` (path-based routing) → can **direct traffic to different EC2 instances based on request URL (path)**.
     - Use Case: We got a user and we are using Route 53 for our DNS, which is sending all the requests (100%) to a Load Balancer in AZ1, The first AZ1 has 4 EC2 instances and the second has only one EC2 instance.
       - www.myurl.com should go to AZ1 and www.myurl.com/images should go to the media instances in AZ2. In this instance, we enable Path Patterns.
 
@@ -684,7 +681,7 @@ Exam Question: A company runs a large batch processing job at the end of every q
 | Gateway Load Balancer       | Thirdparty appliances, virtual applications e.g. firewalls | Layer 3                     |
 | Classic Load Balancer (old) | HTTP, HTTPS, TCP                                           | Both Layer 7 and Layer 4    |
 
-- Use Case: A Solutions Architect has deployed an application on several Amazon EC2 instances across three private subnets. The application must be made accessible to internet-based clients with the least amount of administrative effort ==> To make the application instances accessible on the internet the Solutions Architect needs to place them behind an internet-facing Elastic Load Balancer. The way you add instances in private subnets to a public facing ELB is to add public subnets in the same AZs as the private subnets to the ELB
+- Use Case: An application has been deployed on multiple Amazon EC2 instances across **three private subnets**. How do make accesible the application must be made accessible to internet-based clients with the least amount of administrative effort ==> Placing them application instances behind an internet-facing Elastic Load Balancer. The way you add instances in private subnets to a public facing ELB is adding NAT Gateway/Instance in the public subnets in the same AZs as the private subnets to the ELB.
 
 ![elb diagram](https://img-c.udemycdn.com/redactor/raw/test_question_description/2021-02-25_10-09-08-4d552faa7e6a02f1057665490b64d36b.jpg)
 
@@ -721,13 +718,13 @@ Exam Question: A company runs a large batch processing job at the end of every q
 ![ASG](https://d1.awsstatic.com/product-marketing/AutoScaling/aws-auto-scaling-how-it-works-diagram.d42779c774d634883bdcd0463de7bd86f6e2231d.png)
 
 - Monitors and scales applications to optimise performance and costs.
-- It can be used across a number of different services including EC2 instances and Spot Fleets, ECS tasks, Aurora replicas and DynamoDB tables.
-  - Autoscaling across different **AZs** empowers High Availability for instances or services.
+- It can be used across a number of **different services** including EC2 instances and Spot Fleets, ECS tasks, Aurora replicas and DynamoDB tables.
+- Autoscaling **across different AZs empowers High Availability** for instances or services.
   - Exam tip: ASG cannot created instances across different Regions.
-- Instances are created in ASG using Launch Configuration (Legacy) or Launch Template (Recommended option)
+- Instances are created in ASG using **Launch Configuration (Legacy) or Launch Template (Recommended option)**
   - You can create ASG that launches both Spot and On-Demand Instances or multiple instance types using launch template, not possible with launch configuration.
   - You cannot change the launch configuration for an ASG, you must create a new launch configuration and update your ASG with it.
-- You can add Lifecycle Hooks to ASG to perform custom action during:
+- You can add **Lifecycle Hooks** to ASG to perform custom action during:
   1. scale-out to run script, install softwares and send complete-lifecycle-action command to continue
   2. scale-in e.g. download logs, take snapshot before termination
 - Use Case: How to increase High Availability for Web Applications running on AWS
@@ -741,12 +738,12 @@ Auto Scaling offers both dynamic scaling and predictive scaling options:
 
 ##### Dynamic Scaling
 
-- Dynamic scaling scales the capacity of your Auto Scaling group as traffic changes occur, based on demand.
-- Types Dynamic Scaling Policies => Increase and decrease the current capacity of the group based on:
+- Dynamic scaling scales the capacity of your Auto Scaling group **as traffic changes occur, based on demand**.
+- Types of Dynamic Scaling Policies => Increase and decrease the current capacity of the group based on:
   - `Target tracking scaling`: A Amazon CloudWatch metric and a target value (it can combine more than one target). Health checks are performed to ensure resource level is maintained.
     - Use Case: Keep the average aggregate CPU utilization of your Auto Scaling group at 40% (and request count per target of your ALB target group at 1000)
   - `Step scaling`: A set of scaling adjustments, known as _step adjustments_, that vary based on the size of the alarm breach.
-    - CloudWatch alarm CPUUtilization (60%-80%)- add 1, (>80%) - add 3 more, (30%-40%) - remove 1, (<30%) - remove 2 more
+    - CloudWatch alarm `CPUUtilization` (60%-80%)- add 1, (>80%) - add 3 more, (30%-40%) - remove 1, (<30%) - remove 2 more
   - `Simple scaling`: A `single scaling adjustment`, with a `cooldown period` between each scaling activity.
     - CloudWatch alarm CPUUtilization (>80%) - add 2 instances
 
@@ -765,24 +762,21 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 - FaaS (**Function as a Service**), Serverless. You don’t have to worry about OS or scaling (scale on demand)
 - Lambda function supports many languages such as Node.js, Python, Java, C#, Golang, Ruby, etc.
 - It is cheaper than EC2. There is no charge when your code is not running. What determines price for Lambda?
-  - Request Pricing (Free Tier: 1 million requests per month)
-  - Duration Pricing and resource (memory) usage
+  - Number of Request Pricing (Free Tier: 1 million requests per month)
+  - Duration Pricing (Execution) and resource (memory) usage
   - Additional Charges: if your lambda uses other AWS services or transfers data. For example, If your lambda function reads and writes data to or from Amazon S3, you will be billed for the read/write requests and the data stored in Amazon S3
-- You are charged based on number of requests (first million free), execution time usage. Cheaper than EC2.
 - AWS Lambda integrates with other AWS services to invoke functions or take other actions (Check examples [here](https://aws.amazon.com/lambda/))
-- ==> Method of Invocation:
-
-  - `Lambda polling`: For services that generate a queue or data stream, you set up an event source mapping in Lambda to have Lambda poll the queue or a data stream.
+- Method of Invocation:
+  - `Lambda polling`: For services that generate a **queue or data stream**
     - Services: Amazon Managed Streaming for Apache Kafka, Self-managed Apache Kafka, Amazon DynamoDB, Amazon Kinesis, Amazon MQ, Amazon Simple Queue Service
-  - `Event-driven`: Some services generate events (JSON documents) that can invoke your Lambda function.
+  - `Event-driven`: Some services generate **events (JSON documents) that can invoke your Lambda function**.
     - Synchronous
       - Services: Elastic Load Balancing (Application Load Balancer), Amazon Cognito, Amazon Lex, Amazon Alexa, Amazon API Gateway, Amazon CloudFront (Lambda@Edge), Amazon Kinesis Data Firehose, AWS Step Functions
       - Common Use Case: Respond to incoming HTTP requests using API Gateway.
     - Asynchronous
-      - Common Use Case
-        - Services: Amazon Simple Storage Service, Amazon Simple Notification Service, Amazon Simple Email Service, AWS CloudFormation, Amazon CloudWatch Logs, Amazon CloudWatch Events, AWS CodeCommit, AWS Config, AWS IoT Events
-        - In response to resource **lifecycle events**, such as with Amazon Simple Storage Service (Amazon S3).
-        - **On a Schedule** with Amazon EventBridge (CloudWatch Events).
+      - Services: Amazon Simple Storage Service, Amazon Simple Notification Service, Amazon Simple Email Service, AWS CloudFormation, Amazon CloudWatch Logs, Amazon CloudWatch Events, AWS CodeCommit, AWS Config, AWS IoT Events
+      - In response to resource **lifecycle events**, such as with Amazon Simple Storage Service (Amazon S3).
+      - **On a Schedule** with Amazon EventBridge (CloudWatch Events).
 
 - Lambda limitations:
   - Execution time can’t exceed 900 seconds or 15 min
@@ -791,12 +785,7 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
   - Max environment variables size can be 4KB
   - Compressed `.zip` and uncompressed code can’t exceed 50MB and 250MB respectively
 
-- Exam tip:
-
-1. If a Lambda function needs to connect to a VPC and needs Internet access, make sure you connect to a private subnet that has a route to a NAT Gateway (the NAT Gateway will be in a public subnet).
-2. Functions can be registered to target groups using the API, AWS Management Console or the CLI.
-
-- Uses Case: A solutions architect is designing a new service that will use an Amazon API Gateway API on the frontend. The service will need to persist data in a backend database using key-value requests. Which combination of AWS services would meet the most cost efective and scalable solution?
+- Uses Case: A a new service that will use an Amazon API Gateway API on the frontend is being designed. The service will need to persist data in a backend database using key-value requests. Which combination of AWS services would meet the most cost efective and scalable solution?
   - Amazon RDS or Dynamo DB => DynamoDB is built for key-value data storage requirements (No-SQL). Moreover, it is serverless and easily scalable.
   - For EC2, AWS fargate, Lambda => Lambda can perform the computation and store the data in an Amazon DynamoDB table. Lambda can scale concurrent executions to meet demand easily.
 
@@ -841,9 +830,9 @@ An Amazon ECS launch type determines the type of infrastructure on which your ta
 | You’re responsible for upgrading, patching, care of EC2 pool | Fargate provisions compute as needed |
 | You must handle cluster optimization | Fargate handles customer optimizations |
 | More granular control over infrastructure | Limited control, as infrastructure is automated |
-| Support DockerHub, ECR and Selef-Hosted | Only supports DockerHub, ECR |
+| Support DockerHub, ECR and Self-Hosted Registries | Only supports DockerHub, ECR |
 | Cheaper | Costlier |
-| Good for predictable, long running tasks | Good for variable, short running tasks. |
+| **Good for predictable, long running tasks** | **Good for variable, short running tasks.** |
 
 #### ECS
 
@@ -859,7 +848,7 @@ An Amazon ECS launch type determines the type of infrastructure on which your ta
 
 Go to [Index](#index)
 
-Services that help to decouple components.
+Services that help to **decouple components**.
 
 ### Amazon Simple Queue Service (SQS)
 
@@ -868,25 +857,25 @@ Services that help to decouple components.
 - Fully managed, distributed Message Queue service that can be used for micro-services, distributed applications and serverless applications. In other words, a temporary repository for messages that are awaiting processing.
 - It **decouples infraestructure** (acts like a buffer between) the software component producing/saving data and the component receiving data for processing.
 - Specification for Standard SQS:
-  - SQS guarantees that your messages will be processed at least once.
+  - SQS guarantees that your **messages will be processed at least once**.
   - Can have unlimited number of messages waiting in queue
   - Default retention period is 4 days (min 1 min. and max 14 days)
   - Can send message upto 256KB in size (To send messages larger than 256 KB -up tp 2GB- using library allows you to send an Amazon SQS message that contains a reference to a message payload in Amazon S3)
   - Unlimited throughput and low latency (<10ms on publish and receive)
-  - Can have duplicate messages (At least once delivery)
-  - Can have out of order messages (best effort ordering)
+  - **Can have duplicate messages** (At least once delivery)
+  - **Can have out of order messages** (best effort ordering)
 - Consumer (can be EC2 instance or lambda function) **poll** the messages in batches (upto 10 messages) and delete them from queue after processing. If don’t delete, they stay in Queue and may process multiple times.
+  - Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
   - Polling types:
     - Short Polling (`ReceiveMessageWaitTimeSeconds` = 0) - Keeps polling queue looking for work, even if it’s empty.
     - Long Polling (`ReceiveMessageWaitTimeSeconds` > 0) - Reduces the number of empty responses by allowing Amazon SQS to wait until a message is available before sending a response to a ReceiveMessage request, helps to reduce the cost.
-  - Visibility Timeout — Immediately after a message is received, it remains in the queue. Amazon SQS doesn't automatically delete the message because it is a distributed system
-    - To prevent other consumers from processing the message again, Amazon SQS sets a visibility timeout, a period of time during which Amazon SQS prevents other consumers from receiving and processing the message. The default visibility timeout for a message is 30 seconds.
-    - Use Case: If you are getting messages delivered twice, the cause could be your visibility timeout is too low.
-- Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
+  - `Visibility Timeout` — **Immediately after a message is received, it remains in the queue. Amazon SQS doesn't automatically delete the message because it is a distributed system**
+    - To prevent other consumers from processing the message again, Amazon SQS sets a `visibility timeout`, a period of time during which Amazon SQS prevents other consumers from receiving and processing the message. The default visibility timeout for a message is 30 seconds.
+    - Exam Tip: If you are getting messages delivered twice, the cause could be your visibility timeout is too low.
 - Use Cases:
-  1. A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. The Architect would like to reduce-interdependencies so failures do no impact other components ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages.
-  2. A web application allows users to upload photos. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
-  3. A company is working with a strategic partner that has an application that must be able to send messages to one of the company’s Amazon SQS queues. The partner company has its own AWS account. How can a Solutions Architect provide least privilege access to the partner? ==> Amazon SQS supports resource-based policies. The best way to grant the permissions using the **principle of least privilege** is to use a resource-based policy attached to the SQS queue that grants the partner company’s AWS account the `sqs:SendMessage` privilege.
+  1. A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. How to reduce-interdependencies so failures do no impact other components? ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages.
+  2. A web application allows users to upload photos. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ? ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
+  3. A company is working with a partner that has an application that must be able to send messages to one of the company’s Amazon SQS queues. The partner company has its own AWS account. How can a Solutions Architect provide least privilege access to the partner? ==> Amazon SQS supports resource-based policies. The best way to grant the permissions using the **principle of least privilege** is to use a resource-based policy attached to the SQS queue that grants the partner company’s AWS account the `sqs:SendMessage` privilege.
 
 #### Types of Queues
 
@@ -895,7 +884,7 @@ There are two types of queues: Standard & FIFO
 ##### Standard Queues
 
 - Default queue type.
-- Nearly unlimited number of API calls per second.
+- Nearly **unlimited number of API calls per second**.
 - Guarantees message delivered at least once.
 - Occasionally more than one copy of a message might be delivered out of order. However, standard queues provide **best-effort ordering** which ensures that messages are generally delivered in the same order as they are sent.
 
