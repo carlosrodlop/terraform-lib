@@ -535,6 +535,6 @@ module "eks_velero" {
 
 module "node_problem_detector" {
   count      = var.enable_addon_global && var.enable_node_problem_detector ? 1 : 0
-  source     = "../../modules/k8s-node-problem-detector"
+  source     = "../../../shared/modules/k8s-node-problem-detector"
   depends_on = [module.eks_blueprints_kubernetes_addons]
 }
