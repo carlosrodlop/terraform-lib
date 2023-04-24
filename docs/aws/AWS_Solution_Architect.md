@@ -803,22 +803,12 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 - There is no additional charge for Amazon ECS. You pay for:
   - Resources created with the EC2 Launch Type (e.g. EC2 instances and EBS volumes).
   - The number and configuration of tasks you run for the Fargate Launch Type.
-
-#### Elastic Container Service for Kubernetes (Amazon EKS)
-
-- Amazon also provide the Elastic Container Service for Kubernetes (Amazon EKS) which can be used to deploy, manage, and scale containerized applications using Kubernetes on AWS.
-
-| ECS                                     | EKS                   |
-| ----------------------------------------| ----------------------|
-| AWS-specific platform that supports Docker Containers | Compatible with upstream Kubernetes so it’s easy to lift and shift from other Kubernetes deployments |
-| Considered simpler and easier to use | Considered more feature-rich and complex with a steep learning curve |
-| Leverages AWS services like Route 53, ALB, and CloudWatch | A hosted Kubernetes platform that handles many things internally |
-| “Tasks” are instances of containers that are run on underlying compute but more of less isolated | “Pods” are containers collocated with one another and can have shared access to each other |
-| Limited extensibility | Extensible via a wide variety of third-party and community add-ons. |
-
-- Use Case: A company runs containerized applications in an on-premise data center (e.g. OpenShift). The company is planning to deploy containers to AWS and the architect has mandated that the same configuration and administrative tools must be used across all containerized environments ==> Applications running on Amazon EKS are fully compatible with applications running on any standard Kubernetes environment, whether running in on-premises data centers or public clouds (or hybrid)
-
-#### Launch types
+- Terminology:
+  - Cluster: Logical Grouping of EC2 Instances
+  - Container Instance: EC2 instance running the ECS agent
+  - Task Definition: Blueprint that describes how a docker container should launch
+  - Task: A running container using settings in a Task Definition
+  - Service: Defines long running tasks – can control task count with Auto Scaling and attach an ELB
 
 ![Launch Type](https://digitalcloud.training/wp-content/uploads/2022/01/amazon-ecs-ec2-vs-fargate-1.jpeg)
 
@@ -834,15 +824,20 @@ An Amazon ECS launch type determines the type of infrastructure on which your ta
 | Cheaper | Costlier |
 | **Good for predictable, long running tasks** | **Good for variable, short running tasks.** |
 
-#### ECS
+### Elastic Container Service for Kubernetes (Amazon EKS)
 
-##### Terminology
+- Amazon also provide the Elastic Container Service for Kubernetes (Amazon EKS) which can be used to deploy, manage, and scale containerized applications using Kubernetes on AWS.
+- Use Case: A company runs containerized applications in an on-premise data center (e.g. OpenShift). The company is planning to deploy containers to AWS and the architect has mandated that the same configuration and administrative tools must be used across all containerized environments ==> Applications running on Amazon EKS are fully compatible with applications running on any standard Kubernetes environment, whether running in on-premises data centers or public clouds (or hybrid).
 
-- Cluster: Logical Grouping of EC2 Instances
-- Container Instance: EC2 instance running the ECS agent
-- Task Definition: Blueprint that describes how a docker container should launch
-- Task: A running container using settings in a Task Definition
-- Service: Defines long running tasks – can control task count with Auto Scaling and attach an ELB
+### ECS vs EKS
+
+| ECS                                     | EKS                   |
+| ----------------------------------------| ----------------------|
+| AWS-specific platform that supports Docker Containers | Compatible with upstream Kubernetes so it’s easy to lift and shift from other Kubernetes deployments |
+| Considered simpler and easier to use | Considered more feature-rich and complex with a steep learning curve |
+| Leverages AWS services like Route 53, ALB, and CloudWatch | A hosted Kubernetes platform that handles many things internally |
+| “Tasks” are instances of containers that are run on underlying compute but more of less isolated | “Pods” are containers collocated with one another and can have shared access to each other |
+| Limited extensibility | Extensible via a wide variety of third-party and community add-ons. |
 
 ## Application_Integration
 
@@ -895,7 +890,7 @@ There are two types of queues: Standard & FIFO
 - Limits: support up to 3,000 transactions per API batch call.
 - Processed exactly once and duplicates are not introduced to the queue.
 
-#### Dead-Letter Queue
+##### Dead-Letter Queue
 
 - The main task of a dead-letter queue is handling message failure.
   - Messages are moved to the dead-letter queue when the `ReceiveCount` for a message exceeds the `maxReceiveCount` for a queue.
@@ -932,10 +927,10 @@ There are two types of queues: Standard & FIFO
 
 ![Amazon MQ](https://d1.awsstatic.com/products/mq/Product-Page-Diagram_Amazon-MQ.17994587d6bf1579ec8c87db2bb3c5a6d485926e.png)
 
-- It Fully managed service for open-source message brokers
-- Message brokers allow software systems, which often use different programming languages on various platforms, to communication and exchange information. Amazon MQ is a managed message broker service for Apache ActiveMQ and RabbitMQ that streamlines setup, operation, and management of message brokers on AWS.
+- It Fully managed service for open-source **message brokers** for Apache ActiveMQ and RabbitMQ that streamlines setup, operation, and management of message brokers on AWS.
+- It allows software systems, which often **use different programming languages on various platforms, to communication and exchange information**.
 - It can be configured in HA mode across to AZs.
-- Exam Tip: Amazon MQ is similar to SQS but is used for existing applications that are being migrated into AWS. SQS should be used for new applications being created in the cloud.
+- Exam Tip: Amazon MQ is similar to SQS but is used for existing applications that are being migrated into AWS. **SQS should be used for new applications being created** in the cloud.
 
 ## Storage
 
@@ -943,21 +938,21 @@ Go to [Index](#index)
 
 ### S3 (Simple Storage Service)
 
-![](https://d1.awsstatic.com/s3-pdp-redesign/product-page-diagram_Amazon-S3_HIW.cf4c2bd7aa02f1fe77be8aa120393993e08ac86d.png)
+![s3](https://d1.awsstatic.com/s3-pdp-redesign/product-page-diagram_Amazon-S3_HIW.cf4c2bd7aa02f1fe77be8aa120393993e08ac86d.png)
 
-- Storage service that is highly scalable, secure and performant
-- It is OBJECT BASED storage (suitable for files). It does not allow to install Operation System (different with EBS for example)
-- S3 Object is made up of
-  - Key → Name of the object, full path of the object in bucket e.g. /movies/comedy/abc.avi
-    - S3 console show virtual folders based on key.
-  - Value → data bytes of object (photos, videos, documents, etc.)
-  - Version ID - version object (if versioning is enabled)
-  - Metadata
+- Storage service that is highly scalable, secure and performant.
+- It is OBJECT BASED storage (suitable for files). It does not allow to install Operation System (different with EBS for example).
+- S3 Object is made up of:
+  - `Key` → Name of the object, full path of the object in bucket e.g. /movies/comedy/abc.avi
+    - S3 console show **virtual folders based on key**.
+  - `Value` → data bytes of object (photos, videos, documents, etc.)
+  - `Version ID` → version object (if versioning is enabled)
+  - `Metadata`
   - Sub-resources (Access Control Lists & Torrent)
 - There is unlimited storage, but individual files uploaded can be from **0 bytes to 5TB**.
-  - Best practice:  use multi-part upload for Object size > 100MB
+  - **Best practice:  use multi-part upload for Object size > 100MB**
   - When you upload a file to S3, you receive a HTTP `200` code if the file upload is successful.
-- S3 is a UNIVERSAL NAMESPACE, so bucket names need to be globally unique. The reason why is because it creates a web address (DNS name) with the buckets name in it.
+- S3 is a UNIVERSAL NAMESPACE, so **bucket names need to be globally unique**. The reason why is because it creates a **web address (DNS name)** with the buckets name in it.
   - When you view Buckets you view them globally but you have buckets in individual regions.
 
 ```sh
@@ -966,9 +961,9 @@ https://<bucket-name>.s3.<aws-region>.amazonaws.com
 https://s3.<aws-region>.amazonaws.com/<bucket-name>
 ```
 
-- **S3 Consistency**
-  - Delivers **strong read-after-write consistency for PUTS and DELETES** of objects, for both new objects and for updates to existing objects. This means once there is a successful write, overwrite or delete — the next read request automatically receives the latest version of the object.
-  - Updates to a single key are atomic. For example, if you PUT to an existing key from one thread and perform a GET on the same key from a second thread concurrently, you will get either the old data or the new data, but never partial or corrupt data.
+- S3 Consistency
+  - Delivers **strong read-after-write consistency for PUTS and DELETES** of objects, for both new objects and for updates to existing objects. This means once there is a successful write, overwrite or delete — the next **read request automatically receives the latest version of the object**.
+  - **Updates to a single key are atomic**. For example, if you PUT to an existing key from one thread and perform a GET on the same key from a second thread concurrently, you will get either the old data or the new data, but **never partial or corrupt data**.
 - In S3 you pay for the following things:
   - Storage
   - Requests and Data Retrievals
@@ -980,8 +975,8 @@ https://s3.<aws-region>.amazonaws.com/<bucket-name>
 
 #### Optional features
 
-- Enable `S3 Versioning` and `MFA` delete features to protect against accidental delete of S3 Object.
-- Enable `S3 Object Lock` to store object using write-once-read-many (WORM) model to prevent objects from being deleted or overwritten for a fixed amount of time (`Retention period`) or indefinitely (`Legal hold`).
+- **Enable `S3 Versioning` and `MFA` to protect against accidental delete of S3 Object**.
+- **Enable `S3 Object Lock` to store object using write-once-read-many (WORM) model** to prevent objects from being deleted or overwritten for a fixed amount of time (`Retention period`) or indefinitely (`Legal hold`).
   - Amazon S3 currently does not support enabling object lock after a bucket has been created.
   - Retention:
     - Each version of object can have different retention-period.
@@ -994,7 +989,7 @@ https://s3.<aws-region>.amazonaws.com/<bucket-name>
     - Enable Static website hosting and Public access for S3 to avoid 403 forbidden error.
     - Add CORS Policy to allow cross origin request.
   - Exam Tip: It is not used for dynamic websites (eg. AJAX) or websites which require database, for ex: Wordpress...etc.
-  - Use Case: A company has deployed a new website on Amazon EC2 instances behind an Application Load Balancer (ALB). Amazon Route 53 is used for the DNS service. The company has asked a Solutions Architect to create a backup website with support contact details that users will be directed to automatically if the primary website is down. How should be deployed this solution cost-effectively? ==> The most cost-effective solution is to create a static website using an Amazon S3 bucket and then use a **failover routing policy** in Amazon Route 53. With a failover routing policy users will be directed to the main website as long as it is responding to health checks successfully.
+  - Use Case: A company has deployed a new website on Amazon EC2 instances behind an Application Load Balancer (ALB). Amazon Route 53 is used for the DNS service. The company has asked to create a backup website with support contact details that users will be directed to automatically if the primary website is down. How should be deployed this solution cost-effectively? ==> The most cost-effective solution is to create a static website using an Amazon S3 bucket and then use a **failover routing policy** in Amazon Route 53. With a failover routing policy users will be directed to the main website as long as it is responding to health checks successfully.
 
 ```sh
 https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
@@ -1003,8 +998,8 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - `S3 Select` or `Glacier Select` can be used to retrieve subset of data from S3 Objects using SQL query. S3 Objects can be CSV, JSON, or Apache Parquet. GZIP & BZIP2 compression is supported with CSV or JSON format with server-side encryption.
   - Allows you to save money on data transfer and increase speed.
 - Using `Range` HTTP Header in a GET Request to download the specific range of bytes of S3 object, known as Byte Range Fetch.
-- You can create `S3 event notification` to push events e.g. s3:ObjectCreated:\* to SNS topic, SQS queue or execute a Lambda function. It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
-- Enable `S3 Cross-Region Replication` for asynchronous replication of object across buckets in another region.
+- You can create `S3 event notification` to push events e.g. `s3:ObjectCreated:\*` to SNS topic, SQS queue or execute a Lambda function. It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
+- High Availability: Enable `S3 Cross-Region Replication` for asynchronous replication of object across buckets in another region.
   - Cross Region Replication REQUIRES versioning to be ENABLED on both SOURCE & DESTINATION bucket.
   - If enabled, existing objects are not replicated automatically, only subsequent updated files (new objects).
   - You can have this enabled for the entire bucket or just for specific prefixes.
@@ -1021,41 +1016,34 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 
 - You can upload files in the same bucket with different Storage Classes like S3 standard, Standard-IA, One Zone-IA, Glacier etc.
 - You can setup `S3 Lifecycle Rules` to transition current (or previous version) objects to cheaper storage classes or delete (expire if versioned) objects after certain period of time.
-  - Use Case: Transition from S3 Standard to S3 Standard-IA or One Zone-IA can only be done after 30 days.
-  - You can also setup lifecycle rule to abort multipart upload, if it doesn’t complete within certain days, which auto delete the parts from S3 buckets associated with multipart upload.
-- Princing per Storage type:
-  - `S3 Glacier Deep Archive` is the cheapest.
-  - `S3 Standard` is the most expensive, if you are going to use it — why not use `S3 Intelligent tiering` (same price), unless you have thousands or millions of objects.
-    - Benefit of using S3 Intelligent tiering: it does give you access to the infrequently access — so you could save money!
-    - Warning: If you have a lot of objects you are going to incur monitoring and automation charges.
 
 | S3 Storage Class                   | Durability | Availability | AZ  | Min. Storage | Retrieval Time                                           | Retrieval fee |
 | ---------------------------------- | ---------- | ------------ | --- | ------------ | -------------------------------------------------------- | ------------- |
-| S3 Standard (General Purpose)      | 11 9’s     | 99.99%       | ≥3  |  N/A         | milliseconds                                             | N/A           |
+| S3 Standard (General Purpose)      | 11 9’s     | 99.99%       | ≥3  | **N/A**   | milliseconds                                             | **N/A**           |
 | S3 Intelligent Tiering             | 11 9’s     | 99.9%        | ≥3  | 30 days      | millisecond                                              | N/A           |
 | S3 Standard-IA (Infrequent Access) | 11 9’s     | 99.9%        | ≥3  | 30 days      | milliseconds                                             | per GB        |
-| S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | 1   | 30 days      | milliseconds                                             | per GB        |
-| S3 Glacier                         | 11 9’s     | 99.99%       | ≥3  | 90 days      | Expedite (1-5 mins), Standard (3-5 hrs), Bulk (5-12 hrs) | per GB        |
-| S3 Glacier Deep Archive            |  11 9’s    |  99.99%      |  ≥3 |  180 days    | Standard (12 hrs), Bulk (48 hrs) per GB                  |
+| S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | **1**  | 30 days      | milliseconds                                             | per GB        |
+| S3 Glacier                         | 11 9’s     | 99.99%       | ≥3  | **90 days**      | Expedite (1-5 mins), Standard (3-5 hrs), Bulk (5-12 hrs) | per GB        |
+| S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | Standard (12 hrs), Bulk (48 hrs)  | per GB
 
-- `Standard`: General purpose storage for any type of frequently used data very high availability, and fast retrieval.
-  - HA: Stored redundantly across multiple devices in multiple facilities and is designed to sustain the loss of 2 facilities concurrently.
-- `Intelligent Tiering`: Analyze your Object’s usage and move them to the appropriate cost-effective storage class automatically, without performance impact.
-  - Use case: automatic cost savings for data with unknown/changing access patterns.
-- `Standard-IA` (Infrequently Accessed): Cost effective for infrequent access files which cannot be recreated.
-  - For data that is not accessed very frequently — but once it is accessed it needs to be retrieved rapidly.
-  - It is cheaper than standard S3, but you do get charged a retrieval fee.
-- `One-Zone IA`(also called S3 RRS): Cost effective for infrequent access files which can be recreated.
-  - Low cost option for data that is not accessed frequently and does not require the redundancy, if the zone fails, we loose the data.
-  - Use case: re-creatable infrequently accessed data that needs milliseconds access.
-- `Glacier`: Cheaper choice to Archive Data. Retrival time configurable from minutes to hours
-- `Glacier Deep Archive`: Cheapest choice for Long-term storage of large amount of data for compliance. Retrival time configurable but slower than `Glacier`, strating from 12 hours.
+- Types
+  - `Standard`: **General purpose** storage for any type of frequently used data very high availability, and fast retrieval.
+  - `Intelligent Tiering`: Analyze your Object’s usage and move them to the appropriate cost-effective storage class automatically, without performance impact.
+    - Use case: automatic cost savings for data with **unknown/changing access patterns**. It is also suitable for storing objects with changing or unknown access frequency. But you can use S3 Intelligent-Tiering as the default storage class for most workloads.
+  - `Standard-IA` (Infrequently Accessed): Cost effective for **infrequent access files** which **cannot be recreated**.
+    - For data that is not accessed very frequently — but once it is accessed it needs to be retrieved rapidly.
+    - It is cheaper than standard S3, but you do get charged a retrieval fee.
+  - `One-Zone IA`(also called S3 RRS): Cost effective for **infrequent access** files which **can be recreated**.
+    - Low cost option for data that is not accessed frequently and does not require the redundancy, **if the zone fails, we loose the data**.
+    - Use case: re-creatable infrequently accessed data that needs milliseconds access.
+  - `Glacier`: **Retrival time configurable from minutes to hours**.
+  - `Glacier Deep Archive`: **Cheapest choice** for Long-term storage of large amount of data for compliance. Retrival time configurable but slower than `Glacier`, **strating from 12 hours**.
 
 - Use Case:
 
   1. A team are planning to run analytics jobs on log files each day and require a storage solution. The size and number of logs is unknown and data will persist for 24 hours only. What is the MOST cost-effective solution?
      - S3 standard is the best choice in this scenario for a short term storage solution. In this case the size and number of logs is unknown and it would be difficult to fully assess the access patterns at this stage. Therefore, using S3 standard is best as it is cost-effective, provides immediate access, and there are no retrieval fees or minimum capacity charge per object.
-  2. A video production company is planning to move some of its workloads to the AWS Cloud. The company will require around 5 TB of storage for video processing with the maximum possible I/O performance. They also require over 400 TB of extremely durable storage for storing video files and 800 TB of storage for long-term archival. Which combinations of services should a Solutions Architect use to meet these requirements?
+  2. A video production company is planning to move some of its workloads to the AWS Cloud. The company will require around 5 TB of storage for video processing with the maximum possible I/O performance. They also require over 400 TB of extremely durable storage for storing video files and 800 TB of storage for long-term archival. Which combinations of services would meet these requirements?
      - Amazon EC2 instance store for maximum performance, Amazon S3 for durable data storage, and Amazon S3 Glacier for archival storage.
   3. A solutions architect needs to backup some application log files from an online ecommerce store to Amazon S3. It is unknown how often the logs will be accessed or which logs will be accessed the most. From the following options "S3 Standard-Infrequent Access (S3 Standard-IA)", "S3 One Zone-Infrequent Access (S3 One Zone-IA)", "S3 Intelligent-Tiering" and "S3 Glacier". Which is the most cost effective?==> "S3 Intelligent-Tiering" It works by storing objects in two access tiers: one tier that is optimized for frequent access and another lower-cost tier that is optimized for infrequent access. The other options are not valid, because they charge retrieval fees.
 
@@ -1101,7 +1089,7 @@ aws s3 presign s3://mybucket/myobject --expires-in 300
 - `Encryption in Transit` — encrypting network traffic (between client and S3) using SSL/TLS.
 - `Encryption at Rest (Server Side)` — Encrypting the data which is stored. Can be achieved by:
   - `SSE-S3`: S3 Managed Keys (SSE-S3), AWS Managed Keys.
-  - `SSE-KMS`: AWS Key Management Service(SSE-KMS) AWS & you manage keys together.
+  - `SSE-KMS`: AWS Key Management Service (SSE-KMS) AWS & you manage keys together.
   - `SSE-C`: Customer provided keys — give AWS you own keys that you manage.
 - To meet PCI-DSS or HIPAA compliance, encrypt S3 using SSE-C and Client Side Encryption.
 
@@ -1124,7 +1112,7 @@ S3 Has extremely low latency
   - When you upload a file, you will call `GenerateDataKey` in the KMS API.
   - When you download a file, you will call `Decrypt` in the KMS API.
 - Uploading/Downloading will count towards the KMS per second quota, which could affect performance
-  - Region-specific, however, it's either 5,500, 10,000 or 30,000 requests our second.
+  - Region-specific, however, it's either 5500, 10000 or 30000 requests our second.
   - accessed through a Network File System (NFS) mount point
 
 ##### Improving Performance
