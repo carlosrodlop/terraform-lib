@@ -1119,7 +1119,7 @@ S3 Has extremely low latency
 
 - `S3 Prefix` is the part between the bucket name and the filename. You can get better performance by spreading your reads across different prefixes.
 
-  - Use Case: By default, you can get the first byte out of S3 within 100-200 milliseconds. You can also achieve a high number of requests: 3,500 PUT/COPY/POST/DELETE and 5,500 GET/HEAD requests per second per prefix. Spreading your reads across different prefixes. For Example, If you are using two prefixes, you can achieve 11,000 requests per second.
+  - Use Case: By default, you can get the first byte out of S3 within 100-200 milliseconds. You can also achieve a high number of requests: 3500 PUT/COPY/POST/DELETE and 5500 GET/HEAD requests per second per prefix. Spreading your reads across different prefixes. For Example, If you are using two prefixes, you can achieve 11000 requests per second.
 
 ```sh
 mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
