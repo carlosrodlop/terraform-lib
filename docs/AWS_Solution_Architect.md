@@ -1155,7 +1155,7 @@ mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
 - Use Cases:
   1. Storage capacity has become an issue for a company that runs application servers on-premises. The servers are connected to a combination of block storage and NFS storage solutions. The company requires a solution that supports local caching without re-architecting its existing applications.
      - The AWS Storage Gateway Volume gateway should be used to replace the block-based storage systems as it is mounted over iSCSI and the file gateway should be used to replace the NFS file systems as it uses NFS.
-  2. A company is investigating methods to reduce the expenses associated with on-premises backup infrastructure. The Solutions Architect wants to reduce costs by eliminating the use of physical backup tapes. It is a requirement that existing backup applications and workflows should continue to function.
+  2. A company is investigating methods to reduce the expenses associated with on-premises backup infrastructure (physical backup tapes). It is a requirement that existing backup applications and workflows should continue to function.
      - The AWS Storage Gateway Tape Gateway enables you to replace using physical tapes on premises with virtual tapes in AWS without changing existing backup workflows.
 
 ###  Instance Store
