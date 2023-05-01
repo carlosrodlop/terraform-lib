@@ -1643,7 +1643,7 @@ Go to [Index](#index)
 
 ![vpc](https://d1.awsstatic.com/Digital%20Marketing/House/Hero/products/ec2/VPC/Product-Page-Diagram_Amazon-VPC_HIW.9c472d7f2eb39ab8bdd22aa3ab80be00cdd00d8f.png)
 
-- A VPC is a logical separated section of AWS Cloud (your own datacenter in AWS) for an account to enable:
+- A VPC is a **logical separated section of AWS Cloud (your own DataCenter in AWS)** for an account to enable:
   - Launch instances
   - Assign custom IP address ranges
   - Configure route tables between subnets
@@ -1651,14 +1651,14 @@ Go to [Index](#index)
   - Much better security control over your AWS resources
   - Instance security groups
   - Subnet network access control lists (ACL's)
-- VPCs are region specific they do not span across regions
-  - Every region comes with default VPC.
+- VPCs are **region specific** (they do not span across regions)
+  - **Every region comes with default VPC**.
   - You can create upto 5 VPC per Region by default (soflimit, it can be extended)
 - Default VPC vs Custom VPC
-  - Default VPC is user friendly, allowing you to immediately deploy instances.
+  - **Default VPC is user friendly**, allowing you to immediately deploy instances.
   - All subnets in a default VPC are public (have a route out to the internet).
   - Each EC2 instance has both a public and private IP address.
-  - In case it is delated, it can be recovered. But, try not to delete it.
+  - In case it is delated, it can be recovered (but, try not to delete it).
 - Auto assigning a public IP Address is turned off by default, this will need to be updated if you want a public subnet.
 - You are not charged for using a VPC, however you are charged for the components used within it e.g. gateway, traffic monitoring etc.
 - One way to save costs when it comes to networking is to use private IP addresses instead of public IP addresses as they utilise the AWS Backbone network.
@@ -1674,21 +1674,20 @@ Go to [Index](#index)
 - VPC’s consist of an Internet gateway, Subnets, Route tables, Network Access Control Lists and Security Groups.
 - When we create a VPC
   - Created by default: a Route Table, Network Access Control List and Security Group.
-  - No created by default: Subnets and Internet gateway
+  - No created by default: Subnets and Internet gateway.
 
 ##### A/ Subnet (No created by default)
 
-- A range of IP addresses within a VPC.
-  - You assign one CIDR block per Subnet within CIDR range of your VPC. Should not overlap with other Subnet’s CIDR in your VPC.
+- A **range of IP addresses** within a VPC.
+  - You assign **one CIDR block per Subnet**. It should not overlap with other Subnet’s CIDR in your VPC.
   - Amazon don't allow /8 prefix as it is too large — the largest they allow is /16
   - Amazon always reserve 5 IP addresses within your subnets (First 4 IPs and the last IP): Network Address, Router Address, DNS Server Address, Broadcast address and 1 more for future use.
     - For e.g. If you need 29 IP addresses to use, your should choose CIDR /26 = 64 IP and not /27 = 32 IP, since 5 IPs are reserved and can not use.
   - Enable Auto assign public IPv4 address in public subnets, EC2 instances created in public subnets will be assigned a public IPv4 address
-- Use Case: Multi-tier and highly-available architecture: If you have 3 AZ in a region then you create total 6 subnets
+- Use Case: Multi-tier and highly-available architecture: If you have 3 AZ in a region then you create total 6 subnets.
   - 3 private subnets (1 in each AZ) for EC2 instances, Lambda, Database.
-  - 3 public subnets (1 in each AZ) for API gateway and ELB reside in public subnet.
-- Each subnet is tied to one Availability Zone, one Route Table, and one Network ACL
-  - A subnet can not span multiple availability zones. However an AZ can have multiple subnets.
+  - 3 public subnets (1 in each AZ) for **API gateway and ELB reside in public subnet**.
+- **Each subnet is tied to one Availability Zone, one Route Table, and one Network ACL** (A subnet cannot span multiple AZs. However an AZ can have multiple subnets).
 
 ###### CIDR block (Classless Inter-Domain Routing)
 
@@ -1696,7 +1695,7 @@ Go to [Index](#index)
 - Examples - Base IP 192.168.0.0
   - 192.168.0.0/32 means 2 raised to (32-**32**) = **1 single IP**
   - 192.168.0.0/24 means 2 raised to (32-**24**) = 256 IPs ranging from 192.168.0.0 to 192.168.0.255 (last number can change)
-  - 192.168.0.0/16 means 2 raised to (32-**16**) = 65,536 IPs ranging from 192.168.0.0 to 192.168.255.255 (last 2 numbers can change)
+  - 192.168.0.0/16 means 2 raised to (32-**16**) = 65,536 IPs ranging from 192.168.0.0 to 192.168.255.255 (last 2 numbers can change) - Max for AWS
   - 192.168.0.0/8 means 2 raised to (32-8)= 16,777,216 IPs ranging from 192.0.0.0 to 192.255.255.255 (last 3 numbers can change)
   - 0.0 0.0.0.0/0 means 232-0= All IPs ranging from 0.0.0.0 to 255.255.255.255 (all 4 numbers can change)
 
@@ -1704,19 +1703,18 @@ Go to [Index](#index)
 
 ![Internet Gateway](https://docs.aws.amazon.com/images/vpc/latest/userguide/images/internet-gateway-basics.png)
 
-- Allows your VPC (**public subnet**) to communicate with the Internet.
-  - Performs network address translation for instances.
+- Allows your VPC (**public subnet**) to communicate with the Internet ==> Performs network address translation for instances.
 - It is known as Internet gateway or Virtual Private Gateway
 - 1 VPC <-> 1 Internet Gateway. Each Internet Gateway is associated with one VPC only, and each VPC has one Internet Gateway only (one-to-one mapping)
 - For internet communication, you must set up a route in your route table that directs traffic to the Internet Gateway
 
 ##### C/ Route Table (Created by default)
 
-- A set of rules (called routes) that are used to determine where network traffic is directed.
+- A **set of rules (called routes) that are used to determine where network traffic is directed**.
   - Each Route table route has `Destination` like IPs and `Target` like local, IG, NAT, VPC endpoint etc.
-  - Allows subnets to talk to each other
+  - Allows subnets to talk to each other.
 - Each subnet in your VPC must be associated with a route table.
-- Cardinality
+- Cardinality:
   - 1 Subnet -> 1 Route Table. A subnet can only be associated with one route table at a time
   - 1 Route Table -> N Subnets. Multiple subnets can be associated with the same route table For e.g. you create 4 subnets in your VPC where 2 subnets associated with one route table with no internet access rules know as private subnets and another 2 subnets are associated with another route table with internet access rules known as public subnets
 - By default subnets are associated with the Main route table, but this can be a security risk.
@@ -1725,34 +1723,37 @@ Go to [Index](#index)
 - Public vs Private Subnet
   - Public subnet ==> It is a subnet that’s associated with a route table having **rules to connect to internet using Internet Gateway**.
   - Private subnet ==> It is a subnet that’s associated with a route table having **no rules to connect to internet using Internet Gateway**.
-    - Private subnet connect to the internet by setting a rule to a NAT Gateway in a public Subnet.
+    - Private subnet connect to the internet by setting a rule to a **NAT Gateway in a public Subnet**.
 
 ##### D/ Network Access Control List (Created by default)
 
-- Extra layer of security **for your VPC** (acts as a Firewall) as it can be used to control the traffic in and out of subnets.
-- Similar to security groups, as they contain rules, but you can  **block IP addresses** with a NACL (unlike Security Groups).
-- NACL are **stateless**, when you create an inbound rule and an outbound rule is not automatically created. It means they can have separate inbound and outbound rules (unlike Security Groups).
-- A NACL can be associated with many Subnets, but a subnet can only have one NACL.
+- It **acts as a Firewall**, it controls the inbound and ourbound traffic **at Subnets level**.
+- Differences with Security groups:
+  - You can **block IP addresses**, it allows Deny Rules
+  - They are **stateless**, when you create an inbound rule and an outbound rule is not automatically created. It means they can have separate inbound and outbound rules.
+- Cardinality: A NACL can be associated with many Subnets, but a subnet can only have one NACL.
 - VPCs comes with a modifiable default NACL it allows all inbound and outbound traffic (by default)
-  - You can create custom NACL --> denies all inbound and outbound traffic until you add rules  (by default)
+  - You can create custom NACL --> denies all inbound and outbound traffic until you add rules (by default)
 - Each subnet within a VPC must be associated with only 1 NACL
-  - If you don’t specify, auto associate with default NACL.
+  - If you don’t specify, auto associate with default NACL
   - If you associate with new NACL, auto remove previous association
 - Apply to all instances in associated subnet
 - Rules
   - **Support both Allow and Deny rules**
-  - Evaluate rules in number order, starting with lowest numbered rule. NACL rules have number(1 to 32766) and higher precedence to lowest number for e.g. #100 ALLOW <IP> and #200 DENY <IP> means IP is allowed
+  - **Evaluate rules in number order**, starting with lowest numbered rule. NACL rules have number (1 to 32766) and higher precedence to lowest number for e.g. #100 ALLOW <IP> and #200 DENY <IP> means IP is allowed
+    - Tip: It is recommended to create numbered rules in increments (for example, increments of 10 or 100) so that you can insert new rules where you need to later on.
   - Each network ACL also includes a rule with rule number as asterisk *. If any of the numbered rule doesn’t match, it’s denies the traffic. You can't modify or remove this rule.
-  - Recommended to create numbered rules in increments (for example, increments of 10 or 100) so that you can insert new rules where you need to later on.
 
 ##### E/ Security Groups (Created by default)
 
-- Control inbound and outbound traffic **at EC2 instance level**
-- You can specify **allows rule, but not deny rules**. You can specify a source in security group rule to be an IP range, a specific IP (/32), or another security group.
+- It **acts as a Firewall**, it controls inbound and outbound traffic **at EC2 instance level**
+- Differences with Security groups:
+  - You cannot **block IP addresses**, it does not allows Deny Rules
+  - **Stateful** when you create an inbound rule and an outbound rule is automatically created.
+- You can specify a source in security group rule to be an IP range, a specific IP (/32), or another security group.
 - When you first create a security group, by default
   - All outbound traffic is allowed.
-  - All inbound traffic is blocked.
-- **Stateful** when you create an inbound rule and an outbound rule is automatically created.
+  - All inbound traffic is blocked (no rules)
 - Cardinality: N Security Group <--> N EC2 instance.
   - You can have any number of EC2 instances within a security group.
   - You can have multiple Security Groups attached/assigned to EC2 instances. Evaluate all rules before deciding whether to allow traffic. Meaning if you have one security group which has no Allow and you add an allow in another than it will Allow
@@ -1798,9 +1799,7 @@ Go to [Index](#index)
 
 #### VPC Connectivity
 
-TODO: Review: https://digitalcloud.training/amazon-vpc/
-
-There are several methods of connecting to a VPC, including connection from Datacenters to VPC.
+There are several methods of connecting to a VPC, **including connection from Datacenters to VPC**.
 
 - AWS Managed VPN.
 - AWS Direct Connect.
@@ -1812,7 +1811,9 @@ There are several methods of connecting to a VPC, including connection from Data
 - AWS PrivateLink.
 - VPC Endpoints.
 
-##### AWS Managed VPN
+##### Case A: External DataCenter - AWS VPC
+
+###### AWS Managed VPN
 
 ![AWS Managed VPN](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-1.jpg)
 
@@ -1822,7 +1823,7 @@ There are several methods of connecting to a VPC, including connection from Data
 - Cons: Transitive peering is not supported
 - How: VPC Peering request made; acceptor accepts request (either within or across accounts)
 
-##### AWS Direct Connect
+###### AWS Direct Connect
 
 ![AWS Direct Connect](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-2.jpg)
 
@@ -1842,7 +1843,7 @@ There are several methods of connecting to a VPC, including connection from Data
   - It solves a **VPN connection keeping dropping out** because the amount of throughput.
   - It sets a private connectivity between AWS and your data center, office, or collocated environment.
 
-##### AWS Direct Connect Plus VPN
+###### AWS Direct Connect Plus VPN
 
 ![AWS Direct Connect Plus VPN](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-3.jpg)
 
@@ -1852,7 +1853,7 @@ There are several methods of connecting to a VPC, including connection from Data
 - Cons: More complexity introduced by VPN layer
 - How: Work with your existing data networking provider
 
-##### VPN CloudHub
+###### VPN CloudHub
 
 ![VPN CloudHub](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-4.jpg)
 
@@ -1862,7 +1863,7 @@ There are several methods of connecting to a VPC, including connection from Data
 - Cons: Dependent on Internet connections; no inherent redundancy
 - How: Assign multiple Customer Gateways to a Virtual Private Gateway, each with their own BGP ASN and unique IP ranges
 
-##### Software VPN
+###### Software VPN
 
 ![Software VPN](https://docs.aws.amazon.com/images/whitepapers/latest/aws-vpc-connectivity-options/images/image13.png)
 
@@ -1872,7 +1873,7 @@ There are several methods of connecting to a VPC, including connection from Data
 - Cons: You must design for any needed redundancy across the whole chain
 - How: Install VPN software via Marketplace on an EC2 instance
 
-##### Transit VPC
+###### Transit VPC
 
 ![Transit VPC](https://docs.aws.amazon.com/images/whitepapers/latest/aws-vpc-connectivity-options/images/image23.png)
 
@@ -1882,7 +1883,9 @@ There are several methods of connecting to a VPC, including connection from Data
 - Cons: You must design for any redundancy across the whole chain
 - How: Providers like Cisco, Juniper Networks, and Riverbed have offerings which work with their equipment and AWS VPC
 
-##### VPC Peering
+##### Case B: Among VPCs
+
+######  VPC Peering
 
 ![VPC Peering](https://docs.aws.amazon.com/images/vpc/latest/peering/images/peering-intro-diagram.png)
 
@@ -1896,7 +1899,7 @@ There are several methods of connecting to a VPC, including connection from Data
   - Route tables must be updated in both VPC that are peered so that instances can communicate.
   - Must have no overlapping CIDR Blocks.
 
-##### VPC Private Link
+###### VPC Private Link
 
 - What: AWS-provided connectivity between VPCs, AWS services and/or datacenters using interface endpoints, securely on the Amazon network.
 - When: Keep private subnets truly private by using the AWS backbone rather than using the public internet. Best way to expose your VPC to hundreds or thousands of other VPC’s. Can secure your traffic and simplify network management.
@@ -1906,7 +1909,7 @@ There are several methods of connecting to a VPC, including connection from Data
 
 `EXAM TIP`: Know the difference between AWS PrivateLink and ClassicLink. ClassicLink allows you to link EC2-Classic instances to a VPC in your account, within the same region. EC2-Classic is an old platform from before VPCs were introduced and is not available to accounts created after December 2013. However, ClassicLink may come up in exam questions as a possible (incorrect) answer, so you need to know what it is.
 
-##### VPC endpoints
+###### VPC endpoints
 
 - Allows you to **privately connect a VPC to other AWS resources** and it is powered by `Private Link`.
   - Instances in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
@@ -1936,10 +1939,11 @@ There are several methods of connecting to a VPC, including connection from Data
 
 ### AWS Global Accelerator
 
-- KeyWord: Redirecction (Non-cache)
+- KeyWord: Global Redirecction (Non-cache), Optimal routes
 
 ![global_accelerator](https://d1.awsstatic.com/product-page-diagram_AWS-Global-Accelerator%402x.dd86ff5885ab5035037ad065d54120f8c44183fa.png)
 
+- It is a **global service**.
 - It Saas which you create accelerators to improve availability and performance of your applications for **global users**.
   - How? It **redirects traffic to closest AWS Region to the user** over the AWS Global network to **reduce latency**.
 - Steps:
@@ -1951,9 +1955,11 @@ There are several methods of connecting to a VPC, including connection from Data
   - You can control traffic using traffic dials. This is done within the endpoint group.
   - You can control weighting to individual endpoints using weights (how much traffic is routed to each endpoint)
 
+![Difference with CloudFront](https://jayendrapatil.com/wp-content/uploads/2022/07/AWS-CloudFront-vs-Global-Accelerator.jpg)
+
 ### Amazon CloudFront
 
-- Keywords: Global Caché, Distribution
+- Keywords: Global Caché, HTTP applications (websites)
 
 ![cloudfront](https://docs.aws.amazon.com/images/AmazonCloudFront/latest/DeveloperGuide/images/how-you-configure-cf.png)
 
@@ -1967,16 +1973,16 @@ There are several methods of connecting to a VPC, including connection from Data
   - `Invalidations` → these can be files or subfolders that you can select to not be on the edge locations. Useful when you need to remove a file from an edge cache before it expires
   - `Versioning` → can be used to serve a different version of a file under a different name.
 - Objects are cached for the `Time To Live (TTL)` - default 24 hours.
-  - If requested resources does not exist on CloudFront — it will query the original server and then cache it on the edge location. Next requests get a cached copy from the Edge Location instead of downloading it again from the server until TTL expires.
+  - **If requested resources does not exist on CloudFront — it will query the original server and then cache it on the edge location**. Next requests get a cached copy from the Edge Location instead of downloading it again from the server until TTL expires.
   - It is possible to clear cached objects, however you will incur a charge.
-- Can integrate with AWS Shied, Web Application Firewall and Route 53 to advance security (to protect from layer 7 attacks).
+- Can integrate with AWS Shield, Web Application Firewall and Route 53 to advance security (to protect from layer 7 attacks).
 - It supports **Geo restriction (Geo-Blocking)** to whitelist or blacklist countries that can access the content.
 - Use Cases:
   1. A company offers an online product brochure that is delivered from a static website running on Amazon S3. The company’s customers are mainly in the United States, Canada, and Europe. With Amazon CloudFront you can set the price class to determine where in the world the content will be cached. One of the price classes is “U.S, Canada and Europe” and this is where the company’s users are located. Choosing this price class will result in lower costs and better performance for the company’s users.
-  2. A company runs a web application that serves weather updates. The application runs on a fleet of Amazon EC2 instances in a Multi-AZ Auto scaling group behind an Application Load Balancer (ALB). A solutions architect needs to make the application more resilient to sporadic increases in request rates.
+  2. A company runs a web application that serves weather updates. The application runs on a fleet of Amazon EC2 instances in a Multi-AZ Auto scaling group behind an Application Load Balancer (ALB). How to make the application more resilient to sporadic increases in request rates?
      - On the frontend an Amazon CloudFront distribution can be placed in front of the ALB and this will cache content for better performance and also offloads requests from the backend.
-  3. An organization want to share regular updates about their charitable work using static webpages. The pages are expected to generate a large amount of views from around the world. The files are stored in an Amazon S3 bucket. A solutions architect has been asked to design an efficient and effective solution => Amazon CloudFront can be used to cache the files in edge locations around the world and this will improve the performance of the webpages. Possible configuration. Using a REST API endpoint or Using a website endpoint as the origin with anonymous (public) access allowed or with access restricted by a Referer header.
-  4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website.Which combination of actions should a solutions architect take to increase availability?
+  3. An organization want to share regular updates about their charitable work using static webpages. The pages are expected to generate a large amount of views from around the world. The files are stored in an Amazon S3 bucket. How to design an efficient and effective solution => Amazon CloudFront can be used to cache the files in edge locations around the world and this will improve the performance of the webpages. Possible configuration. Using a REST API endpoint or Using a website endpoint as the origin with anonymous (public) access allowed or with access restricted by a Referer header.
+  4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website.Which combination of actions should be taken to increase availability?
      - You can set up CloudFront with origin failover for scenarios that require high availability. To get started, you create an origin group with two origins: a primary and a secondary. If the primary origin is unavailable or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.
   5. A company runs a dynamic website that is hosted on an on-premises server in the United States. The company is expanding to Europe and is investigating how they can optimize the performance of the website for European users. The website’s backed must remain in the United States. The company requires a solution that can be implemented within a few days. Best Practice => A custom origin can point to an on-premises server and CloudFront is able to cache content for dynamic websites. Additionally, connections are routed from the nearest Edge Location to the user across the AWS global network. If the on-premises server is connected via a Direct Connect (DX) link this can further improve performance.
 
