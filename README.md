@@ -24,7 +24,6 @@
 - [Terraform Registry](https://registry.terraform.io/)
 - [Documentation | Terraform | HashiCorp Developer](https://developer.hashicorp.com/terraform/docs)
 - [otf](https://docs.otf.ninja/en/latest/)
-- [Cómo MANGO aplica DevOps: AWS, Jenkins, Kubernetes… | #laFunción 7x29 - YouTube](https://www.youtube.com/watch?v=61C6wD_y1HA&t=195s)
 - [Cloud comparison Tables](https://media.licdn.com/dms/image/C5622AQEWNRJe_IJN1Q/feedshare-shrink_2048_1536/0/1678887625639?e=1681948800&v=beta&t=izj3rSdiOc4iMoqd8UuYScEzZXp6epoSSb7x9tFLFOc)
 - [Cloud Design Patterns - Awesome Software Architecture](https://awesome-architecture.com/cloud-design-patterns/cloud-design-patterns/)
 - [Cloud Best Practices - Awesome Software Architecture](https://awesome-architecture.com/cloud-best-practices/)
