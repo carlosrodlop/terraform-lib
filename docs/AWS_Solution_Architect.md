@@ -414,14 +414,18 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS WAF
 
-- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7 (HTTPs), IP restrictions.
+- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7 (HTTPs), IP restrictions
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
 - **Web Application Firewall** protect against **Layer 7** (HTTP & HTTPS) attacks, adding protection to your web applications or APIs against web attacks from common exploits, such as SQL injection or Cross-site scripting (XSS).
   - SQL injection is a code injection technique used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution (e.g. to dump the database contents to the attacker).
   - Cross-site scripting (XSS) attacks enable attackers to inject client-side scripts into web pages viewed by other users. A cross-site scripting vulnerability may be used by attackers to bypass access controls such as the same-origin policy.
-- You can deploy WAF on CloudFront, Application Load Balancer, API Gateway and AWS AppSync.
+- You can deploy WAF on:
+  - CloudFront
+  - Application Load Balancer (not in ELB or NLB)
+  - API Gateway
+  - AWS AppSync
 - How? => AWS WAF lets you create **Rules** to **filter web traffic** based on **conditions that include IP addresses, HTTP headers and body, or custom URIs**.
   - Those rules can **allow or block** what you specify. It also allows to count the requests that match a certain pattern.
   - It offers a set of pre-configured managed rules that you can use to get started quickly. They cover things like the OWASP Top 10 Security risks.
@@ -655,9 +659,14 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 - AMI's can be created from both Volumes and Snapshots.
   - You can create an AMI from EC2 instance and launch a new EC2 instance from AMI.
 - AMI **are built for a specific region and can be copied across regions** (Important for Disaster Recovery)
-- Use Case: A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, how do you ensure that the resources can also be deployed to a second Region?
+- Use Case:
+  1. A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, how do you ensure that the resources can also be deployed to a second Region?
   - Copy an Amazon Machine Image (AMI) of an EC2 instance and specify the second Region for the destination
   - Launch a new EC2 instance from an Amazon Machine Image (AMI) in the second Region
+  2. An application has been migrated to Amazon EC2 Linux instances. The EC2 instances run several 1-hour tasks on a schedule. There is no common programming language among these tasks, as they were written by different teams. Currently, these tasks run on a single instance, which raises concerns about performance and scalability. To resolve these concerns, a solutions architect must implement a solution Which solution will meet these requirements with the LEAST Operational overhead?
+  - The best solution is to create an AMI of the EC2 instance, and then use it as a template for which to launch additional instances using an Auto Scaling Group, allowing the EC2 instances to automatically scale and be launched across multiple Availability Zones.
+  - Lambda is not the best solution because it is not designed to run for 1 hour (mx 15 min)
+
 
 ### Elastic Load Balancing (ELB)
 
@@ -758,12 +767,16 @@ Auto Scaling offers both dynamic scaling and predictive scaling options:
 
 - Dynamic scaling scales the capacity of your Auto Scaling group **as traffic changes occur, based on demand**.
 - Types of Dynamic Scaling Policies => Increase and decrease the current capacity of the group based on:
-  - `Target tracking scaling`: A Amazon CloudWatch metric and a target value (it can combine more than one target). Health checks are performed to ensure resource level is maintained.
-    - Use Case: Keep the average aggregate CPU utilization of your Auto Scaling group at 40% (and request count per target of your ALB target group at 1000)
+  - `Target tracking scaling`: A Amazon CloudWatch metric and a target value (it can combine more than one target). Health checks are performed to ensure resource level is maintained. More cost-effective.
+    - Use Case:
+      1. A company runs an internal browser-based application. The application runs on Amazon EC2 instances behind an Application Load Balancer. The instances run in an Amazon EC2 Auto Scaling group across multiple Availability Zones. The Auto Scaling group scales up to 20 instances during work hours, but scales down to 2 instances overnight. Staff are complaining that the application is very slow when the day begins, although it runs well by midmorning. How should the scaling be changed to address the staff complaints and keep **costs to a minimum**?
+         - Though this sounds like a good use case for scheduled actions, both answers using scheduled actions will have 20 instances running regardless of actual demand. A better option to be more cost effective is to use a target tracking action that triggers at a lower CPU threshold.
+      2. A web application is being deployed on an Amazon ECS. The application is expected to receive a large volume of traffic initially. The company wishes to ensure that performance is good for the launch and that costs reduce as demand decreases
+         - Use Amazon ECS Service Auto Scaling with target tracking policies to scale when an Amazon CloudWatch alarm is breached. A Target Tracking Scaling policy increases or decreases the number of tasks that your service runs based on a target value for a specific metric.
   - `Step scaling`: A set of scaling adjustments, known as _step adjustments_, that vary based on the size of the alarm breach.
     - CloudWatch alarm `CPUUtilization` (60%-80%)- add 1, (>80%) - add 3 more, (30%-40%) - remove 1, (<30%) - remove 2 more
   - `Simple scaling`: A `single scaling adjustment`, with a `cooldown period` between each scaling activity.
-    - CloudWatch alarm CPUUtilization (>80%) - add 2 instances
+    - CloudWatch alarm CPUUtilization (>80%) - add 2 instances.
 
 ##### Predictive scaling
 
@@ -774,6 +787,7 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 - Scale Based on a `Schedule`: Scaling performed as a function of time to reflect forecasted load. For example, if you know there will be increased load on the application at 9am every morning you can choose to scale at this time.
 
 - Scale based on `Load forecasting`: Auto Scaling analyses the history of your applications load for up to 14 days and then uses this predict to the load for the next 2 days.
+
 
 ### Lambda
 
@@ -797,7 +811,7 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
       - **On a Schedule** with Amazon EventBridge (CloudWatch Events).
 
 - Lambda limitations:
-  - Execution time can’t exceed 900 seconds or 15 min
+  - Execution time can’t exceed 15 min (900 seconds)
   - Min required memory is 128MB and can go till 10GB with 1-MB increment
   - `/temp` directory size to download file can’t exceed 512 MB
   - Max environment variables size can be 4KB
@@ -1275,6 +1289,8 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Lustre
 
+- Keyword: HPC, Linux
+
 ![FSx for Lustre AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_Amazon-FSx-for-Lustre.097ed5e5175fa96e8ac77a2470151965774eec32.png)
 
 - Fully managed and High performance file system for **fast processing of workload** with consistent **sub-millisecond latencies**, up to hundreds of gigabytes per second of throughput, and up to millions of IOPS.
@@ -1383,10 +1399,9 @@ Go to [Index](#index)
 
 - Use Case:
 
-1. A company runs a web application that store data in an Amazon Aurora database. A solutions architect needs to make the application more resilient to sporadic increases in request rates.
+  1. A company runs a web application that store data in an Amazon Aurora database. A solutions architect needs to make the application more resilient to sporadic increases in request rates.
   - To resolve this situation Amazon Aurora Read Replicas can be used to serve read traffic which offloads requests from the main database.
-
-2. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
+  2. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
 
 #### Aurora Serverless
 
@@ -1397,11 +1412,11 @@ Go to [Index](#index)
 
 ### DynamoDB
 
-- KeyWords: NoSQL, AWS proprietary, Eventual Consistent Read, Strongly Consistent Reads
+- KeyWords: NoSQL, AWS proprietary, Eventual Consistent Read, Strongly Consistent Reads, IoT, Near Real Time Performance
 
 ![AWS Dynamo DB](https://d1.awsstatic.com/product-page-diagram_Amazon-DynamoDBa.1f8742c44147f1aed11719df4a14ccdb0b13d9a3.png)
 
-- AWS proprietary, a fast and flexible **NoSQL** database service for all applications that need consistent, single-digit millisecond latency at any scale.
+- AWS proprietary, a fast and flexible **NoSQL** database service for all applications that need consistent, **single-digit millisecond latency/response** at any scale.
 - It is fully Managed and Serverless (no servers to provision, patch, or manage) database.
 - Its **flexible data model** and reliable performance make it a great fit for mobile, web, gaming, ad-tech, IoT, and many other applications. It supports both:
   - Document (limit of 400KB item size. E.g. JSON documents, or session data.)
@@ -1411,6 +1426,8 @@ Go to [Index](#index)
 - It supports eventually consistent and strongly consistent reads (eventual consistency is default).
   - Eventual Consistent Read (Default): Consistency across data within a second, meaning the response might not reflect the results of a just completed write operation, but if you repeat the read request again it should return the updated data (Best Read Performance).
   - Strongly Consistent Reads: Returns the latest data. Results should reflect all writes that received a successful response prior to that read!
+- Use Case: An IoT sensor is being rolled out to thousands of a company’s existing customers. The sensors will stream high volumes of data each second to a central location. A solution must be designed to ingest and store the data for analytics. The solution must provide near-real time performance and millisecond responsiveness.
+  - Ingest the data into an Amazon Kinesis Data Stream. Process the data with an AWS Lambda function and then store the data in Amazon DynamoDB.
 
 #### Streams
 
@@ -1420,7 +1437,7 @@ Go to [Index](#index)
 
 #### Global Tables
 
-- This feature is enabled to serve the data globally for distributed apps or for Disaster Recovery/High Availability scenarios: multi-active & multi-region database, that replicate your DynamoDB tables across selected regions
+- This feature is enabled to serve the data globally for distributed apps or for Disaster Recovery/High Availability scenarios: multi-active & multi-region database, that replicate your DynamoDB tables across selected regions.
 - It is based on DynamoDB streams, thus it must enabled first to create global table.
 
 #### Security in DynamoDB
@@ -1438,26 +1455,20 @@ Go to [Index](#index)
 
 ### ElastiCache
 
-- KeyWords: In-memory Cache
+- KeyWords: In-memory Cache, Gaming
 
 ![AWS ElasticCache](https://d1.awsstatic.com/elasticache/EC_Use_Cases/product-page-diagram_ElastiCache_how-it-works.ec509f8b878f549b7fb8a49669bf2547878303f6.png)
 
-- It is SaaS for **in-memory caching** supporting flexible, real-time use cases.
-- Uses Cases:
-  - Improves the performance of web applications, as it allows you to retrieve data fast from memory with high throughput and low latency. Use as distributed cache with sub millisecond performance.
-  - primary data store for use cases that don't require durability like session stores, gaming leaderboards, streaming, and analytics
-- There are two types of in-memory caching engines:
+- It is SaaS for **in-memory caching** supporting flexible, real-time use cases. In-memory key/value store, not persistent in the traditional sense.
+- Fully managed implementations of two popular in-memory data stores – Redis and Memcached.
   - Memcached — designed for simplicity, so used with you need the simplest model possible.
   - Redis — works for a wide range of use cases and have multi AZ. You can also complete backups/restores of redis.
     - Use password/token to access data using Redis Auth.
     - HIPAA Compliant.
-- Services capable of caching
-  - CloudFront
-  - API Gateway
-  - ElasticCache
-  - Dynamo DB Accelerator
-- Caching is a balancing act between up-to-date accurate information and latency.
-- The further up you cache in your architecture the better e.g. at CloudFront level instead of waiting to DB level.
+- Uses Cases:
+  - Improves Performance of Applications and Database. It allows you to retrieve data fast from memory with high throughput and low latency. Use as distributed cache with sub millisecond performance.
+  - Primary data store for use cases that don't require durability like session stores, gaming leaderboards, streaming, and analytics
+  - Best for scenarios where the DB load is based on Online Analytics Processing (OLAP) transactions.
 
 **Exam tip** : the key use cases for ElastiCache are offloading reads from a database and storing the results of computations and session state. Also, remember that ElastiCache is an in-memory database and it’s a managed service (so you can’t run it on EC2).
 
@@ -1492,7 +1503,7 @@ Go to [Index](#index)
 
 ### Amazon Kinesis
 
-- KeyWords: Streaming media, Real-time
+- KeyWords: Streaming media, Real-time performance, IoT
 
 ![Amazon Kinesis](https://d1.awsstatic.com/Digital%20Marketing/House/1up/products/kinesis/Product-Page-Diagram_Amazon-Kinesis-Data-Streams.e04132af59c6aa1e9372cabf44a17749f4a81b16.png)
 
@@ -1822,7 +1833,7 @@ Go to [Index](#index)
 
 #### Bastion Host
 
-- A Bastion host is used to **securely administer EC2 instances** in private subnet (using SSH or RDP). (Bastions are called Jump Boxes in Australia).
+- A Bastion host is used to **securely administer EC2 instances in private subnet** (using SSH or RDP). (Bastions are called Jump Boxes in Australia).
 - A NAT Gateway or a NAT instance is used to provide **internet traffic** to EC2 instances in a private subnets. **They cannnot be used as Bastion Host**.
 
 #### VPC Flow Logs
@@ -1838,15 +1849,18 @@ Go to [Index](#index)
 
 There are several methods of connecting to a VPC, **including connection from Datacenters to VPC**.
 
-- AWS Managed VPN.
-- AWS Direct Connect.
-- AWS Direct Connect plus a VPN.
-- AWS VPN CloudHub.
-- Software VPN.
-- Transit VPC.
-- VPC Peering.
-- AWS PrivateLink.
-- VPC Endpoints.
+- External DataCenter - AWS VPC
+  - AWS Managed VPN
+  - AWS Direct Connect
+  - AWS Direct Connect plus a VPN
+  - AWS VPN CloudHub
+  - Software VPN
+  - Transit VPC
+  - Transit Gateway
+- Among VPCs
+  - VPC Peering
+  - AWS PrivateLink
+  - VPC Endpoints
 
 ##### Case A: External DataCenter - AWS VPC
 
@@ -1922,6 +1936,16 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Cons: You must design for any redundancy across the whole chain
 - How: Providers like Cisco, Juniper Networks, and Riverbed have offerings which work with their equipment and AWS VPC
 
+###### Transit Gateway
+
+- AWS Transit Gateway connects your Amazon Virtual Private Clouds (VPCs) and on-premises networks through a central hub. This connection simplifies your network and puts an end to complex peering relationships. Transit Gateway acts as a highly scalable cloud router—each new connection is made only once.
+- Difference with Transit VPC: Transit VPC is more of a network architecture concept while Transit Gateway is a service.
+
+![Transit Gateway](https://d1.awsstatic.com/products/transit-gateway/product-page-diagram_AWS-Transit-Gateway%402x.921cf305305867447fcabfc6b7acae9f0e5bc9d5.png)
+
+- Use Case: A company runs a number of core enterprise applications in an on-premises data center. The data center is connected to an Amazon VPC using AWS Direct Connect. The company will be creating additional AWS accounts and these accounts will also need to be quickly, and cost-effectively connected to the on-premises data center in order to access the core applications. Which solution will cause least overhead?
+  - Configure AWS Transit Gateway between the accounts. Assign Direct Connect to the transit gateway and route network traffic to the on-premises servers. With AWS Transit Gateway, you can quickly add Amazon VPCs, AWS accounts, VPN capacity, or AWS Direct Connect gateways to meet unexpected demand, without having to wrestle with complex connections or massive routing tables. This is the operationally least complex solution and is also cost-effective.
+
 ##### Case B: Among VPCs
 
 ######  VPC Peering
@@ -1945,8 +1969,12 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Pros: Redundant; uses AWS backbone
 - Cons: ?
 - How: Create endpoint for required AWS or Marketplace service in all required subnets; access via the provided DNS hostname
-
-`EXAM TIP`: Know the difference between AWS PrivateLink and ClassicLink. ClassicLink allows you to link EC2-Classic instances to a VPC in your account, within the same region. EC2-Classic is an old platform from before VPCs were introduced and is not available to accounts created after December 2013. However, ClassicLink may come up in exam questions as a possible (incorrect) answer, so you need to know what it is.
+- `EXAM TIP`: AWS PrivateLink is NOT the same as ClassicLink
+  - ClassicLink may come up in exam questions as a possible (incorrect) answer, so you need to know what it is.
+  - ClassicLink allows you to link EC2-Classic instances to a VPC in your account, within the same region
+  - EC2-Classic is an old platform from before VPCs were introduced and is not available to accounts created after December 2013.
+- Use Case: A shared services VPC is being setup for use by several AWS accounts. An application needs to be securely shared from the shared services VPC. The solution should not allow consumers to connect to other instances in the VPC.
+  - To restrict access so that consumers cannot connect to other instances in the VPC the best solution is to use PrivateLink to create an endpoint for the application. The endpoint type will be an interface endpoint and it uses an NLB in the shared services VPC.
 
 ###### VPC endpoints
 
@@ -2037,7 +2065,7 @@ There are several methods of connecting to a VPC, **including connection from Da
   a. URL expiration.
   b. IP ranges
   c. Trusted Signers (which AWS accounts can create signed URL's)
-- Use Case: Netflix - Option in AWS CloudFront is "Restrict Viewer access (Use Signed URL's or Signed cookies)")
+- Use Case: Netflix - Option in AWS CloudFront is "Restrict Viewer access (Use Signed URL's or Signed cookies)"
 
 ##### Features of a signed url
 
@@ -2237,7 +2265,11 @@ Go to [Index](#index)
   - Always use strong and complex passwords on root account.
   - Paying account should be used for billing purposes only. Do not deploy resources into the paying account, into the root account or the master account.
   - Enable and disable AWS services using service control policies (SCPs) either on organisational units or on individual accounts.
-  - Use Case: An AWS Organization has an OU with multiple member accounts in it. The company needs to restrict the ability to launch only specific Amazon EC2 instance types. How can this policy be applied across the accounts with the least effort? => use a Service Control Policy (SCP) in the AWS Organization. The way you would do this is to create a deny rule that applies to anything that does not equal the specific instance type you want to allow.
+- Use Cases:
+  1. An AWS Organization has an OU with multiple member accounts in it. The company needs to restrict the ability to launch only specific Amazon EC2 instance types. How can this policy be applied across the accounts with the least effort?
+     - Use a Service Control Policy (SCP) in the AWS Organization. The way you would do this is to create a deny rule that applies to anything that does not equal the specific instance type you want to allow.
+  2. A company has divested a single business unit and needs to move the AWS account owned by the business unit to another AWS Organization. How can this be achieved?
+     - Migrate the account using the AWS Organizations console. To do this you must have root or IAM access to both the member and master accounts. Resources will remain under the control of the migrated account.
 
 ### AWS OpsWorks
 
