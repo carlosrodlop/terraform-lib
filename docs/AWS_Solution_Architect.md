@@ -1455,7 +1455,7 @@ Go to [Index](#index)
 
 ### ElastiCache
 
-- KeyWords: In-memory Cache, Gaming
+- KeyWords: In-memory Cache
 
 ![AWS ElasticCache](https://d1.awsstatic.com/elasticache/EC_Use_Cases/product-page-diagram_ElastiCache_how-it-works.ec509f8b878f549b7fb8a49669bf2547878303f6.png)
 
@@ -1983,13 +1983,16 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Eliminates the need of an Internet Gateway and NAT Instances/Gateway for instances in public and private subnets to access the other AWS services through public internet.
 - 2 types:
   - `Interface endpoint` → Attach an Elastic Network Interface (ENI) with a private IP address onto your EC2 instance for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a supported service.
-  - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for only S3 & Dynamo.
+  - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for **only S3 & Dynamo DB**.
 
 - **Exam Tip :**
   1. Know which services use interface endpoints and gateway endpoints. The easiest way to remember this is that Gateway Endpoints are for Amazon S3 and DynamoDB only.
   2. In addition to VPC endpoints, it is require an route table to link the 2 services (e.g EC2 and DynamoDB via Gateway endpoint)
 
 ![EC2 and DynamoDB via Gateway endpoint](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-00-45-ac665c89acb1641afb831f1eb795210e.jpg)
+
+- Use Case: A company runs an application on Amazon EC2 instances which requires access to sensitive data in an Amazon S3 bucket. All traffic between the EC2 instances and the S3 bucket must not traverse the internet and must use private IP addresses. Additionally, the bucket must only allow access from services in the VPC.
+  - Private access to public services such as Amazon S3 can be achieved by creating a VPC endpoint in the VPC. For S3 this would be a gateway endpoint. The bucket policy can then be configured to restrict access to the S3 endpoint only which will ensure that only services originating from the VPC will be granted access.
 
 ### Amazon API Gateway
 
@@ -2026,7 +2029,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 ### Amazon CloudFront
 
-- Keywords: Global Caché, HTTP applications (websites)
+- Keywords: Global Cache, HTTP applications (websites)
 
 ![cloudfront](https://docs.aws.amazon.com/images/AmazonCloudFront/latest/DeveloperGuide/images/how-you-configure-cf.png)
 
