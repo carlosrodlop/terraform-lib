@@ -232,9 +232,11 @@ Go to [Index](#index)
     - Not to use the root account for anything other than billing (not login)
     - Always setup Multifactor Authentication on your root account.
 - `Power user access` → Access to all AWS services except the management of groups and users within IAM
+- Permission Boundary: A managed policy that defines the maximum permissions that an identity-based policy can grant to an IAM entity. When you use a policy to set the permissions boundary for a user, it limits the user's permissions but does not provide permissions on its own.
 - Use Case:
   1. An application running on an Amazon ECS container instance needs permissions to write data to Amazon DynamoDB. How can you assign these permissions only to the specific ECS task that is running the application? ==> To specify permissions for a specific task on Amazon ECS you should use IAM Roles for Tasks. The permissions policy can be applied to tasks when creating the task definition, or by using an IAM task role override using the AWS CLI or SDKs. The taskRoleArn parameter is used to specify the policy.
   2. A company requires that all AWS IAM user accounts have specific complexity requirements and minimum password length. How to accomplish this? ==> Update the password policy that applies to the entire AWS account.
+  3. To accelerate experimentation and agility, a company allows developers to apply existing IAM policies to existing IAM roles. Nevertheless, the security operations team is concerned that the developers could attach the existing administrator policy, circumventing any other security policies ==> Use Permisssion Boundaries.
 
 ### Access AWS
 
@@ -412,7 +414,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS WAF
 
-- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7
+- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7, IP restrictions.
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
@@ -938,6 +940,8 @@ Go to [Index](#index)
 
 ### S3 (Simple Storage Service)
 
+- Keywords: Block Storage
+
 ![s3](https://d1.awsstatic.com/s3-pdp-redesign/product-page-diagram_Amazon-S3_HIW.cf4c2bd7aa02f1fe77be8aa120393993e08ac86d.png)
 
 - Storage service that is highly scalable, secure and performant.
@@ -1007,9 +1011,13 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - Enable `Server access logging` for logging object-level fields object-size, total time, turn around time, and Http referrer. Not available with CloudTrail.
 - Use `VPC S3 gateway endpoint` to access S3 bucket within AWS VPC to reduce the overall data transfer cost.
 - Enable `S3 Transfer Acceleration` for faster transfer (high throughput) to S3 bucket (mainly uploads).
-  - Create CloudFront distribution with Origin Access Identity (OAI) pointing to S3 for faster cached content delivery (mainly reads) over long distances between your client and S3.
+
+#### Integrations
+
+- Create `CloudFront` distribution with Origin Access Identity (OAI) pointing to S3 for faster cached content delivery (mainly reads) over long distances between your client and S3.
   - Restrict the access of S3 bucket through CloudFront only using Origin Access Identity (OAI). Make sure user can’t use a direct URL to the S3 bucket to access the file.
-- Use AWS Athena (Serverless Query Engine) to perform analytics directly against S3 objects using SQL query and save the analysis report in another S3 bucket.
+  - Note: CloudFront provides two ways to send authenticated requests to an Amazon S3 origin: origin access control (OAC) and origin access identity (OAI). OAC is recommeded.
+- Use `AWS Athena` (Serverless Query Engine) to perform analytics directly against S3 objects using SQL query and save the analysis report in another S3 bucket.
   - Use Case: one time SQL query on S3 objects, S3 access log analysis, serverless queries on S3, IoT data analytics in S3, etc.
 
 #### S3 Tiered Storage (Storage Classes)
@@ -1134,12 +1142,12 @@ mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
 
 ### AWS Storage Gateway
 
-- Keyword: Hybrid solution without need to re-architecting
+- Keyword: Hybrid solution, not re-architecting, S3
 
 ![storagegateway](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_AWS-Storage-Gateway_HIW@2x.6df96d96cdbaa61ed3ce935262431aabcfb9e52d.png)
 
-- It is a set of **hybrid cloud storage** services that provide on-premises access to virtually unlimited cloud storage.
-- How? Applications connect to the Storage Gateway service through a virtual machine or hardware appliance that is installed on site (the data center) and uses standard protocols such as NFS, SMB, and iSCSI. This local device connects to the Storage Gateway service which in turn connects to AWS storage services such as Amazon S3, Amazon S3 Glacier, Amazon S3 Glacier Deep Archive and Amazon EBS, thus providing storage for your applications. This device is also used as a **local cache** to provide low latency access to the most active data. Since our priority at AWS is security, the connection to the AWS Storage Gateway service is made through a secure channel using HTTPS.
+- It is a set of **hybrid cloud storage** services that provide on-premises access to unlimited cloud storage (**S3 based**), object-based storage system.
+- How? Applications connect to the Storage Gateway service through a virtual machine or hardware appliance that is installed on site (the data center) and uses standard protocols such as NFS, SMB, and iSCSI. to **connects to AWS S3 storage services** (Amazon S3, Amazon S3 Glacier, Amazon S3 Glacier Deep Archive and Amazon EBS). This device is also used as a **local cache** to provide low latency access to the most active data. Since our priority at AWS is security, the connection to the AWS Storage Gateway service is made through a secure channel using HTTPS.
 
 ![storagegateway_how](https://d2908q01vomqb2.cloudfront.net/4d134bc072212ace2df385dae143139da74ec0ef/2020/11/05/image002-2.png)
 
@@ -1240,6 +1248,8 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Windows
 
+- Keyword: NAS, NTFS
+
 ![FSx for Windows AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/Product-Page-Diagram_Managed-File-System-How-it-Works_Updated@2x.c0c4e846c0fca27e8f43bd1651883b21b4cc1eec.png)
 
 - Fully managed, highly performant, native Microsoft Windows file system that supports **SMB protocol & Windows NTFS**. It also supports Microsoft Active Directory (AD) integration, ACLs, User quotas, Distributed File System Namespace (DFSN) and Distributed File System Replication (DFSR)
@@ -1297,7 +1307,9 @@ Go to [Index](#index)
     - You can force a fail-over from AZ to another by rebooting the RDS instance.
   - **Read Replicas** > Used for Scaling, improving Performance.
     - A Read Replica allows you to have read-only copies (Upto 5 Read replicas) of your production database. This is achieved by using Asynchronous replication so reads are eventually consistent. Every time you write to the main database, it is replicated in the secondary databases.
-    - Read replicas can be distributed across multiple AZ, even in a different Region of your running RDS instance. You pay for replication cross Region, but not for cross AZ.
+    - Once RDS is selected as MultiAZ ==> Create a **read replica as a Multi-AZ DB instance**.
+      - Exam Tip: Do not confuse with "Deploy a read replica in a different AZ to the master DB instance" (this is not Multi-AZ and not HA)
+      - Amazon RDS creates a standby of your replica in another Availability Zone for failover support for the replica, even in a different Region of your running RDS instance. You pay for replication cross Region, but not for cross AZ.
     - **It must have automatic backups turned on in order to deploy a read replica**.
     - You can have read replicas of read replicas (but watch out for latency)
     - Each read replica will have its own DNS end point.
