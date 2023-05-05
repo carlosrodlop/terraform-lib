@@ -414,7 +414,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS WAF
 
-- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7, IP restrictions.
+- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7 (HTTPs), IP restrictions.
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
@@ -435,6 +435,22 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
     - Presence of a script
 - Pay for what you use, based on the number of rules you have and requests your applications receive.
 - Use Case: A website runs on Amazon EC2 instances behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. How to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
+
+### AWS Network Firewall
+
+- Keywords: VPC level, Layer 3-7
+
+- With AWS Network Firewall, you can define **firewall rules** that provide fine-grained control over network traffic. Network Firewall works together with AWS Firewall Manager so you can build policies based on Network Firewall rules and then centrally apply those policies across your **virtual private clouds (VPCs) and accounts**.
+- Its primary objective is to separate a secured zone from a less secure zone and control communications between the two. Without it, any computer with a public Internet Protocol (IP) address is accessible outside the network and potentially at risk of attack.
+
+![AWS Network Firewall](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Network-Firewall%402x.68dc577022a7624450c24747789d214ccf0f1178.png)
+
+- Use Case: An Amazon EC2 instance runs in a VPC network, and the network must be secured. The EC2 instances contain highly sensitive data and have been launched in private subnets. Company policy restricts EC2 instances that run in the VPC from accessing the internet. The instances need to access the software repositories using a third-party URL to download and install software product updates. All other internet traffic must be blocked, with no exceptions.
+  - The AWS Network Firewall is a managed service that makes it easy to deploy essential network protections for all your Amazon Virtual Private Clouds, and you can then use domain list rules to block HTTP or HTTPS traffic to domains identified as low-reputation, or that are known or suspected to be associated with malware or botnets.
+
+#### AWS Network Firewall vs WAF vs Security Groups vs NACLs
+
+![AWS Network Firewall vs WAF vs Security Groups vs NACLs](https://jayendrapatil.com/wp-content/uploads/2022/08/AWS-Security-Groups-vs-NACLs-vs-WAF-vs-Network-Firewall.jpg)
 
 ### AWS Firewall Manager
 
@@ -1326,6 +1342,9 @@ Go to [Index](#index)
   - Manual Database Snapshot
     - User-initiated, must be manually done by yourself
     - Stored until you explicitly delete them, even after you delete the original RDS instance they are still persisted (This is not the case with automated backups).
+- Amazon RDS Proxy is a fully managed, highly available database proxy for Amazon Relational Database Service (RDS) that makes applications more scalable, more resilient to database failures, and more secure.
+  - Use Case: A company hosts a serverless application on AWS. The application uses Amazon RDS for PostgreSQL. During times of peak traffic and when traffic spikes are experienced, the company notices an increase in application errors caused by database connection timeouts. The company is looking for a solution that will reduce the number of application failures with the least amount of code changes.
+    - Amazon RDS Proxy allows applications to pool and share connections established with the database, improving database efficiency and application scalability.
 - It offers **encryption at rest** but **encryption must be specified when creating the RDS DB instance**. Once your RDS instance is encrypted, as are its automated backups, read replicas, and snapshots. But you cannot create an encrypted Read Replica from an unencrypted master DB instance.
   - Use Cases:
   1. To change the encryption status of an existing RDS DB instance ==> Create a new master DB by taking a snapshot of the existing DB, and then creating the new DB from the snapshot (during creation). You can then create the encrypted cross-region Read Replica of the master DB. Applications must be updated to use the new RDS DB endpoint.
@@ -1769,6 +1788,12 @@ Go to [Index](#index)
 - Cardinality: N Security Group <--> N EC2 instance.
   - You can have any number of EC2 instances within a security group.
   - You can have multiple Security Groups attached/assigned to EC2 instances. Evaluate all rules before deciding whether to allow traffic. Meaning if you have one security group which has no Allow and you add an allow in another than it will Allow
+- Use Cases:
+  1. An architect is designing a two-tier web application. The application consists of a public-facing web tier hosted on Amazon EC2 in public subnets. The database tier consists of Microsoft SQL Server running on Amazon EC2 in a private subnet. Security is a high priority for the company. How should security groups be configured in this situation?
+     - Web Tier: **inbound rule** is required to allow traffic from any internet client to the web front end on SSL/TLS port 443. The source should therefore be set to `0.0.0.0/0` to allow any inbound traffic.
+     - Web - DataBase Tier: To secure the connection from the web frontend to the database tier, an **outbound rule** should be created from the public EC2 security group with a destination of the private EC2 security group. The port should be set to 1433 for MySQL. The private EC2 security group will also need to allow inbound traffic on 1433 from the public EC2 security group.
+  2. An application is running on Amazon EC2 behind an Elastic Load Balancer (ELB). Content is being published using Amazon CloudFront and you need to restrict the ability for users to circumvent CloudFront and access the content directly through the ELB.
+     - The only way to get this working is by using a VPC Security Group for the ELB that is configured to allow only the internal service IP ranges associated with CloudFront. As these are updated from time to time, you can use AWS Lambda to automatically update the addresses. This is done using a trigger that is triggered when AWS issues an SNS topic update when the addresses are changed.
 
 #### NAT Gateway/Instances
 
@@ -1842,7 +1867,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 - What: Dedicated network connection over private line straight into the AWS backbone
 - When: Requires a large network link into AWS; lots of resources and services being provided on AWS to your corporate users
 - Pros: More predictable network performance; potential bandwidth cost reduction; increase in bandwidth throughput (up to 10 Gbps provisioned connections); supports BGP peering and routing
-- Cons: May require additional telecom and hosting provider relationships and/or network circuits; costly
+- Cons: May require additional telecom and hosting provider relationships and/or network circuits; costly; It takes time to set up.
 - How: Work with your existing data networking provider; create Virtual Interfaces (VIFs) to connect to VPCs (private VIFs) or other AWS services like S3 or Glacier (public VIFs)
 
 | AWS VPN | AWS Direct Connect |
@@ -1854,6 +1879,8 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Use Cases:
   - It solves a **VPN connection keeping dropping out** because the amount of throughput.
   - It sets a private connectivity between AWS and your data center, office, or collocated environment.
+  - A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, lead times are often longer than 1 month so it cannot be used to migrate data within the timeframes
+    - Alternatively, use AWS Snowball to move the data and order a Direct Connect connection to satisfy the other requirement later on. In the meantime the organization can use an AWS VPN for secure, private access to their VPC.
 
 ###### AWS Direct Connect Plus VPN
 
