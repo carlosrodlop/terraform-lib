@@ -423,7 +423,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
   - Cross-site scripting (XSS) attacks enable attackers to inject client-side scripts into web pages viewed by other users. A cross-site scripting vulnerability may be used by attackers to bypass access controls such as the same-origin policy.
 - You can deploy WAF on:
   - CloudFront
-  - Application Load Balancer (not in ELB or NLB)
+  - **Application Load Balancer** (not in ELB or NLB) - Exat Tip
   - API Gateway
   - AWS AppSync
 - How? => AWS WAF lets you create **Rules** to **filter web traffic** based on **conditions that include IP addresses, HTTP headers and body, or custom URIs**.
@@ -438,7 +438,8 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
     - Presence of SQL code
     - Presence of a script
 - Pay for what you use, based on the number of rules you have and requests your applications receive.
-- Use Case: A website runs on Amazon EC2 instances behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. How to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
+- Use Case:
+  1. A website runs on Amazon EC2 instances behind an Application Load Balancer (ALB) which serves as an origin for an Amazon CloudFront distribution. An AWS WAF is being used to protect against SQL injection attacks. A review of security logs revealed an external malicious IP that needs to be blocked from accessing the website. How to protect the application? ==> Create a Rule to block request based on the malicious IP addresses.
 
 ### AWS Network Firewall
 
@@ -1057,13 +1058,14 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 
 | S3 Storage Class                   | Durability | Availability | AZ  | Min. Storage | Retrieval Time                                           | Retrieval fee |
 | ---------------------------------- | ---------- | ------------ | --- | ------------ | -------------------------------------------------------- | ------------- |
-| S3 Standard (General Purpose)      | 11 9’s     | 99.99%       | ≥3  | **N/A**   | milliseconds                                             | **N/A**           |
+| S3 Standard (General Purpose)      | 11 9’s     | 99.99%       | ≥3  | **N/A**  `*` | milliseconds                                             | **N/A**            |
 | S3 Intelligent Tiering             | 11 9’s     | 99.9%        | ≥3  | 30 days      | millisecond                                              | N/A           |
 | S3 Standard-IA (Infrequent Access) | 11 9’s     | 99.9%        | ≥3  | 30 days      | milliseconds                                             | per GB        |
 | S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | **1**  | 30 days      | milliseconds                                             | per GB        |
 | S3 Glacier                         | 11 9’s     | 99.99%       | ≥3  | **90 days**      | Expedite (1-5 mins), Standard (3-5 hrs), Bulk (5-12 hrs) | per GB        |
 | S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | Standard (12 hrs), Bulk (48 hrs)  | per GB
 
+`*` Although there is not minimum time for storage, a Lifecycle requires at least 30 days before you transition objects from the S3 Standard
 - Types
   - `Standard`: **General purpose** storage for any type of frequently used data very high availability, and fast retrieval.
   - `Intelligent Tiering`: Analyze your Object’s usage and move them to the appropriate cost-effective storage class automatically, without performance impact.
@@ -1084,6 +1086,8 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
   2. A video production company is planning to move some of its workloads to the AWS Cloud. The company will require around 5 TB of storage for video processing with the maximum possible I/O performance. They also require over 400 TB of extremely durable storage for storing video files and 800 TB of storage for long-term archival. Which combinations of services would meet these requirements?
      - Amazon EC2 instance store for maximum performance, Amazon S3 for durable data storage, and Amazon S3 Glacier for archival storage.
   3. A solutions architect needs to backup some application log files from an online ecommerce store to Amazon S3. It is unknown how often the logs will be accessed or which logs will be accessed the most. From the following options "S3 Standard-Infrequent Access (S3 Standard-IA)", "S3 One Zone-Infrequent Access (S3 One Zone-IA)", "S3 Intelligent-Tiering" and "S3 Glacier". Which is the most cost effective?==> "S3 Intelligent-Tiering" It works by storing objects in two access tiers: one tier that is optimized for frequent access and another lower-cost tier that is optimized for infrequent access. The other options are not valid, because they charge retrieval fees.
+  4. A company migrated a two-tier application from its on-premises data center to AWS Cloud. A Multi-AZ Amazon RDS for Oracle deployment is used for the data tier, along with 12 TB of General Purpose SSD Amazon EBS storage. With an average document size of 6 MB, the application processes, and stores documents as binary large objects (blobs) in the database. Over time, the database size has grown, which has reduced performance and increased storage costs. A highly available and resilient solution is needed to improve database performance. Which solution could meet these requirements MOST cost-effectively?
+     - Set up an Amazon S3 bucket. The application should be updated to use S3 buckets to store documents. Store the object metadata in the existing database
 
 #### Sharing S3 buckets Across Accounts
 
@@ -1109,17 +1113,16 @@ For multiple accounts within the same organisation, to share S3 buckets among ac
 - S3 Bucket Policies are JSON based policy for complex access rules at user, account, folder, and object level
 - Bucket policies are **bucket wide**. This works at budget levels not individual file level.
 
-###### S3 Signed URLS
+###### S3 (Pre-)Signed URLS
 
-- Used to secure content so only authorised people are able to access (upload or download object data) temporarly it.
+- Used to secure content so only authorised people are able to access (upload or download object data) **temporarly** it (it requires an expiration date and time defined).
 - It can be generated from CLI or SDK (can’t from web) and has an LIMITED LIFETIME (e.g. 5 min).
 
 ```sh
 aws s3 presign s3://mybucket/myobject --expires-in 300
 ```
 
-- Use Case: when not using CloudFront (Different from CloudFront signed urls) and user have direct access to S3.
-- Issues a request as the IAM user who creates the pre-signed URL (Same permissions).
+- Use Case: An application upgrade caused some issues with stability. The application owner enabled logging and has generated a 5 GB log file in an Amazon S3 bucket. The log file must be securely shared with the application vendor to troubleshoot the issues ==> Generate a presigned URL and ask the vendor to download the log file before the URL expires
 
 ##### Encryption
 
@@ -1431,9 +1434,11 @@ Go to [Index](#index)
 
 #### Streams
 
-- This feature is enabled to trigger events on database.
-- It is a time ordered sequence of item level modifications in a table (stored up to 24 hours)
-- It can be integrated with lambda function for e.g. send welcome email to user added into the table.
+- This feature is enabled to **trigger events on database**.
+- It is a time ordered sequence of item level modifications in a table (stored up to 24 hours).
+- Possible Integrations
+  - Lambda function for e.g. Send welcome email to user added into the table.
+  - SNS Topics e.g. Send an alert to the managers multiple teams every time a new record is updated. Note managers needs to subscribe to the topic.
 
 #### Global Tables
 
@@ -1637,8 +1642,12 @@ Go to [Index](#index)
 ![different cloud](https://d1.awsstatic.com/Digital%20Marketing/House/Editorial/products/DataSync/AWS-DataSync-CrossCloud-to-AWS-Storage-Services_1%402x.bf8d56bb81dce99407eed06593b961bcb893dc0f.png)
 
 - Use Case:
-  An organization has a large amount of data in their on-premises data center. The organization would like to move data into Amazon S3 => The most reliable and time-efficient solution that keeps the data secure is to use `AWS DataSync` and synchronize the data from on premise to directly to Amazon S3
-  - Use `AWS Direct Connect` connection to ensure reliability, speed, and security.
+  An organization has a large amount of data in their on-premises data center. The organization would like to move data into Amazon S3
+  - The most reliable and time-efficient solution that keeps the data secure is to use `AWS DataSync` and synchronize the data from on premise to directly to Amazon S3
+  - In case the data center bandwidth is saturated => NOT Use `DataSync` but use `AWS Snowball` because it is requires a pshipical device.
+  - Combinations:
+    - `AWS Direct Connect` connection to ensure reliability, speed, and security.
+    - `AWS Glue` for data transformation when it is required.
 
 ### AWS Backup
 
@@ -2056,7 +2065,7 @@ There are several methods of connecting to a VPC, **including connection from Da
      - You can set up CloudFront with origin failover for scenarios that require high availability. To get started, you create an origin group with two origins: a primary and a secondary. If the primary origin is unavailable or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.
   5. A company runs a dynamic website that is hosted on an on-premises server in the United States. The company is expanding to Europe and is investigating how they can optimize the performance of the website for European users. The website’s backed must remain in the United States. The company requires a solution that can be implemented within a few days. Best Practice => A custom origin can point to an on-premises server and CloudFront is able to cache content for dynamic websites. Additionally, connections are routed from the nearest Edge Location to the user across the AWS global network. If the on-premises server is connected via a Direct Connect (DX) link this can further improve performance.
 
-#### Restricting Access to CloudFront: Signed URL or Signed Cookies
+#### Restricting Access to CloudFront: (Pre-)Signed URL or (Pre-)Signed Cookies
 
 - It is used to restrict access to the resource to certain people so that it is **only accessible through CloudFront and not directly through the AWS resource**.
   - If your origin is EC2, then use CloudFront Signed URL.
