@@ -333,7 +333,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ![AWS Key Management Service (KMS)](https://d1.awsstatic.com/Security/aws-kms/Group%2017aws-kms.6dc3dbbbe5b75b46c4f62218d0531e5bed7276ce.png)
 
-- AWS managed **centralized key management** service to create, manage and rotate customer master keys (CMKs) for **encryption at REST**.
+- AWS managed **centralized key management** service to create, manage and rotate `Customer Master Keys (CMKs)` for **encryption at REST**.
 - Can integrate with most other AWS services to increase security and make it easier to encrypt your data.
 - You can enable automatic master key rotation once per year. Service keeps the older version of master key to decrypt old encrypted data.
 - Allows you to control access to the keys using things like IAM policies or key policies.
@@ -342,7 +342,8 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 - Validated under `FIPS 140–2 (Level 2)` security standard.
 - Types of `Customer Master Keys` (CMKs)
   - `Customer Managed` CMKs (Dedicated to my account) → Keys that you have created in AWS, that you own and manage. You are responsible for managing their key policies, rotating them and enabling/disabling them.
-    - You can create customer-managed `Symmetric` (single key for both encrypt and decrypt operations) or `Asymmetric` (public/private key pair for encrypt/decrypt or sign/verify operations) master keys
+    - It can be created for encyption and client/server side both (AWS Managed or Customer Managed only server side.)
+    - You can create customer-managed `Symmetric` (single key for both encrypt and decrypt operations) or `Asymmetric` (public/private key pair for encrypt/decrypt or sign/verify operations) master keys.
     - Symmetric CMKs
       - With symmetric keys, the same key is used to encrypt and decrypt
       - The key never leaves AWS unencrypted
@@ -539,6 +540,7 @@ Go to [Index](#index)
 - EC2 Design
   - Place all the EC2 instances in same AZ to reduce the data transfer cost.
   - Design for failure. Have one EC2 instance in each availability zone.
+- Instance profiles: Use an instance profile to pass an **IAM role to an EC2 instance**.
 
 Exam tip: You can stop and start an EC2 instance to move it to a different physical host if EC2 status checks are failing or there is planned maintenance on the current physical host.
 
@@ -649,7 +651,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 - You can’t merge placement groups, but you can move an existing instance into a placement group (the instance must be in the stopped state before moving it)
   - Move or remove can only be done via AWS Console (an instance using the AWS CLI or AWS SDK).
 - There is no charge associated with creating placement groups
-- Types (A Clustered placement group can't span multiple AZ's, others can)
+- Types (A clustered placement group can't span multiple AZ's, others can)
   - **Cluster** - Grouping instances close together within a **single Availability Zone, Same Rack**. It is used to achieve **low Network latency & high throughput, High Performance Computing (HPC)**. Recommended you have the same type on instances in the cluster.
   - **Spread** - Opposite to clustered placement group. Instance are placed on **Different AZ, Distinct Rack**. It used for Critical Applications that requires to be seperated on each other to ensure **High Availability** in case of failure. Spread placement groups can span multiple Availability Zones.
   - **Partition** - EC2 creates partitions by dividing each group into logical segments. Each partition has its own set of racks, network and power source to help isolate the impact of a hardware failure. Same or Different AZ, Different Rack (or Partition), Distributed Applications like Hadoop, Cassandra, Kafka, etc.
@@ -667,7 +669,6 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
   2. An application has been migrated to Amazon EC2 Linux instances. The EC2 instances run several 1-hour tasks on a schedule. There is no common programming language among these tasks, as they were written by different teams. Currently, these tasks run on a single instance, which raises concerns about performance and scalability. To resolve these concerns, a solutions architect must implement a solution Which solution will meet these requirements with the LEAST Operational overhead?
   - The best solution is to create an AMI of the EC2 instance, and then use it as a template for which to launch additional instances using an Auto Scaling Group, allowing the EC2 instances to automatically scale and be launched across multiple Availability Zones.
   - Lambda is not the best solution because it is not designed to run for 1 hour (mx 15 min)
-
 
 ### Elastic Load Balancing (ELB)
 
@@ -789,7 +790,6 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 
 - Scale based on `Load forecasting`: Auto Scaling analyses the history of your applications load for up to 14 days and then uses this predict to the load for the next 2 days.
 
-
 ### Lambda
 
 - FaaS (**Function as a Service**), Serverless. You don’t have to worry about OS or scaling (scale on demand)
@@ -831,7 +831,7 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 ### Elastic Container Service (ECS)
 
 - It is a highly scalable, high performance container management service that supports Docker containers magement and lifecyle.
-- Using API calls you can launch and stop container-enabled applications, query the complete state of clusters, and access features like security groups, Elastic Load Balancing, EBS volumes and IAM roles.
+- Using API calls you can launch and stop container-enabled applications, query the complete state of clusters, and access features like security groups, Elastic Load Balancing, EBS volumes and **IAM roles**.
 - Amazon ECS can be used to schedule the placement of containers across clusters based on resource needs and availability requirements.
 - There is no additional charge for Amazon ECS. You pay for:
   - Resources created with the EC2 Launch Type (e.g. EC2 instances and EBS volumes).
@@ -892,6 +892,7 @@ Services that help to **decouple components**.
   - Unlimited throughput and low latency (<10ms on publish and receive)
   - **Can have duplicate messages** (At least once delivery)
   - **Can have out of order messages** (best effort ordering)
+- Integration: It can be configured to scale EC2 instances using Auto Scaling based on the number of jobs waiting in the SQS queue. It can be used the backlog per instance metric with the target value being the acceptable backlog per instance to maintain.
 - Consumer (can be EC2 instance or lambda function) **poll** the messages in batches (upto 10 messages) and delete them from queue after processing. If don’t delete, they stay in Queue and may process multiple times.
   - Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
   - Polling types:
@@ -1292,7 +1293,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Lustre
 
-- Keyword: HPC, Linux
+- Keyword: HPC, Linux, Gaming
 
 ![FSx for Lustre AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_Amazon-FSx-for-Lustre.097ed5e5175fa96e8ac77a2470151965774eec32.png)
 
@@ -1371,7 +1372,7 @@ Go to [Index](#index)
 
 ### Amazon Aurora
 
-- KeyWords: Relation Database (SQL), Read Replicas (across AZs), Global Database (**across Regions**), AWS proprietary Database, Serveless (optional)
+- KeyWords: Relation Database (SQL), Scalable (Read Replicas - across AZs for HA), Global Database (**across Regions**), AWS proprietary Database, Serveless (optional).
 
 ![AWS Aurora](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Aurora_How-it-Works.b1c2b37e7548757780b195c6dcceb58511de5b1d.png)
 
@@ -1479,11 +1480,11 @@ Go to [Index](#index)
 
 ### Redshift
 
-- KeyWords: SQL for BI, Compression, Massive Parallel Processing
+- KeyWords: SQL for BI, Compression, Massive Parallel Processing, Data Warehousing
 
 ![AWS Redshift](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Redshift%402x.6c8ada98ebf822d3ddc113e6b802abe08fd4a4d2.png)
 
-- Saas that uses **SQL** to analyze **structured and semi-structured data across data warehouses, operational databases, and data lakes**, using AWS-designed hardware and machine learning (**ML**) to deliver the best price performance at any scale.
+- Saas that uses **SQL** to analyze **structured and semi-structured data across data warehouses, operational databases, and data lakes**, using AWS-designed hardware and machine learning (**ML**) to deliver the best price performance at any scale. For long running operations.
 - It can be used for **Business Intelligence (BI)**, allowing integrations with tools like AWS Quicksight or Tableau for analytics
 - It uses Advanced compression: Has column compression — compress columns instead of rows because of similar data because similar data is stored sequentially on disk.
 - Automated Backups (not manual snapshots)
@@ -1501,6 +1502,7 @@ Go to [Index](#index)
   - Multi-Node
     1. Leader Node (manages client connections and receives queries)
     2. Compute Node (store data and perform queries and computations). Up to 128 Compute Nodes.
+- Result Cache (enabled by default): To improve performance, it caches the results of certain types of queries in memory on the leader node. It is transparent to the enduser.
 - Availability
   - **Currently only in 1 AZ** (check AWS to confirm for the latest)
   - Can restore snapshots to new AZs in the event of an outage
@@ -1513,6 +1515,10 @@ Go to [Index](#index)
 ![Amazon Kinesis](https://d1.awsstatic.com/Digital%20Marketing/House/1up/products/kinesis/Product-Page-Diagram_Amazon-Kinesis-Data-Streams.e04132af59c6aa1e9372cabf44a17749f4a81b16.png)
 
 - It is PaaS for collecting, processing, and analyzing streaming real-time data in the cloud (video, audio, logs, analytics etc.) and process/analyse that data in real time. Real-time data generally comes from IoT devices, gaming applications, vehicle tracking, click stream, etc.
+- Use Case: An automotive company plans to implement IoT sensors in manufacturing equipment that will send data to AWS in real time. The solution must receive events in an ordered manner from each asset and ensure that the data is saved for future processing.
+  - Use Amazon Kinesis Data Streams for real-time events with a partition for each equipment asset. Use Amazon Kinesis Data Firehose to save data to Amazon S3.
+  - Amazon Kinesis Data Streams is the ideal service for receiving streaming data. The Amazon Kinesis Client Library (KCL) delivers all records for a given partition key to the same record processor, making it easier to build multiple applications reading from the same Amazon Kinesis data stream. Therefore, a separate partition (rather than shard) should be used for each equipment asset.
+  - Amazon Kinesis Firehose can be used to receive streaming data from Data Streams and then load the data into Amazon S3 for future processing.
 
 #### Kinesis Video Streams
 
