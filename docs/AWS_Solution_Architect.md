@@ -1893,8 +1893,8 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 ![AWS Direct Connect](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-2.jpg)
 
-- What: Dedicated network connection over private line straight into the AWS backbone
-- When: Requires a large network link into AWS; lots of resources and services being provided on AWS to your corporate users
+- What: **Dedicated network connection over private line** straight between AWS and your data center
+- When: Requires a large network link into AWS; lots of resources and services being provided on AWS to your corporate users. It solves a **VPN connection keeping dropping out** because the amount of throughput.
 - Pros: More predictable network performance; potential bandwidth cost reduction; increase in bandwidth throughput (up to 10 Gbps provisioned connections); supports BGP peering and routing
 - Cons: May require additional telecom and hosting provider relationships and/or network circuits; costly; It takes time to set up.
 - How: Work with your existing data networking provider; create Virtual Interfaces (VIFs) to connect to VPCs (private VIFs) or other AWS services like S3 or Glacier (public VIFs)
@@ -1906,10 +1906,10 @@ There are several methods of connecting to a VPC, **including connection from Da
 | low to modest bandwidth   | high bandwidth 1 to 100 GB/s |
 
 - Use Cases:
-  - It solves a **VPN connection keeping dropping out** because the amount of throughput.
-  - It sets a private connectivity between AWS and your data center, office, or collocated environment.
-  - A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, lead times are often longer than 1 month so it cannot be used to migrate data within the timeframes
-    - Alternatively, use AWS Snowball to move the data and order a Direct Connect connection to satisfy the other requirement later on. In the meantime the organization can use an AWS VPN for secure, private access to their VPC.
+  1. A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, lead times are often longer than 1 month so it cannot be used to migrate data within the timeframes
+     - Alternatively, use AWS Snowball to move the data and order a Direct Connect connection to satisfy the other requirement later on. In the meantime the organization can use an AWS VPN for secure, private access to their VPC.
+  2. A solutions architect has been tasked with designing a highly resilient hybrid cloud architecture connecting an on-premises data center and AWS. The network should include AWS Direct Connect (DX). Which DX configuration offers the HIGHEST resiliency?
+     - The most resilient solution is to configure DX connections at multiple DX locations. This ensures that any issues impacting a single DX location do not affect availability of the network connectivity to AWS.
 
 ###### AWS Direct Connect Plus VPN
 
