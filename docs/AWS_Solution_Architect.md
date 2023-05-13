@@ -330,7 +330,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS Key Management Service (KMS)
 
-- Keywords: AWS Managed encription Keys store, Used by AWS services
+- Keywords: AWS Managed encription Keystore
 
 ![AWS Key Management Service (KMS)](https://d1.awsstatic.com/Security/aws-kms/Group%2017aws-kms.6dc3dbbbe5b75b46c4f62218d0531e5bed7276ce.png)
 
@@ -362,7 +362,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS CloudHSM
 
-- Keywords: Own encription Keys store
+- Keywords: Own encription Keystore
 
 ![AWS CloudHSM](https://d1.awsstatic.com/whiteboard-graphics/products/CloudHSM/product-page-diagram_AWS-CloudHSM_HIW.76ce14889e22d8861a6a9fff0b5664516ed1bddd.png)
 
@@ -416,7 +416,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS WAF
 
-- Keywords: Protection for SQL injection and Cross-site scripting (XSS), Layers 7 (HTTPs), IP restrictions
+- Keywords: SQL injection, Cross-site scripting (XSS), Layers 7 (HTTPs), IP restrictions
 
 ![AWS WAF](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Web-Application-Firewall%402x.5f24d1b519ed1a88b7278c5d4cf7e4eeaf9b75cf.png)
 
@@ -468,7 +468,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS GuardDuty
 
-- Keywords: Protection for Anomalous Behaviour
+- Keywords: Anomalous Behaviour, Machine Learning
 
 ![AWS GuardDuty](https://d1.awsstatic.com/Security/Amazon-GuardDuty/Amazon-GuardDuty_HIW.057a144483974cb73ab5f3f87a50c7c79f6521fb.png)
 
@@ -478,7 +478,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### Amazon Inspector
 
-- Keywords: Protection for Software vulnerabilities and Network Exposure
+- Keywords: Software Vulnerabilities, Network Exposure
 
 ![Amazon Inspector](https://d1.awsstatic.com/reInvent/re21-pdp-tier1/amazon-inspector/Amazon-Inspector_HIW%402x.c26d455cb7e4e947c5cb2f9a5e0ab0238a445227.png)
 
@@ -531,14 +531,17 @@ Go to [Index](#index)
   - `http://169.254.169.254/latest/meta-data` ==> Metadata Private & public IP
   - `http://169.254.169.254/latest/user-data` ==> user-defined data
 - Use VM Import/Export to import virtual machine image and convert to Amazon EC2 AMI to launch EC2 instances
-- Termination protection is turned off by default.
-- On an EBS-backed instance, the default action is for **the root EBS volume to be deleted when the instance is terminated**. Any additional EBS volumes by default won't be deleted.
+- Termination State ==> Destroy EC2
+  - There is optional protection (it is turned off by default)
+  - On an EBS-backed instance, the default action once a EC2 instance moves to Terminate State:
+    - **Root EBS volume to be deleted**.
+    - Additional EBS volumes mounts won't be deleted.
 - Encryption
-  - You need to create a key pair — public & private for asymmetric encryption.
+  - Asymmetric encryption (key pair — public & private)
   - Root device volumes can be encrypted. You can also use a third party tool (such as bit locker etc) to encrypt the root volume, or this can be done when creating AMI's in the AWS console or using the API.
   - Additional volumes can be encrypted as well.
 - You must provision nitro-based EC2 instance to achieve 64000 EBS IOPS. Max 32000 EBS IOPS with Non-Nitro EC2.
-- EC2 Design
+- EC2 Design patterns:
   - Place all the EC2 instances in same AZ to reduce the data transfer cost.
   - Design for failure. Have one EC2 instance in each availability zone.
 - Instance profiles: Use an instance profile to pass an **IAM role to an EC2 instance**.
