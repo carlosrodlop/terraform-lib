@@ -117,7 +117,7 @@ Go to [Index](#index)
   - Platforms as a service remove the need for organizations to manage the underlying infrastructure (usually hardware and operating systems).
   - This helps you be more efficient as you don’t need to worry about resource procurement, capacity planning, software maintenance, patching, or any of the other undifferentiated heavy lifting involved in running your application.
 
-- Infrastructure as a Service - **IaaS** (Examples: EC2, ELB, VPC)
+- Infrastructure as a Service - **IaaS** (Examples: EC2, ELB, VPC, EBS, EFS)
 
   - Basic building blocks for cloud IT and typically provide access to networking features, computers (virtual or on dedicated hardware), and data storage space.
   - Highest level of flexibility and management control over your IT resources.
@@ -149,6 +149,8 @@ Go to [Index](#index)
 
 ### IAM (Global Service)
 
+- Keywords: Permissions (Policies), Roles, Users, Groups, MFA, Federation
+
 - AWS Identity and Access Management Service (AWS IAM) is used to securely control **individual and group access to AWS resources**.
 
 ![IAM](https://d1.awsstatic.com/product-marketing/IAM/iam-how-it-works-diagram.04a2c4e4a1e8848155840676fa97ff2146d19012.png)
@@ -177,7 +179,7 @@ Go to [Index](#index)
     - Adventanges
       - Roles are more secure than storing your access key and secret access key on individual EC2 instances.
       - Roles are easier to manage.
-      - Roles can be assigned to an EC2 instance after it is created using both the console & command line.
+      - Roles can be assigned to an EC2 instance after it is created using both the console & command line. (`Instance Profile` ==> Service Roles assigned to EC2 instances).
 - `Policies` JSON Document that defines permissions (`Allow` or `Deny` access to an action that can be performed on AWS resources) for Access Entities (user, group or role)
   - Each statement matches an AWS API request
   - If a resource has multiple policies — AWS joins them.
@@ -187,8 +189,8 @@ Go to [Index](#index)
     - `Service control policies (SCPs)` are a type of organization policy that you can use to manage permissions in your organization.
       - It offers central control over the maximum available permissions for all accounts in your organization.
       - It helps you to ensure your accounts stay within your organization’s access control guidelines.
-    - **Resource Based Policies** are supported by S3, SNS, and SQS.
-    - **IAM Permission Boundaries** to set at individual user or role for maximum allowed permissions.
+    - `Resource Based Policies` are supported by S3, SNS, and SQS.
+    - `IAM Permission Boundaries` to set at individual user or role for maximum allowed permissions. When you use a policy to set the permissions boundary for a user, it limits the user's permissions but does not provide permissions on its own.
   - Policies Sections:
     - `Version` policy language version. `2012-10-17` is the latest version.
     - `Statement` container for one or more policy statements
@@ -232,7 +234,6 @@ Go to [Index](#index)
     - Not to use the root account for anything other than billing (not login)
     - Always setup Multifactor Authentication on your root account.
 - `Power user access` → Access to all AWS services except the management of groups and users within IAM
-- Permission Boundary: A managed policy that defines the maximum permissions that an identity-based policy can grant to an IAM entity. When you use a policy to set the permissions boundary for a user, it limits the user's permissions but does not provide permissions on its own.
 - Use Case:
   1. An application running on an Amazon ECS container instance needs permissions to write data to Amazon DynamoDB. How can you assign these permissions only to the specific ECS task that is running the application? ==> To specify permissions for a specific task on Amazon ECS you should use IAM Roles for Tasks. The permissions policy can be applied to tasks when creating the task definition, or by using an IAM task role override using the AWS CLI or SDKs. The taskRoleArn parameter is used to specify the policy.
   2. A company requires that all AWS IAM user accounts have specific complexity requirements and minimum password length. How to accomplish this? ==> Update the password policy that applies to the entire AWS account.
@@ -380,7 +381,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS Systems Manager
 
-- Keywords: Configueration and Secrets store
+- Keywords: Configuration and Secrets store
 
 ![AWS Systems Manager](https://d1.awsstatic.com/AWS%20Systems%20Manager/Product-Page-Diagram_AWS-Systems-Manager.9184df66edfbc48285d16c810c3f2d670e210479.png)
 
