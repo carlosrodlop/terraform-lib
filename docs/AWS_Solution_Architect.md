@@ -404,7 +404,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS Shield
 
-- Keywords: Protection for DDoS attacks, Layers 3,4 and 7
+- Keywords: DDoS attacks, Layers 3,4 and 7
 
 ![AWS Shield](https://d1.awsstatic.com/AWS%20Shield%402x.1d111b296bfd0dd864664b682217bc7610453808.png)
 
@@ -656,7 +656,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
   - Move or remove can only be done via AWS Console (an instance using the AWS CLI or AWS SDK).
 - There is no charge associated with creating placement groups
 - Types (A clustered placement group can't span multiple AZ's, others can)
-  - **Cluster** - Grouping instances close together within a **single Availability Zone, Same Rack**. It is used to achieve **low Network latency & high throughput, High Performance Computing (HPC)**. Recommended you have the same type on instances in the cluster.
+  - **Cluster** - Grouping instances close together within a **single Availability Zone, Same Rack**. It is used to achieve **low Network latency & high throughput, High Performance Computing (HPC)**.
   - **Spread** - Opposite to clustered placement group. Instance are placed on **Different AZ, Distinct Rack**. It used for Critical Applications that requires to be seperated on each other to ensure **High Availability** in case of failure. Spread placement groups can span multiple Availability Zones.
   - **Partition** - EC2 creates partitions by dividing each group into logical segments. Each partition has its own set of racks, network and power source to help isolate the impact of a hardware failure. Same or Different AZ, Different Rack (or Partition), Distributed Applications like Hadoop, Cassandra, Kafka, etc.
 
@@ -670,7 +670,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
   1. A company's application is running on Amazon EC2 instances in a single Region. In the event of a disaster, how do you ensure that the resources can also be deployed to a second Region?
   - Copy an Amazon Machine Image (AMI) of an EC2 instance and specify the second Region for the destination
   - Launch a new EC2 instance from an Amazon Machine Image (AMI) in the second Region
-  2. An application has been migrated to Amazon EC2 Linux instances. The EC2 instances run several 1-hour tasks on a schedule. There is no common programming language among these tasks, as they were written by different teams. Currently, these tasks run on a single instance, which raises concerns about performance and scalability. To resolve these concerns, a solutions architect must implement a solution Which solution will meet these requirements with the LEAST Operational overhead?
+  1. An application has been migrated to Amazon EC2 Linux instances. The EC2 instances run several 1-hour tasks on a schedule. There is no common programming language among these tasks, as they were written by different teams. Currently, these tasks run on a single instance, which raises concerns about performance and scalability. Which solution will meet these requirements with the LEAST Operational overhead?
   - The best solution is to create an AMI of the EC2 instance, and then use it as a template for which to launch additional instances using an Auto Scaling Group, allowing the EC2 instances to automatically scale and be launched across multiple Availability Zones.
   - Lambda is not the best solution because it is not designed to run for 1 hour (mx 15 min)
 
@@ -680,30 +680,24 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
   - Target group (ALB o CLB) can have one or more EC2 instances, IP Addresses, lambda functions.
 - It makes the **traffic Scale and Fault Tolerant** (It can balance load **across one or more Availability Zones**)
 - Internal Load Balancers are load balancers that are inside private subnets
-- Load Balancers have their own static DNS name (e.g. <http://myalb-123456789.us-east-1.elb.amazonaws.com>) — you will NEVER be given an IP address
-- If you need the IPv4 address of your end user, look for the `X-Forwarded-For` header.
+- Load Balancers have their own **static DNS name** (e.g. <http://myalb-123456789.us-east-1.elb.amazonaws.com>) — you will NEVER be given an IP address
+  - If you need the IPv4 address of your end user, look for the `X-Forwarded-For` header.
 - `Health Checks`
   - Instances monitored by ELB are reported as; InService, or OutofService
   - Health Checks checks the instance health by talking to it.
   - `504 Error` means that the gateway has timed out. This means that the application not responding within the idle timeout period.
 - Advanced Load Balancers Theory
-  - `Stickiness` (a.k.a. Session Affinity):
+  - `Stickiness` (a.k.a. Session Affinity, Sticky Sessions):
     - Allows you to **bind a users session to a specific instance**, ensuring all requests in that specific session are sent to the same instance.
     - Use Cases: If you have got an EC2 instance or an application, where you're writing to an EC2 instance like local disk, then of course you would want to enable Sticky.
     - Exam Question: A user trying to visit a website behind a classic load balancer and essentially what's happening is it's just sending all the traffic to one EC2 instance. Answer: Disable Sticky session.
     - It works in CLB and ALB. (It doesn’t work with NLB)
   - `Cross Zone load Balancing`
     - It enables **EC2 instances to get equal share of traffic/load across multiple AZs**
-    - Use Cases:
-      - With No Cross Zone Load Balancing, we got a user and we are using Route 53 for our DNS, which is splitting of our traffic 50/50 and sending the requests to EC2's in two diff AZ's. Each AZ has a Load Balancer, The first AZ has 4 EC2 instances and the second has only one EC2 instance.
-        - Because we don't have Cross Zone Load Balancing enabled - First AZ will split 50% to 4 instances and the second AZ receives 50% on 1 instance.
-        - When we enable Cross Zone Load Balancing: The Load balancer will distribute the load evenly among instances on both AZ's.
-      - We got a user and we are using Route 53 for our DNS, which is sending all the requests (100%) to a Load Balancer in AZ1, The first AZ1 has 4 EC2 instances and the second has only one EC2 instance.
-        - Route 53's 100% traffic is sent to the only load balancer in US-EAST-1A and no traffic is being sent to US-EAST-1B.
-        - In this scenario, we enable Cross Zone Load Balancing to distribute the traffic evenly between US-EAST-1A and US-EAST-1B
+    - Use Cases: Route 53 is used for DNS, and it is splitting of our traffic 50/50 and sending the requests to EC2's in two diff AZ's. Each AZ has a Load Balancer, The first AZ (US-EAST-1A) has 4 EC2 instances and the second (US-EAST-1B) has only one EC2 instance. As result first AZ will split 50% to 4 instances and the second AZ receives 50% on 1 instance.
+      - When we enable Cross Zone Load Balancing: The Load balancer will distribute the load evenly among instances on both AZ's.
   - `Path Patterns` (path-based routing) → can **direct traffic to different EC2 instances based on request URL (path)**.
-    - Use Case: We got a user and we are using Route 53 for our DNS, which is sending all the requests (100%) to a Load Balancer in AZ1, The first AZ1 has 4 EC2 instances and the second has only one EC2 instance.
-      - www.myurl.com should go to AZ1 and www.myurl.com/images should go to the media instances in AZ2. In this instance, we enable Path Patterns.
+    - Use Case: We got a user and we are using Route 53 for our DNS, enabling Path Patterns we could send request to `www.myurl.com` to AZ1 and `www.myurl.com/images` to instances in AZ2.
 
 - Types of ELB
 
@@ -714,7 +708,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 | Gateway Load Balancer       | Thirdparty appliances, virtual applications e.g. firewalls | Layer 3                     |
 | Classic Load Balancer (old) | HTTP, HTTPS, TCP                                           | Both Layer 7 and Layer 4    |
 
-- Use Case: An application has been deployed on multiple Amazon EC2 instances across **three private subnets**. How do make accesible the application must be made accessible to internet-based clients with the least amount of administrative effort ==> Placing them application instances behind an internet-facing Elastic Load Balancer. The way you add instances in private subnets to a public facing ELB is adding NAT Gateway/Instance in the public subnets in the same AZs as the private subnets to the ELB.
+- Use Case: An application has been deployed on multiple Amazon EC2 instances across **three private subnets**. How do make accesible the application to internet-based clients with the least amount of administrative effort ==> Placing them application instances behind an internet-facing Elastic Load Balancer. The way you add instances in private subnets to a public facing ELB is adding NAT Gateway/Instance in the public subnets in the same AZs as the private subnets to the ELB.
 
 ![elb diagram](https://img-c.udemycdn.com/redactor/raw/test_question_description/2021-02-25_10-09-08-4d552faa7e6a02f1057665490b64d36b.jpg)
 
@@ -740,7 +734,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 - Thirdparty appliances, virtual applications e.g. firewalls | Layer 3
 - Automatically scales virtual appliances based on demand.
 
-#### Classic Load Balancers (Previos Generation)
+#### Classic Load Balancers (Previous Generation)
 
 - It can operate at both Layer 7 (Application layer) and Layer 4 (Transport layer).
 - Use Case: Test & Dev to keep costs low.
@@ -773,10 +767,10 @@ Auto Scaling offers both dynamic scaling and predictive scaling options:
 
 - Dynamic scaling scales the capacity of your Auto Scaling group **as traffic changes occur, based on demand**.
 - Types of Dynamic Scaling Policies => Increase and decrease the current capacity of the group based on:
-  - `Target tracking scaling`: A Amazon CloudWatch metric and a target value (it can combine more than one target). Health checks are performed to ensure resource level is maintained. More cost-effective.
+  - `Target tracking scaling`: Using **AWS CloudWatch metric with a target value** (it can combine more than one target). Health checks are performed to ensure resource level is maintained. **Most cost-effective**.
     - Use Case:
       1. A company runs an internal browser-based application. The application runs on Amazon EC2 instances behind an Application Load Balancer. The instances run in an Amazon EC2 Auto Scaling group across multiple Availability Zones. The Auto Scaling group scales up to 20 instances during work hours, but scales down to 2 instances overnight. Staff are complaining that the application is very slow when the day begins, although it runs well by midmorning. How should the scaling be changed to address the staff complaints and keep **costs to a minimum**?
-         - Though this sounds like a good use case for scheduled actions, both answers using scheduled actions will have 20 instances running regardless of actual demand. A better option to be more cost effective is to use a target tracking action that triggers at a lower CPU threshold.
+         - Though this sounds like a good use case for scheduled actions, using scheduled scaling will have a fixed number of instances (e.g. 20) running regardless of actual demand. A better option to be more cost effective is to use a target tracking action that triggers at a lower CPU threshold.
       2. A web application is being deployed on an Amazon ECS. The application is expected to receive a large volume of traffic initially. The company wishes to ensure that performance is good for the launch and that costs reduce as demand decreases
          - Use Amazon ECS Service Auto Scaling with target tracking policies to scale when an Amazon CloudWatch alarm is breached. A Target Tracking Scaling policy increases or decreases the number of tasks that your service runs based on a target value for a specific metric.
   - `Step scaling`: A set of scaling adjustments, known as _step adjustments_, that vary based on the size of the alarm breach.
@@ -798,9 +792,9 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 
 - FaaS (**Function as a Service**), Serverless. You don’t have to worry about OS or scaling (scale on demand)
 - Lambda function supports many languages such as Node.js, Python, Java, C#, Golang, Ruby, etc.
-- It is cheaper than EC2. There is no charge when your code is not running. What determines price for Lambda?
-  - Number of Request Pricing (Free Tier: 1 million requests per month)
-  - Duration Pricing (Execution) and resource (memory) usage
+- It is cheaper than EC2 because there is **no charge when your code is not running**. What determines price for Lambda?
+  - Number of Request (Free Tier: 1 million requests per month)
+  - Duration (Execution) and resource (memory) usage
   - Additional Charges: if your lambda uses other AWS services or transfers data. For example, If your lambda function reads and writes data to or from Amazon S3, you will be billed for the read/write requests and the data stored in Amazon S3
 - AWS Lambda integrates with other AWS services to invoke functions or take other actions (Check examples [here](https://aws.amazon.com/lambda/))
 - Method of Invocation:
@@ -816,15 +810,15 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
       - **On a Schedule** with Amazon EventBridge (CloudWatch Events).
 
 - Lambda limitations:
-  - Execution time can’t exceed 15 min (900 seconds)
-  - Min required memory is 128MB and can go till 10GB with 1-MB increment
-  - `/temp` directory size to download file can’t exceed 512 MB
-  - Max environment variables size can be 4KB
-  - Compressed `.zip` and uncompressed code can’t exceed 50MB and 250MB respectively
+  - Execution time **can’t exceed 15 min** (900 seconds)
+  - Min required memory is 128MB and can go **till 10GB** with 1-MB increment
+  - `/temp` directory size to download file **can’t exceed 512 MB**
+  - **Max environment variables size can be 4KB**
+  - Compressed `.zip` and uncompressed code can’t exceed **50MB and 250MB respectively**
 
 - Uses Case: A a new service that will use an Amazon API Gateway API on the frontend is being designed. The service will need to persist data in a backend database using key-value requests. Which combination of AWS services would meet the most cost efective and scalable solution?
   - Amazon RDS or Dynamo DB => DynamoDB is built for key-value data storage requirements (No-SQL). Moreover, it is serverless and easily scalable.
-  - For EC2, AWS fargate, Lambda => Lambda can perform the computation and store the data in an Amazon DynamoDB table. Lambda can scale concurrent executions to meet demand easily.
+  - For EC2, AWS fargate, Lambda => Lambda can perform the computation and store the data in an Amazon DynamoDB table (as long as it does not go over its limitations). Lambda can scale concurrent executions to meet demand easily.
 
 ## Containers
 
