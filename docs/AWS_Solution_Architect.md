@@ -880,7 +880,7 @@ Services that help to **decouple components**.
 
 ![SQS](https://d1.awsstatic.com/product-page-diagram_Amazon-SQS%402x.8639596f10bfa6d7cdb2e83df728e789963dcc39.png)
 
-- Fully managed, distributed Message Queue service that can be used for micro-services, distributed applications and serverless applications. In other words, a temporary repository for messages that are awaiting processing.
+- Fully managed, distributed **Message Queue** service that can be used for micro-services, distributed applications and serverless applications. In other words, **a temporary repository for messages that are awaiting processing**.
 - It **decouples infraestructure** (acts like a buffer between) the software component producing/saving data and the component receiving data for processing.
 - Specification for Standard SQS:
   - SQS guarantees that your **messages will be processed at least once**.
@@ -902,11 +902,11 @@ Services that help to **decouple components**.
 - Use Cases:
   1. A new application will run across multiple Amazon ECS tasks. Front-end application logic will process data and then pass that data to a back-end ECS task to perform further processing and write the data to a datastore. How to reduce-interdependencies so failures do no impact other components? ==> Create an Amazon SQS queue and configure the front-end to add messages to the queue and the back-end to poll the queue for messages.
   2. A web application allows users to upload photos. The application offers two tiers of service: free and paid. Photos uploaded by paid users should be processed before those submitted using the free tier. The photos are uploaded to an Amazon S3 bucket which uses an event notification to send the job information to Amazon SQS. How to meet the requirements ? ==> AWS recommend using separate queues when you need to provide prioritization of work. The logic can then be implemented at the application layer to prioritize the queue for the paid photos over the queue for the free photos.
-  3. A company is working with a partner that has an application that must be able to send messages to one of the company’s Amazon SQS queues. The partner company has its own AWS account. How can a Solutions Architect provide least privilege access to the partner? ==> Amazon SQS supports resource-based policies. The best way to grant the permissions using the **principle of least privilege** is to use a resource-based policy attached to the SQS queue that grants the partner company’s AWS account the `sqs:SendMessage` privilege.
+  3. A company is working with a partner that has an application that must be able to send messages to one of the company’s Amazon SQS queues. The partner company has its own AWS account. How can least privilege access to the partner be provided? ==> Amazon SQS supports resource-based policies. The best way to grant the permissions using the **principle of least privilege** is to use a resource-based policy attached to the SQS queue that grants the partner company’s AWS account the `sqs:SendMessage` privilege.
 
 #### Types of Queues
 
-There are two types of queues: Standard & FIFO
+There are two types of queues: Standard & FIFO.
 
 ##### Standard Queues
 
@@ -919,12 +919,12 @@ There are two types of queues: Standard & FIFO
 
 - First in First Out => The **order in which the messages are sent is preserved**.
 - Has high throughput
-- Limits: support up to 3,000 transactions per API batch call.
-- Processed exactly once and duplicates are not introduced to the queue.
+- **Limits: support up to 3,000 transactions** per API batch call.
+- **Processed exactly once** and duplicates are not introduced to the queue.
 
 ##### Dead-Letter Queue
 
-- The main task of a dead-letter queue is handling message failure.
+- The main task of a dead-letter queue is **handling message failure**.
   - Messages are moved to the dead-letter queue when the `ReceiveCount` for a message exceeds the `maxReceiveCount` for a queue.
 - It is not a queue type; it is a standard or FIFO queue that has been specified as a dead-letter queue in the configuration of another standard or FIFO queue.
   - Dead-letter queues will break the order of messages in FIFO queues.
@@ -1032,8 +1032,7 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - `S3 Select` or `Glacier Select` can be used to retrieve subset of data from S3 Objects using SQL query. S3 Objects can be CSV, JSON, or Apache Parquet. GZIP & BZIP2 compression is supported with CSV or JSON format with server-side encryption.
   - Allows you to save money on data transfer and increase speed.
 - Using `Range` HTTP Header in a GET Request to download the specific range of bytes of S3 object, known as Byte Range Fetch.
-- You can create `S3 event notification` to push events e.g. `s3:ObjectCreated:\*` to SNS topic, SQS queue or execute a Lambda function. It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
-- High Availability: Enable `S3 Cross-Region Replication` for asynchronous replication of object across buckets in another region.
+- High Availability: Enable `S3 Cross-Region Replication` for asynchronous **replication of object across buckets in another region**.
   - Cross Region Replication REQUIRES versioning to be ENABLED on both SOURCE & DESTINATION bucket.
   - If enabled, existing objects are not replicated automatically, only subsequent updated files (new objects).
   - You can have this enabled for the entire bucket or just for specific prefixes.
@@ -1049,6 +1048,7 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
   - Note: CloudFront provides two ways to send authenticated requests to an Amazon S3 origin: origin access control (OAC) and origin access identity (OAI). OAC is recommeded.
 - Use `AWS Athena` (Serverless Query Engine) to perform analytics directly against S3 objects using SQL query and save the analysis report in another S3 bucket.
   - Use Case: one time SQL query on S3 objects, S3 access log analysis, serverless queries on S3, IoT data analytics in S3, etc.
+- Integration with SNS: You can create `S3 event notification` to push events e.g. `s3:ObjectCreated:\*` to SNS topic, SQS queue or execute a Lambda function. It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
 
 #### S3 Tiered Storage (Storage Classes)
 
@@ -1084,7 +1084,7 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
      - S3 standard is the best choice in this scenario for a short term storage solution. In this case the size and number of logs is unknown and it would be difficult to fully assess the access patterns at this stage. Therefore, using S3 standard is best as it is cost-effective, provides immediate access, and there are no retrieval fees or minimum capacity charge per object.
   2. A video production company is planning to move some of its workloads to the AWS Cloud. The company will require around 5 TB of storage for video processing with the maximum possible I/O performance. They also require over 400 TB of extremely durable storage for storing video files and 800 TB of storage for long-term archival. Which combinations of services would meet these requirements?
      - Amazon EC2 instance store for maximum performance, Amazon S3 for durable data storage, and Amazon S3 Glacier for archival storage.
-  3. A solutions architect needs to backup some application log files from an online ecommerce store to Amazon S3. It is unknown how often the logs will be accessed or which logs will be accessed the most. From the following options "S3 Standard-Infrequent Access (S3 Standard-IA)", "S3 One Zone-Infrequent Access (S3 One Zone-IA)", "S3 Intelligent-Tiering" and "S3 Glacier". Which is the most cost effective?==> "S3 Intelligent-Tiering" It works by storing objects in two access tiers: one tier that is optimized for frequent access and another lower-cost tier that is optimized for infrequent access. The other options are not valid, because they charge retrieval fees.
+  3. Application log files needs to backup from an online ecommerce store to Amazon S3. It is unknown how often the logs will be accessed or which logs will be accessed the most. From the following options "S3 Standard-Infrequent Access (S3 Standard-IA)", "S3 One Zone-Infrequent Access (S3 One Zone-IA)", "S3 Intelligent-Tiering" and "S3 Glacier". Which is the most cost effective? ==> "S3 Intelligent-Tiering" It works by storing objects in two access tiers: one tier that is optimized for frequent access and another lower-cost tier that is optimized for infrequent access. The other options are not valid, because they charge retrieval fees and the accesibility is unknown.
   4. A company migrated a two-tier application from its on-premises data center to AWS Cloud. A Multi-AZ Amazon RDS for Oracle deployment is used for the data tier, along with 12 TB of General Purpose SSD Amazon EBS storage. With an average document size of 6 MB, the application processes, and stores documents as binary large objects (blobs) in the database. Over time, the database size has grown, which has reduced performance and increased storage costs. A highly available and resilient solution is needed to improve database performance. Which solution could meet these requirements MOST cost-effectively?
      - Set up an Amazon S3 bucket. The application should be updated to use S3 buckets to store documents. Store the object metadata in the existing database
 
