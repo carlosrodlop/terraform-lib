@@ -181,8 +181,10 @@ Go to [Index](#index)
       - Roles are easier to manage.
       - Roles can be assigned to an EC2 instance after it is created using both the console & command line. (`Instance Profile` ==> Service Roles assigned to EC2 instances).
 - `Policies` JSON Document that defines permissions (`Allow` or `Deny` access to an action that can be performed on AWS resources) for Access Entities (user, group or role)
-  - Each statement matches an AWS API request
-  - If a resource has multiple policies — AWS joins them.
+  - Types of policies
+    - `Identity-based policies` are attached to an IAM identity (a user, group, or role). You can use these policies to grant permissions to perform specific actions on resources.
+    - `Resource-based policies` are attached to a resource. For example, you can attach resource-based policies to Amazon S3 buckets, Amazon SQS queues, VPC endpoints, and AWS Key Management Service encryption keys.
+    - If a resource has multiple policies — AWS joins them.
   - The **Least Privilege Principle** should be followed in AWS, don’t give more permission than a user needs.
   - **IAM Policy Evaluation Logic** ➔ Explicit Deny ➯ Organization SCPs ➯ Resource-based Policies (optional) ➯ IAM Permission Boundaries ➯ Identity-based Policies.
     - Anything that is not explicitly allowed is implicitly denied
@@ -468,7 +470,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS GuardDuty
 
-- Keywords: Anomalous Behaviour, Machine Learning
+- Keywords: **Anomalous Behaviour**, Machine Learning
 
 ![AWS GuardDuty](https://d1.awsstatic.com/Security/Amazon-GuardDuty/Amazon-GuardDuty_HIW.057a144483974cb73ab5f3f87a50c7c79f6521fb.png)
 
@@ -489,7 +491,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### Amazon Macie
 
-- Keywords: Protect sensitive data
+- Keywords: **sensitive data**
 
 ![Amazon Macie](https://d1.awsstatic.com/reInvent/reinvent-2022/macie/Product-Page-Diagram_Amazon-Macie.a51550cca0a731ba2e4a26e8463ed5f5a81202e3.png)
 
@@ -1055,17 +1057,19 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 - You can upload files in the same bucket with different Storage Classes like S3 standard, Standard-IA, One Zone-IA, Glacier etc.
 - You can setup `S3 Lifecycle Rules` to transition current (or previous version) objects to cheaper storage classes or delete (expire if versioned) objects after certain period of time.
 
-| S3 Storage Class                   | Durability | Availability | AZ  | Min. Storage | Retrieval Time                                           | Retrieval fee |
+| S3 Storage Class                   | Durability | Availability | AZ  | Min Fee for Data Storage | Retrieval Time                                           | Retrieval fee |
 | ---------------------------------- | ---------- | ------------ | --- | ------------ | -------------------------------------------------------- | ------------- |
 | S3 Standard (General Purpose)      | 11 9’s     | 99.99%       | ≥3  | **N/A**  `*` | milliseconds                                             | **N/A**            |
-| S3 Intelligent Tiering             | 11 9’s     | 99.9%        | ≥3  | 30 days      | millisecond                                              | N/A           |
+| S3 Intelligent Tiering             | 11 9’s     | 99.9%        | ≥3  | 30 days      | millisecond                                              | **N/A**       |
 | S3 Standard-IA (Infrequent Access) | 11 9’s     | 99.9%        | ≥3  | 30 days      | milliseconds                                             | per GB        |
 | S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | **1**  | 30 days      | milliseconds                                             | per GB        |
-| S3 Glacier                         | 11 9’s     | 99.99%       | ≥3  | **90 days**      | Expedite (1-5 mins), Standard (3-5 hrs), Bulk (5-12 hrs) | per GB        |
-| S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | Standard (12 hrs), Bulk (48 hrs)  | per GB
+|  S3 Glacier Instant Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | milliseconds  | per GB
+| S3 Glacier Flexible Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | **minutes**  | per GB
+| S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | **hours**   | per GB
 
 `*` Although there is not minimum time for storage, a Lifecycle requires at least 30 days before you transition objects from the S3 Standard
-- Types
+
+- Types:
   - `Standard`: **General purpose** storage for any type of frequently used data very high availability, and fast retrieval.
   - `Intelligent Tiering`: Analyze your Object’s usage and move them to the appropriate cost-effective storage class automatically, without performance impact.
     - Use case: automatic cost savings for data with **unknown/changing access patterns**. It is also suitable for storing objects with changing or unknown access frequency. But you can use S3 Intelligent-Tiering as the default storage class for most workloads.
@@ -1075,8 +1079,9 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
   - `One-Zone IA`(also called S3 RRS): Cost effective for **infrequent access** files which **can be recreated**.
     - Low cost option for data that is not accessed frequently and does not require the redundancy, **if the zone fails, we loose the data**.
     - Use case: re-creatable infrequently accessed data that needs milliseconds access.
-  - `Glacier`: **Retrival time configurable from minutes to hours**.
-  - `Glacier Deep Archive`: **Cheapest choice** for Long-term storage of large amount of data for compliance. Retrival time configurable but slower than `Glacier`, **strating from 12 hours**.
+  - `S3 Glacier Instant Retrieval`: Amazon S3 Glacier Instant Retrieval is an archive storage class that delivers the lowest-cost storage for long-lived data that is rarely accessed and requires retrieval in milliseconds
+  - `S3 Glacier Flexible Retrieval` (Formerly S3 Glacier): S3 Glacier Flexible Retrieval delivers low-cost storage, up to 10% lower cost (than S3 Glacier Instant Retrieval), for archive data that is accessed 1—2 times per year and is retrieved asynchronously. For archive data that does not require immediate access but needs the flexibility to retrieve large sets of data at no cost, such as Backup or Disaster recovery use cases. With S3 Glacier Instant Retrieval, you can save up to 68% on storage costs compared to using the S3 Standard-Infrequent Access (S3 Standard-IA) storage class, when your data is accessed once per quarter.
+  - `Glacier Deep Archive`: **Cheapest choice** for Long-term storage of large amount of data for compliance.
 
 - Use Case:
 
@@ -1739,6 +1744,8 @@ Go to [Index](#index)
   - Amazon always reserve 5 IP addresses within your subnets (First 4 IPs and the last IP): Network Address, Router Address, DNS Server Address, Broadcast address and 1 more for future use.
     - For e.g. If you need 29 IP addresses to use, your should choose CIDR /26 = 64 IP and not /27 = 32 IP, since 5 IPs are reserved and can not use.
   - Enable Auto assign public IPv4 address in public subnets, EC2 instances created in public subnets will be assigned a public IPv4 address
+- Private vs Public Subnets:
+  - Public Subnet: A subnet that does have a route to the internet gateway.
 - Use Case: Multi-tier and highly-available architecture: If you have 3 AZ in a region then you create total 6 subnets.
   - 3 private subnets (1 in each AZ) for EC2 instances, Lambda, Database.
   - 3 public subnets (1 in each AZ) for **API gateway and ELB reside in public subnet**.
