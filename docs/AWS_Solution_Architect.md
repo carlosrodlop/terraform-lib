@@ -943,6 +943,8 @@ There are two types of queues: Standard & FIFO.
 
 - Keywords: Pushing Messages, Multiple consumer (subscribers)
 
+![A2A](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-SNS_Event-Driven-SNS-Compute%402x.03cb54865e1c586c26ee73f9dff0dc079125e9dc.png)
+
 ![producer-consumer](https://betterdev.blog/app/uploads/2021/08/sns-messaging.png)
 
 - Managed Messaging Service that allows you **push** (Instantaneous) **messages on SNS topic and all topic subscribers receive those messages**.
@@ -955,25 +957,8 @@ There are two types of queues: Standard & FIFO.
   - email
   - Kinesis Firehose
 - Highly available as all messages stored across multiple regions.
-- Inexpensive, pay-as-you-go model with no up-front costs.
-
-#### A2A (PubSub model)
-
-![A2A](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-SNS_Event-Driven-SNS-Compute%402x.03cb54865e1c586c26ee73f9dff0dc079125e9dc.png)
-
-- Allows for many-to-many messaging between distributed systems, microservices and other AWS Services
-- Event driven.
-- Decouple messages publishers from subscriber with a topic.
 - You can setup a Subscription Filter Policy which is JSON policy to send the filtered messages to specific subscribers.
-- Subscribers can be Kinesis Data Firehose, SQS, HTTP, HTTPS, Lambda, Email, Email-JSON, SMS Messages, Mobile Notifications.
-
-#### A2P
-
-![A2P_1](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-SNS-SMS%402x.f499caaae8a9877fbefb4d9cf4768d030dc282da.png)
-
-![A2P_2](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-SNS-Mobile-Push%402x.08ac920f6c0bcf10c713be9e423b13e6fd9bd50c.png)
-
-- Lets you send messages to your **customers** with SMS texts, push notifications, and email.
+- Inexpensive, pay-as-you-go model with no up-front costs.
 
 ### Amazon MQ
 
@@ -982,7 +967,7 @@ There are two types of queues: Standard & FIFO.
 - It Fully managed service for open-source **message brokers** for Apache ActiveMQ and RabbitMQ that streamlines setup, operation, and management of message brokers on AWS.
 - It allows software systems, which often **use different programming languages on various platforms, to communication and exchange information**.
 - It can be configured in HA mode across to AZs.
-- Exam Tip: Amazon MQ is similar to SQS but is used for existing applications that are being migrated into AWS. **SQS should be used for new applications being created** in the cloud.
+- Exam Tip: Amazon MQ is similar to SQS but is used to Migrate existing applications (using already ActiveMQ and RabbitMQ) into AWS . **SQS should be used for new applications being created** in the cloud.
 
 ## Storage
 
@@ -1309,8 +1294,8 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 - Fully managed, highly performant, native Microsoft Windows file system that supports **SMB protocol & Windows NTFS**. It also supports Microsoft Active Directory (AD) integration, ACLs, User quotas, Distributed File System Namespace (DFSN) and Distributed File System Replication (DFSR)
 - Use cases:
-  1. When you need centralised storage for Windows-based applications such as Sharepoint, Microsoft SQL Server, Workspaces, IIS Web Server or any other native Microsoft Application.
-  2. Migration from on-premises a Microsoft Windows file server farm to the cloud
+  1. When you need **centralised storage for Windows-based applications** such as Sharepoint, Microsoft SQL Server, Workspaces, IIS Web Server or any other native Microsoft Application.
+  2. **Migration from on-premises a Microsoft Windows file server farm to the cloud**
 
 ### FSx for Lustre
 
@@ -1333,7 +1318,7 @@ Go to [Index](#index)
 
 ### Database migration service (DMS)
 
-- KeyWords: Database Migration, Replication
+- KeyWords: Database Migration, Homogeneos/heterogeneos Migration
 - It Saas that to transfer (Replicate) a database to another type (relational databases, data warehouses, NoSQL databases and other types of data stores.). It is valid for on-premise, in cloud (AWS o different vendro, Azure) or combination of both for Sources and Targets.
 - Steps:
   - Create a source and a target endpoints
@@ -1350,7 +1335,7 @@ Go to [Index](#index)
 
 ### RDS (Relational Database Service)
 
-- KeyWords: Relation Database (SQL), Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas), No cross Regions.
+- KeyWords: Relation Database (SQL), Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas), Cross Region
 
 ![AWS RDS](https://d1.awsstatic.com/video-thumbs/RDS/product-page-diagram_Amazon-RDS-Regular-Deployment_HIW-V2.96bc5b3027474538840af756a5f2c636093f311f.png)
 
@@ -1359,7 +1344,7 @@ Go to [Index](#index)
   - RDS runs on Virtual Machines (can’t log in to the OS or SSH in)
   - RDS is not serverless — (one exception Aurora Serverless)
 - RDS Main Features
-  - **Multi AZ Deployment** > Used for HA and Disaster Recovery.
+  - **Multi AZ Deployment** > Used for HA and Disaster Recovery (not cross regions)
     - Have a primary and secondary database, if you lose the primary database, AWS would detect and automatically update the DNS to point at the secondary database.
     - You can force a fail-over from AZ to another by rebooting the RDS instance.
   - **Read Replicas** > Used for Scaling, improving Performance.
@@ -1367,7 +1352,7 @@ Go to [Index](#index)
     - Once RDS is selected as MultiAZ ==> Create a **read replica as a Multi-AZ DB instance**.
       - Exam Tip: Do not confuse with "Deploy a read replica in a different AZ to the master DB instance" (this is not Multi-AZ and not HA)
       - Amazon RDS creates a standby of your replica in another Availability Zone for failover support for the replica, even in a different Region of your running RDS instance. You pay for replication cross Region, but not for cross AZ.
-    - **It must have automatic backups turned on in order to deploy a read replica**.
+    - Requirement: **Source DB must have automatic backups turned on in order to deploy a read replica**.
     - You can have read replicas of read replicas (but watch out for latency)
     - Each read replica will have its own DNS end point.
     - Read replicas can be promoted to be their own databases. This breaks the replication.
@@ -1532,16 +1517,15 @@ Go to [Index](#index)
 ### Amazon Kinesis
 
 - KeyWords: Streaming media, Real-time performance, IoT
-
-![Amazon Kinesis](https://d1.awsstatic.com/Digital%20Marketing/House/1up/products/kinesis/Product-Page-Diagram_Amazon-Kinesis-Data-Streams.e04132af59c6aa1e9372cabf44a17749f4a81b16.png)
-
-- It is PaaS for collecting, processing, and analyzing streaming real-time data in the cloud (video, audio, logs, analytics etc.) and process/analyse that data in real time. Real-time data generally comes from IoT devices, gaming applications, vehicle tracking, click stream, etc.
+- It is PaaS for collecting, processing, and analyzing **streaming real-time data in the cloud** (video, audio, logs, analytics etc.) and process/analyse that data in real time. Real-time data generally comes from **IoT devices, gaming applications, vehicle tracking, click stream, etc.**
 - Use Case: An automotive company plans to implement IoT sensors in manufacturing equipment that will send data to AWS in real time. The solution must receive events in an ordered manner from each asset and ensure that the data is saved for future processing.
   - Use Amazon Kinesis Data Streams for real-time events with a partition for each equipment asset. Use Amazon Kinesis Data Firehose to save data to Amazon S3.
   - Amazon Kinesis Data Streams is the ideal service for receiving streaming data. The Amazon Kinesis Client Library (KCL) delivers all records for a given partition key to the same record processor, making it easier to build multiple applications reading from the same Amazon Kinesis data stream. Therefore, a separate partition (rather than shard) should be used for each equipment asset.
   - Amazon Kinesis Firehose can be used to receive streaming data from Data Streams and then load the data into Amazon S3 for future processing.
 
 #### Kinesis Video Streams
+
+![kinesis-video](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Kinesis-Video-Streams%20(1).bdd5d9aa84af0b6aa1ba0fdfe66f172e02173db2.png)
 
 - It is SaaS that makes it easy to securely (Automatically encrypts it at rest) stream live video from devices to the cloud.
 - Enables playback, analytics and machine learning on video data that has been ingested.
@@ -1550,7 +1534,7 @@ Go to [Index](#index)
 
 - Keywords: Streaming data, Shar, No autoscale
 
-![Kinesis Data Streams](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-04-57-65202de89627ab9ac70ef6b89817c981.jpg)
+![Amazon Kinesis](https://d1.awsstatic.com/Digital%20Marketing/House/1up/products/kinesis/Product-Page-Diagram_Amazon-Kinesis-Data-Streams.e04132af59c6aa1e9372cabf44a17749f4a81b16.png)
 
 - It is SaaS for streaming data that makes it easy to capture, process, and store data streams at any scale.
 - Automatically stores data and encrypts it at rest
@@ -1561,7 +1545,7 @@ Go to [Index](#index)
   - Kinesis keeps the messages for a specified time, from 24 hours (default) to 365 days (max).
   - Order is maintained at Shard (partition) level.
 
-[consumer-producer](https://betterdev.blog/app/uploads/2021/08/kinesis-streams-messaging.png)
+![consumer-producer](https://betterdev.blog/app/uploads/2021/08/kinesis-streams-messaging.png)
 
 ##### Shards
 
@@ -1572,6 +1556,8 @@ Go to [Index](#index)
 
 #### Kinesis Firehose
 
+![firehouse](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Kinesis-Data-Firehose%20(2).f9965f969e70f3f6f4ca9efaba3a6cfec8a746a1.png)
+
 - It is SaaS for **ETL** with streaming data
   - load data streams into AWS data stores such as S3, Amazon Redshift and ElastiSearch.
   - Transform data using lambda functions and store failed data to another S3 bucket.
@@ -1580,6 +1566,8 @@ Go to [Index](#index)
 - Pay for the volume of data that transmits through the service.
 
 #### Kinesis Analytics
+
+![KinesisAnalytics](https://d1.awsstatic.com/Product-Page-Diagram_Kinesis-Data-Analytics%20(1).4c9d80d0aac0f17f5043f1677a4db5d427e1157f.png)
 
 - It is SaaS to allows you to analyse streaming data in real time to gain **actionable insights**.
 - Allows you to process and analyse data using standard SQL.
