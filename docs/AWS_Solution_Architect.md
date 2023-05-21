@@ -880,9 +880,11 @@ Services that help to **decouple components**.
 
 ### Amazon Simple Queue Service (SQS)
 
+- Keywords: Pulling Messages, Only 1 consumer
+
 ![SQS](https://d1.awsstatic.com/product-page-diagram_Amazon-SQS%402x.8639596f10bfa6d7cdb2e83df728e789963dcc39.png)
 
-- Fully managed, distributed **Message Queue** service that can be used for micro-services, distributed applications and serverless applications. In other words, **a temporary repository for messages that are awaiting processing**.
+- Fully managed, distributed, scalale **Message Queue** service that can be used for micro-services, distributed applications and serverless applications. In other words, **a temporary repository for messages that are awaiting processing**.
 - It **decouples infraestructure** (acts like a buffer between) the software component producing/saving data and the component receiving data for processing.
 - Specification for Standard SQS:
   - SQS guarantees that your **messages will be processed at least once**.
@@ -893,8 +895,14 @@ Services that help to **decouple components**.
   - **Can have duplicate messages** (At least once delivery)
   - **Can have out of order messages** (best effort ordering)
 - Integration: It can be configured to scale EC2 instances using Auto Scaling based on the number of jobs waiting in the SQS queue. It can be used the backlog per instance metric with the target value being the acceptable backlog per instance to maintain.
-- Consumer (can be EC2 instance or lambda function) **poll** the messages in batches (upto 10 messages) and delete them from queue after processing. If don’t delete, they stay in Queue and may process multiple times.
-  - Exam Tip: Amazon SQS is pull-based (polling) not push-based (use SNS for push-based).
+
+![producer-consumer](https://betterdev.blog/app/uploads/2021/08/sqs-messaging.png)
+
+- One or Multiple Producers can push messages to The Queue. **Only one consumer** will read an individual message (**Pull message from the Queue**)
+  - Consumer/Producers types EC2 instance OR lambda function)
+  - Exam Tip: Amazon SQS vs SNS:
+    - SQS pull-based (polling). Only 1 Consumer
+    - SNS Push-based. Multiple Consumers
   - Polling types:
     - Short Polling (`ReceiveMessageWaitTimeSeconds` = 0) - Keeps polling queue looking for work, even if it’s empty.
     - Long Polling (`ReceiveMessageWaitTimeSeconds` > 0) - Reduces the number of empty responses by allowing Amazon SQS to wait until a message is available before sending a response to a ReceiveMessage request, helps to reduce the cost.
@@ -933,10 +941,20 @@ There are two types of queues: Standard & FIFO.
 
 ### Amazon Simple Notification Service (SNS)
 
+- Keywords: Pushing Messages, Multiple consumer (subscribers)
+
+![producer-consumer](https://betterdev.blog/app/uploads/2021/08/sns-messaging.png)
+
 - Managed Messaging Service that allows you **push** (Instantaneous) **messages on SNS topic and all topic subscribers receive those messages**.
-- Can group multiple recipients through topics.
+- Consumers needs to subscribe to the topic to receive the messages. Then, one topic can support deliveries to multiple endpoint types:
+  - Lambda function
+  - SQS
+  - HTTP endpoint
+  - mobile phone – via SMS
+  - mobile app – via push notification
+  - email
+  - Kinesis Firehose
 - Highly available as all messages stored across multiple regions.
-- One topic can support deliveries to multiple endpoint types - for example, you can group together iOS, Android and SMS recipients. When you publish once to a topic, SNS delivers appropriately formatted copies of your message to each subscriber.
 - Inexpensive, pay-as-you-go model with no up-front costs.
 
 #### A2A (PubSub model)
@@ -1530,15 +1548,20 @@ Go to [Index](#index)
 
 #### Kinesis Data Streams
 
+- Keywords: Streaming data, Shar, No autoscale
+
 ![Kinesis Data Streams](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-04-57-65202de89627ab9ac70ef6b89817c981.jpg)
 
 - It is SaaS for streaming data that makes it easy to capture, process, and store data streams at any scale.
 - Automatically stores data and encrypts it at rest
-- Takes data from a producer and passes it through a **SHARD** to the consumer
+- Not Autoscale
+- Like SQS, the consumer pulls data but passes it through a **SHARD** to the consumer
   - Producer can be Amazon Kinesis Agent, SDK, or Kinesis Producer Library (KPL)
-  - Consumer can be Kinesis Data Analytics, Kinesis Data Firehose, or Kinesis Consumer Library (KCL)
-  - Data Retention period from 24 hours (default) to 365 days (max).
+  - Kinesis you can have multiple distinct consumers: Kinesis Data Analytics, Kinesis Data Firehose, or Kinesis Consumer Library (KCL)
+  - Kinesis keeps the messages for a specified time, from 24 hours (default) to 365 days (max).
   - Order is maintained at Shard (partition) level.
+
+[consumer-producer](https://betterdev.blog/app/uploads/2021/08/kinesis-streams-messaging.png)
 
 ##### Shards
 
@@ -2265,8 +2288,10 @@ Go to [Index](#index)
 
 ![AWSStepFunctions](https://d1.awsstatic.com/video-thumbs/Step-Functions/AWS_Step_Functions_HIW.bc3d2930f00dd0401269367b8e8617a7dba5915c.png)
 
-- Build serverless visual workflow to orchestrate your Lambda functions.
+- Visual workflow service that helps developers use AWS services to build distributed applications, **automate processes**, **orchestrate** microservices, and create data and **machine learning (ML) pipelines**.
 - You write state machine in declarative JSON, you write a decider program to separate activity steps from decision steps.
+
+![steps-function](https://imgix.datadoghq.com/img/knowledge-center/aws-step-functions/aws-step-functions-visual-editor.png?auto=format&fit=max&w=847)
 
 ### AWS Simple Workflow Service (SWF)
 
