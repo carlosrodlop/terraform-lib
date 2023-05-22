@@ -1316,23 +1316,6 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 Go to [Index](#index)
 
-### Database migration service (DMS)
-
-- KeyWords: Database Migration, Homogeneos/heterogeneos Migration
-- It Saas that to transfer (Replicate) a database to another type (relational databases, data warehouses, NoSQL databases and other types of data stores.). It is valid for on-premise, in cloud (AWS o different vendro, Azure) or combination of both for Sources and Targets.
-- Steps:
-  - Create a source and a target endpoints
-  - Schedule/Run a Replication Task (Replication Instance - VM) to move the data
-  - No downtime (Source stays functioning the whole time during the migration)
-- Types of migrations:
-  - Homogenous Migrations — Identical e.g. oracle to oracle
-
-![Homogeneos](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Database-Migration-Service_Homogenous-Database-Migrations_Reduced%402x.053ebcf3f38feed093d6180bb7a351c5551a30a1.png)
-
-  - Heterogenous Migrations — Different (e.g. SQLServer to Aurora). It requires a Schema Conversion Tool (SCT)
-
-![Heterogeneos](https://d1.awsstatic.com/reInvent/reinvent-2022/data-migration-services/product-page-diagram_AWS-DMS_Heterogenous-Brief.e64d5fda98f36a79ab5ffcefa82b2735f94540ea.png)
-
 ### RDS (Relational Database Service)
 
 - KeyWords: Relation Database (SQL), Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas), Cross Region
@@ -1678,10 +1661,14 @@ Go to [Index](#index)
 
 ### Database Migration Service (DMS)
 
-- It helps to migrate database (data storage) to AWS with source remain fully operational during migration, minimize the downtime
-- It supports multiple combinations: Out of AWS => AWS, AWS => AWS, AWS => Out of AWS
-  - Out of AWS can be On premises or a Different Cloud Provider
-- How it works? You need to select EC2 instance to run DMS in order to migrate (and replicate) database from source => target
+- KeyWords: Database Migration, Homogeneos/heterogeneos Migration
+- It Saas that to transfer (Replicate) a database to another type (relational databases, data warehouses, NoSQL databases and other types of data stores).
+- It supports multiple combinations: Out of AWS => AWS, AWS => AWS, AWS => Out of AWS (different cloud)
+- Steps:
+  - Create a source and a target endpoints
+  - Schedule/Run a Replication Task (Replication Instance - VM) to move the data
+  - No downtime (Source stays functioning the whole time during the migration)
+- Types of migrations:
 - Types:
 
 **A/** Homogenous migrations (origin and target same technology) e.g. On-premise PostgreSQL => AWS RDS PostgreSQL
@@ -1701,7 +1688,7 @@ Exam Tip: Migration from on-premises Databases to AWS RDS (e.g Microsoft SQL Ser
 
 ![mgn](https://d1.awsstatic.com/pdp-headers/2022/application-migration/MGN-How-It-Works-Diagram_biggerfonts1.1cb6cd71af1796ed95842d71c7b7a588a81c442d.jpg)
 
-- It helps on automating the conversion of your **Source servers (VM)** (VMware vSphere, Microsoft Hyper-V or Microsoft Azure) **to run natively on AWS**. It also simplifies application modernization with built-in and custom optimization options.
+- It helps on automating the conversion of your **Source servers (VM)** (VMware vSphere, Microsoft Hyper-V or Microsoft Azure) **to run natively on AWS** (EC2). It also simplifies application modernization with built-in and custom optimization options.
 - AWS Application Migration Service: Legacy vs New.
   - New, it utilizes continuous, block-level replication and enables cutover windows measured in minutes.
   - Legacy, it utilizes incremental, snapshot-based replication and enables cutover windows measured in hours.
@@ -1727,10 +1714,9 @@ Go to [Index](#index)
   - You can create upto 5 VPC per Region by default (soflimit, it can be extended)
 - Default VPC vs Custom VPC
   - **Default VPC is user friendly**, allowing you to immediately deploy instances.
-  - All subnets in a default VPC are public (have a route out to the internet).
+  - All **subnets in a default VPC are public** (have a route out to the internet).
   - Each EC2 instance has both a public and private IP address.
   - In case it is delated, it can be recovered (but, try not to delete it).
-- Auto assigning a public IP Address is turned off by default, this will need to be updated if you want a public subnet.
 - You are not charged for using a VPC, however you are charged for the components used within it e.g. gateway, traffic monitoring etc.
 - One way to save costs when it comes to networking is to use private IP addresses instead of public IP addresses as they utilise the AWS Backbone network.
   - If you want to cut all network costs, group all EC2 instances in same AZ and use private IP addresses.
@@ -1779,7 +1765,7 @@ Go to [Index](#index)
 - Allows your VPC (**public subnet**) to communicate with the Internet ==> Performs network address translation for instances.
 - It is known as Internet gateway or Virtual Private Gateway
 - 1 VPC <-> 1 Internet Gateway. Each Internet Gateway is associated with one VPC only, and each VPC has one Internet Gateway only (one-to-one mapping)
-- For internet communication, you must set up a route in your route table that directs traffic to the Internet Gateway
+- For internet communication, you must set up a route in your route table that directs traffic to the Internet Gateway ==> It becomes a public subnet.
 
 ##### C/ Route Table (Created by default)
 
@@ -1790,8 +1776,7 @@ Go to [Index](#index)
 - Cardinality:
   - 1 Subnet -> 1 Route Table. A subnet can only be associated with one route table at a time
   - 1 Route Table -> N Subnets. Multiple subnets can be associated with the same route table For e.g. you create 4 subnets in your VPC where 2 subnets associated with one route table with no internet access rules know as private subnets and another 2 subnets are associated with another route table with internet access rules known as public subnets
-- By default subnets are associated with the Main route table, but this can be a security risk.
-  - e.g. if you were to put a route out to the public internet in the route table all subnets would automatically be made public.
+- By default subnets are associated with the Main route table, but this can be a security risk (e.g. if you were to put a route out to the public internet in the route table all subnets would automatically be made public).
   - To resolve this — keep main route table as private and then have separate route tables that use the main one, but have additional routes.
 - Public vs Private Subnet
   - Public subnet ==> It is a subnet that’s associated with a route table having **rules to connect to internet using Internet Gateway**.
@@ -1800,7 +1785,7 @@ Go to [Index](#index)
 
 ##### D/ Network Access Control List (Created by default)
 
-- It **acts as a Firewall**, it controls the inbound and ourbound traffic **at Subnets level**.
+- It **acts as a Firewall**, it controls the inbound and ourbound traffic **at Subnets level** ==> It applies to all instances in associated subnet.
 - Differences with Security groups:
   - You can **block IP addresses**, it allows Deny Rules
   - They are **stateless**, when you create an inbound rule and an outbound rule is not automatically created. It means they can have separate inbound and outbound rules.
@@ -1810,7 +1795,6 @@ Go to [Index](#index)
 - Each subnet within a VPC must be associated with only 1 NACL
   - If you don’t specify, auto associate with default NACL
   - If you associate with new NACL, auto remove previous association
-- Apply to all instances in associated subnet
 - Rules
   - **Support both Allow and Deny rules**
   - **Evaluate rules in number order**, starting with lowest numbered rule. NACL rules have number (1 to 32766) and higher precedence to lowest number for e.g. #100 ALLOW <IP> and #200 DENY <IP> means IP is allowed
@@ -1819,14 +1803,14 @@ Go to [Index](#index)
 
 ##### E/ Security Groups (Created by default)
 
-- It **acts as a Firewall**, it controls inbound and outbound traffic **at EC2 instance level**
+- It **acts as a Firewall**, it controls inbound and outbound traffic **at EC2 instance level**, specific for each instance.
 - Differences with Security groups:
-  - You cannot **block IP addresses**, it does not allows Deny Rules
+  - You **cannot block IP addresses**, it does not allows Deny Rules
   - **Stateful** when you create an inbound rule and an outbound rule is automatically created.
 - You can specify a source in security group rule to be an IP range, a specific IP (/32), or another security group.
-- When you first create a security group, by default
-  - All outbound traffic is allowed.
-  - All inbound traffic is blocked (no rules)
+- When you first create a security group, by default (no rules)
+  - All **outbound** traffic is **allowed**.
+  - All **inbound** traffic is **blocked**.
 - Cardinality: N Security Group <--> N EC2 instance.
   - You can have any number of EC2 instances within a security group.
   - You can have multiple Security Groups attached/assigned to EC2 instances. Evaluate all rules before deciding whether to allow traffic. Meaning if you have one security group which has no Allow and you add an allow in another than it will Allow
@@ -1922,17 +1906,17 @@ There are several methods of connecting to a VPC, **including connection from Da
 | low to modest bandwidth   | high bandwidth 1 to 100 GB/s |
 
 - Use Cases:
-  1. A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, lead times are often longer than 1 month so it cannot be used to migrate data within the timeframes
+  1. A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, **lead times are often longer than 1 month** so it cannot be used to migrate data within the timeframes.
      - Alternatively, use AWS Snowball to move the data and order a Direct Connect connection to satisfy the other requirement later on. In the meantime the organization can use an AWS VPN for secure, private access to their VPC.
-  2. A solutions architect has been tasked with designing a highly resilient hybrid cloud architecture connecting an on-premises data center and AWS. The network should include AWS Direct Connect (DX). Which DX configuration offers the HIGHEST resiliency?
+  2. It is required a design for a highly resilient hybrid cloud architecture connecting an on-premises data center and AWS. The network should include AWS Direct Connect (DX). Which DX configuration offers the HIGHEST resiliency?
      - The most resilient solution is to configure DX connections at multiple DX locations. This ensures that any issues impacting a single DX location do not affect availability of the network connectivity to AWS.
 
 ###### AWS Direct Connect Plus VPN
 
 ![AWS Direct Connect Plus VPN](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-3.jpg)
 
-- What: IPSec VPN connection over private lines (Direct Connect)
-- When: Need the added security of encrypted tunnels over Direct Connect
+- What: **IPSec VPN connection** over private lines (Direct Connect)
+- When: Need the **added security of encrypted tunnels over Direct Connect**
 - Pros: More secure (in theory) than Direct Connect alone. This combination provides an IPsec-encrypted private connection that also reduces network costs, increases bandwidth throughput, and provides a more consistent network experience than internet-based VPN connections.
 - Cons: More complexity introduced by VPN layer
 - How: Work with your existing data networking provider
@@ -1969,8 +1953,8 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 ###### Transit Gateway
 
-- AWS Transit Gateway connects your Amazon Virtual Private Clouds (VPCs) and on-premises networks through a central hub. This connection simplifies your network and puts an end to complex peering relationships. Transit Gateway acts as a highly scalable cloud router—each new connection is made only once.
-- Difference with Transit VPC: Transit VPC is more of a network architecture concept while Transit Gateway is a service.
+- AWS Transit Gateway connects your Amazon VPCs and on-premises networks through a **central hub**. This connection simplifies your network (no complex peering relationships). Transit Gateway acts as a highly scalable cloud router—each new connection is made only once.
+- Difference with Transit VPC: **Transit VPC is more of a network architecture concept while Transit Gateway is a service**.
 
 ![Transit Gateway](https://d1.awsstatic.com/products/transit-gateway/product-page-diagram_AWS-Transit-Gateway%402x.921cf305305867447fcabfc6b7acae9f0e5bc9d5.png)
 
@@ -1983,7 +1967,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 ![VPC Peering](https://docs.aws.amazon.com/images/vpc/latest/peering/images/peering-intro-diagram.png)
 
-- What: AWS-provided network connectivity between VPCs. It connects two VPC over a direct network route using **private IP addresses** (secure). Instances on peered VPCs behave just like they are on the same network.
+- What: AWS-provided network connectivity between VPCs. It connects two VPC over a direct network route using **private IP addresses** (secure). Instances on peered VPCs behave **just like they are on the same network**.
   - It can connect one VPC to another in same or different region (VPC inter-region peering).
   - It can connect one VPC to another in same or different AWS account.
 - When: Multiple VPCs need to connect with one another and access their resources
@@ -1995,7 +1979,9 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 ###### VPC Private Link
 
-- What: AWS-provided connectivity between VPCs, AWS services and/or datacenters using interface endpoints, securely on the Amazon network.
+![private link](https://d1.awsstatic.com/products/privatelink/product-page-diagram_AWS-PrivateLink.fc899b8ebd46fa0b3537d9be5b2e82de328c63b8.png)
+
+- What: AWS-provided **connectivity technology between VPCs, AWS services and/or datacenters using interface endpoints**, securely on the Amazon network backbone.
 - When: Keep private subnets truly private by using the AWS backbone rather than using the public internet. Best way to expose your VPC to hundreds or thousands of other VPC’s. Can secure your traffic and simplify network management.
 - Pros: Redundant; uses AWS backbone
 - Cons: ?
@@ -2010,11 +1996,15 @@ There are several methods of connecting to a VPC, **including connection from Da
 ###### VPC endpoints
 
 - Allows you to **privately connect a VPC to other AWS resources** and it is powered by `Private Link`.
-  - Instances in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
-- Eliminates the need of an Internet Gateway and NAT Instances/Gateway for instances in public and private subnets to access the other AWS services through public internet.
+  - Services in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
+- VPC Endpoints vs PrivateLink
+  - AWS PrivateLink — A technology that provides private connectivity between VPCs and services.
+  - VPC endpoint — The entry point in your VPC that enables you to connect privately to a service.
 - 2 types:
   - `Interface endpoint` → Attach an Elastic Network Interface (ENI) with a private IP address onto your EC2 instance for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a supported service.
   - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for **only S3 & Dynamo DB**.
+
+![VPC endpoints](https://docs.aws.amazon.com/images/whitepapers/latest/aws-privatelink/images/connectivity.png)
 
 - **Exam Tip :**
   1. Know which services use interface endpoints and gateway endpoints. The easiest way to remember this is that Gateway Endpoints are for Amazon S3 and DynamoDB only.
@@ -2023,7 +2013,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 ![EC2 and DynamoDB via Gateway endpoint](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-00-45-ac665c89acb1641afb831f1eb795210e.jpg)
 
 - Use Case: A company runs an application on Amazon EC2 instances which requires access to sensitive data in an Amazon S3 bucket. All traffic between the EC2 instances and the S3 bucket must not traverse the internet and must use private IP addresses. Additionally, the bucket must only allow access from services in the VPC.
-  - Private access to public services such as Amazon S3 can be achieved by creating a VPC endpoint in the VPC. For S3 this would be a gateway endpoint. The bucket policy can then be configured to restrict access to the S3 endpoint only which will ensure that only services originating from the VPC will be granted access.
+  - Private access to public services such as Amazon S3 can be achieved by creating a VPC endpoint in the VPC. For S3 this would be a Gateway endpoint. The bucket policy can then be configured to restrict access to the S3 endpoint only which will ensure that only services originating from the VPC will be granted access.
 
 ### Amazon API Gateway
 
@@ -2083,7 +2073,7 @@ There are several methods of connecting to a VPC, **including connection from Da
   2. A company runs a web application that serves weather updates. The application runs on a fleet of Amazon EC2 instances in a Multi-AZ Auto scaling group behind an Application Load Balancer (ALB). How to make the application more resilient to sporadic increases in request rates?
      - On the frontend an Amazon CloudFront distribution can be placed in front of the ALB and this will cache content for better performance and also offloads requests from the backend.
   3. An organization want to share regular updates about their charitable work using static webpages. The pages are expected to generate a large amount of views from around the world. The files are stored in an Amazon S3 bucket. How to design an efficient and effective solution => Amazon CloudFront can be used to cache the files in edge locations around the world and this will improve the performance of the webpages. Possible configuration. Using a REST API endpoint or Using a website endpoint as the origin with anonymous (public) access allowed or with access restricted by a Referer header.
-  4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website.Which combination of actions should be taken to increase availability?
+  4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website. Which combination of actions should be taken to increase availability?
      - You can set up CloudFront with origin failover for scenarios that require high availability. To get started, you create an origin group with two origins: a primary and a secondary. If the primary origin is unavailable or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.
   5. A company runs a dynamic website that is hosted on an on-premises server in the United States. The company is expanding to Europe and is investigating how they can optimize the performance of the website for European users. The website’s backed must remain in the United States. The company requires a solution that can be implemented within a few days. Best Practice => A custom origin can point to an on-premises server and CloudFront is able to cache content for dynamic websites. Additionally, connections are routed from the nearest Edge Location to the user across the AWS global network. If the on-premises server is connected via a Direct Connect (DX) link this can further improve performance.
 
@@ -2124,51 +2114,73 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 - `Internet Protocol (IP)` → is a numerical label assigned to devices and used by computers to identify each other on a network.
 - `Domain Name System (DNS)` → used to convert human friendly domain names into IP addresses.
-- `Domain Registrars` → authority that can assign domain names
+- `Domain Registrars` → authority that can assign domain names.
 - `Start of Authority Record (SOA)` → type of resource record that every DNS must begin with, it contains the following information:
   - Stores the name of the server supplying the data
   - Stores the admin zone
   - Currently version of data file
   - Time to live
 - `Name Server (NS) records` → used by top level domain servers to direct traffic to the content DNS server. It specifies which DNS server is authoritative for a domain.
-- `A Records (Address Record)` → type of DNS record, used by computer to translate a logical domain name to an IP address.
+- `A Records (Address Record)` →  It indicates the **IP address** of a given domain.
+
+```txt
+NAME                    TYPE   VALUE
+--------------------------------------------------
+foo.example.com.        A      192.0.2.23
+```
+
+- `Canonical Name (CName)` → It maps one domain name (an alias) to another (the canonical name). It is convenient when running multiple services in the same IP. **Only works with subdomains** e.g. something.mydomain.com
+
+```txt
+NAME                    TYPE   VALUE
+--------------------------------------------------
+bar.example.com.        CNAME  foo.example.com.
+```
+
+when an A record lookup for bar.example.com is carried out, the resolver will see a CNAME record and restart the checking at foo.example.com and will then return 192.0.2.23.
+
+- `Alias Record (A or AAAA)` → It provide CNAME-like behavior on apex domains (a naked/root domain name e.g. example.com). It works with both **root-domain and subdomains**
+
+Alias records are used to map DNS with AWS resources like ALB, API Gateway, CloudFront, S3 Bucket, Global Accelerator, Elastic Beanstalk, VPC interface endpoint etc. [How do I create alias records for services hosted in AWS](https://repost.aws/knowledge-center/route-53-create-alias-records)
+
+For example, if you created a hosted zone for the domain "example.com", then you **can't** create the following CNAME record with the root domain but you could do with Alias Record.
+
+```txt
+example.com Alias(A) dualstack.elb123.us-east 1.elb.amazonaws.com.
+```
+
 - `Time To Live (TTL)` → length of time the DNS record is cached on the server for in seconds. Default is 48 hours.
-- `Canonical Name (CName)` → It is used to resolve one domain name (hostname) to another (Map to a reference). Only works with subdomains e.g. something.mydomain.com
-- `Alias Record (A or AAAA)` → Similar to CName but can be used:
-  - At the top node of a DNS namespace, also known as the zone apex (a naked domain name) e.g. example.com
-  - Points hostname to an AWS Resource like ALB, API Gateway, CloudFront, S3 Bucket, Global Accelerator, Elastic Beanstalk, VPC interface endpoint etc.
-  - Works with both root-domain and subdomains
 
 #### DNS Record: Routing Policy
 
 In order for Route 53 to respond to queries, you need to define one of the following routing policies:
 
-- `Simple`You can only have one record with multiple IP addresses. If you specify multiple values in a record, Route 53 returns all values to the user in a random order — so you never know which EC2 you are hitting and it can be shuffled on refreshed!
-  - You can't have any health checks.
-- `Weighted` Split traffic based on different custom proportions you assign.
-  - You can set health checks on individual record sets. If a recordset fails a health check it will be removed from Route53 until it passes the health check.
-  - Example: you can set 10% of your traffic to go to US-EAST-1 and 90% to EU-WEST-1.
-- `Latency` Allows you to route your traffic based on the lowest network latency for your end user (ie which region will give them the fastest response time).
-  - Example: create 3 DNS records with region us-east-1, eu-west-2, and ap-east-1.
-- `Failover` to route traffic from Primary to Secondary (DR scenario) in case of failover (active/passive set-up)
-  - It is mandatory to create health check for both IP and associate to record. The traffic goes to main site when its healthy and then can route traffic to the secondary site when the main one becomes unhealthy.
-  - Example create 2 DNS records for primary site in EU-WEST-2 and secondary (DR) IP in AP-SOUTHEAST-2.
-- `Geolocation` to route traffic to specific IP based on user geolocation (select Continent or Country).
-  - For this you need to create separate record sets for each required location. It also requires a default (select Default location) policy in case there’s no match on location.
-  - For Example: You might want all queries from Europe to be routed to a fleet of EC2 instances that are specifically configured for European customers. These servers may have the local language of European customers and all prices are displayed in Euros.
-- `Geoproximity` to route traffic to specific IP based on user geolocation AND location of your resources.
-  - You can also optionally choose to route more traffic or less to a given resource by specifying a value, known as a bias A bias expands or shrinks the size of the geographic region from which traffic is routed to a resource.
-  - To use Geoproximity Routing, you must use Route 53 traffic flow.
+- `Simple` You can only have **one record with multiple IP addresses**. If you specify multiple values in a record, Route 53 returns all values to the user in a random order — so you never know which EC2 you are hitting and it can be shuffled on refreshed!
+  - You **can't have any health checks**.
 - `Multivalue Answer` configure Amazon Route 53 to return multiple values, such as IP addresses for your web servers, in response to DNS queries.
   - You can specify multiple value for almost any record, but multivalue answer routing also lets you check the health of each resource, so Route 53 returns only values from healthy resources.
-  - Similar to Simple Routing only you can put health checks on each record set so that only healthy resources are returned.
+  - Similar to Simple Routing only **you can put health checks** on each record set so that only healthy resources are returned.
   - Use case: Your company hosts 10 web servers all serving the same web content in AWS. They want Route 53 to serve traffic to random web servers.
   - Example: create 3 DNS records with associated health check. Acts as client side Load Balancer, expect a downtime of TTL, if an EC2 becomes unhealthy.
+- `Weighted` Split traffic based on different **custom proportions** you assign.
+  - You can set health checks on individual record sets. If a recordset fails a health check it will be removed from Route53 until it passes the health check.
+  - Example: you can set 10% of your traffic to go to US-EAST-1 and 90% to EU-WEST-1.
+- `Latency` Allows you to route your traffic based on the **lowest network latency** for your end user (ie which region will give them the fastest response time).
+  - Example: create 3 DNS records with region us-east-1, eu-west-2, and ap-east-1.
+- `Failover` to route traffic from Primary to Secondary (**DR scenario**) in case of **failover (active/passive set-up)**
+  - It is **mandatory to create health check for both IP and associate to record**. The traffic goes to main site when its healthy and then can route traffic to the secondary site when the main one becomes unhealthy.
+  - Example create 2 DNS records: for primary site in EU-WEST-2 and secondary (DR) IP in AP-SOUTHEAST-2.
+- `Geolocation` to route traffic to specific IP based on **user geolocation (select Continent or Country)**.
+  - For this you need to create **separate record sets for each required location**. It also requires a default (select Default location) policy in case there’s no match on location.
+  - For Example: You might want all queries from Europe to be routed to a fleet of EC2 instances that are specifically configured for European customers. These servers may have the local language of European customers and all prices are displayed in Euros.
+- `Geoproximity` to route traffic to specific IP based on **user AND AWS resources geolocation**.
+  - You can also optionally choose to route more traffic or less to a given resource by specifying a value, known as a bias A bias expands or shrinks the size of the geographic region from which traffic is routed to a resource.
+  - To use Geoproximity Routing, you must use **Route 53 traffic flow**.
 
 #### DNS Failover
 
-- Active-Active failover when you want all resources to be available the majority of time. All records have same name, same type, and same routing policy such as weighted or latency
-- Active-Passive failover when you have active primary resources and standby secondary resources. You create two records - primary & secondary with failover routing policy
+- `Active-Active` failover when you want all resources to be available the majority of time. All records have same name, same type, and same routing policy such as **weighted or latency**
+- `Active-Passive` failover when you have active primary resources and standby secondary resources. You create two records - primary & secondary with **failover routing policy**
 
 ## Management_and_Governance
 
@@ -2249,10 +2261,8 @@ Go to [Index](#index)
 
 ![ElasticBeanstalk](https://d1.awsstatic.com/Product-Page-Diagram_AWS-Elastic-Beanstalk%402x.6027573605a77c0e53606d5264ec7d3053bf26af.png)
 
-- Platform as a Service (PaaS)
-  - It Makes it easier for developers to quickly deploy and manage applications without thinking about underlying resources
-  - It Automatically handles the deployment details of capacity provisioning, load balancing, auto-scaling and application health monitoring
-- You can launch an application with following pre-configured platforms:
+- Platform as a Service (PaaS) ==> Automatically handles the Deployment Details (Architecture Design): capacity provisioning, load balancing, auto-scaling and application health monitoring
+- You can launch an applications with following pre-configured platforms (Templates):
   - Apache Tomcat for Java applications,
   - Apache HTTP Server for PHP and Python applications
   - Nginx or Apache HTTP Server for Node.js applications
@@ -2262,17 +2272,22 @@ Go to [Index](#index)
 - You can also launch an environment with following environment tier:
   - An application that serves HTTP requests runs in a web server environment tier.
   - A backend environment that pulls tasks from an Amazon Simple Queue Service (Amazon SQS) queue runs in a worker environment tier.
+- Simplify developers tasks to quickly deploy and manage applications without thinking about underlying resources.
 - It costs nothing to use Elastic Beanstalk, only the resources it provisions e.g. EC2, ASG, ELB, and RDS etc.
 
 ### AWS ParallelCluster
 
+- KeyWords: HPC
+
 ![ParallelCluster](https://d1.awsstatic.com/HPC2019/Product-Page-Diagram_Paralell-Cluster_How-It-Works.50eb43991f5baa11d4d7687ac8155ed7943341ef.png)
 
-- Open-source cluster management tools **deploy and manage High Performance Computing (HPC) clusters** resources on AWS (VPC, subnet, cluster type and instance types.) using a simple text file for modeling.
+- Open-source cluster management tools **deploy and manage High Performance Computing (HPC) clusters** resources on AWS (VPC, subnet, cluster type and instance types.) using GUI or a simple text file for modeling and provisioning.
 - You have full control on the underlying resources.
 - AWS ParallelCluster is free, and you pay only for the AWS resources needed to run your applications.
 
 ### AWS Step Functions (SF)
+
+- KeyWords: Orchestration, Visual Configuration (No Code)
 
 ![AWSStepFunctions](https://d1.awsstatic.com/video-thumbs/Step-Functions/AWS_Step_Functions_HIW.bc3d2930f00dd0401269367b8e8617a7dba5915c.png)
 
@@ -2283,9 +2298,9 @@ Go to [Index](#index)
 
 ### AWS Simple Workflow Service (SWF)
 
-- Amazon Workflow Service (Amazon SWF) is a web service that makes it easy to coordinate work across distributed application components. SWF enables applications for a range of use cases, including media processing, web application back-ends, business process workflows and analytics pipelines, to be designed as a coordination of tasks.
-- Tasks represent invocations of various processing steps in an application which can be performed by executable code, web service calls, human actions and scripts.
-- Exam Scenario: Any human interaction required in the service, think of SWF
+- It is a service that makes it easy to **coordinate work across distributed application components** in the AWS Cloud.
+- A task represents a logical unit of work that is performed by a component of your workflow. SWF coordinates tasks in a workflow involving the manage intertask dependencies, schedulle, and concurrency in accordance with the logical flow of the application.
+- Use cases: including media processing, web application back-ends, business process workflows and analytics pipelines, to be designed as a coordination of tasks.
 
 ### AWS Organization
 
