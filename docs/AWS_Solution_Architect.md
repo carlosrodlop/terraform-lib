@@ -188,7 +188,7 @@ Go to [Index](#index)
   - The **Least Privilege Principle** should be followed in AWS, don’t give more permission than a user needs.
   - **IAM Policy Evaluation Logic** ➔ Explicit Deny ➯ Organization SCPs ➯ Resource-based Policies (optional) ➯ IAM Permission Boundaries ➯ Identity-based Policies.
     - Anything that is not explicitly allowed is implicitly denied
-    - `Service control policies (SCPs)` are a type of organization policy that you can use to manage permissions in your organization.
+    - `Service control policies (SCPs)` are a type of **Organization policy** that you can use to manage permissions in your organization.
       - It offers central control over the maximum available permissions for all accounts in your organization.
       - It helps you to ensure your accounts stay within your organization’s access control guidelines.
     - `Resource Based Policies` are supported by S3, SNS, and SQS.
@@ -344,7 +344,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 - Pay per API call.
 - Validated under `FIPS 140–2 (Level 2)` security standard.
 - Types of `Customer Master Keys` (CMKs)
-  - `Customer Managed` CMKs (Dedicated to my account) → Keys that you have created in AWS, that you own and manage. You are responsible for managing their key policies, rotating them and enabling/disabling them.
+  - `Customer Managed` CMKs (Dedicated to my account) → Keys that you have created in AWS, that you own and manage. You are responsible for managing their **key policies (who can access), rotating them and enabling/disabling them**.
     - It can be created for encyption and client/server side both (AWS Managed or Customer Managed only server side.)
     - You can create customer-managed `Symmetric` (single key for both encrypt and decrypt operations) or `Asymmetric` (public/private key pair for encrypt/decrypt or sign/verify operations) master keys.
     - Symmetric CMKs
@@ -361,6 +361,9 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
   - `AWS Owned` CMKs (No Dedicated to my account) → owned and managed by AWS and shared across many accounts.
 
 **Exam Tip :** Encryption keys are regional.
+
+- Use Case: A company is planning to use Amazon S3 to store documents uploaded by its customers. The images must be encrypted at rest in Amazon S3. The company does not want to spend time managing and rotating the keys, but it does want to control who can access those keys.
+ -  Server-Side Encryption with AWS KMS-Managed Keys (SSE-KMS) => SSE-KMS requires that AWS manage the data key but you manage the customer master key (CMK) in AWS KMS, chosing customer managed CMK (not AWS Managed) because you want to control who can access the keys (policies).
 
 ### AWS CloudHSM
 
@@ -975,11 +978,11 @@ Go to [Index](#index)
 
 ### S3 (Simple Storage Service)
 
-- Keywords: Block Storage
+- Keywords: Block Storage, Concurrency
 
 ![s3](https://d1.awsstatic.com/s3-pdp-redesign/product-page-diagram_Amazon-S3_HIW.cf4c2bd7aa02f1fe77be8aa120393993e08ac86d.png)
 
-- Storage service that is highly scalable, secure and performant.
+- Storage service that is highly scalable, secure and performant. It allows concurency (more than one compute unit can access to the files at the same time).
 - It is OBJECT BASED storage (suitable for files). It does not allow to install Operation System (different with EBS for example).
 - S3 Object is made up of:
   - `Key` → Name of the object, full path of the object in bucket e.g. /movies/comedy/abc.avi
@@ -1038,7 +1041,9 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
   - Allows you to save money on data transfer and increase speed.
 - Using `Range` HTTP Header in a GET Request to download the specific range of bytes of S3 object, known as Byte Range Fetch.
 - High Availability: Enable `S3 Cross-Region Replication` for asynchronous **replication of object across buckets in another region**.
-  - Cross Region Replication REQUIRES versioning to be ENABLED on both SOURCE & DESTINATION bucket.
+  - Requirement:
+    - An existing bucket to Replicate data
+    - Versioning enabled on both SOURCE & DESTINATION bucket.
   - If enabled, existing objects are not replicated automatically, only subsequent updated files (new objects).
   - You can have this enabled for the entire bucket or just for specific prefixes.
   - Delete markers ARE NOT replicated.
@@ -1048,12 +1053,34 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 
 #### Integrations
 
-- Create `CloudFront` distribution with Origin Access Identity (OAI) pointing to S3 for faster cached content delivery (mainly reads) over long distances between your client and S3.
-  - Restrict the access of S3 bucket through CloudFront only using Origin Access Identity (OAI). Make sure user can’t use a direct URL to the S3 bucket to access the file.
+##### s3 + CloudFront: Origin Access Identity (OAI)
+
+- Amazon CloudFront `Origin Access Identity (OAI)` is a function of CloudFront distribution that you can enable when you select **S3 buckets as origin**. If you don’t use an OAI, the S3 bucket must allow public access for downloading objects.
+  - It makes faster **cached** content delivery (mainly reads) over long distances between your client and S3.
+  - **Restrict the access of S3 bucket endpoint directly**, only making it possible through CloudFront only endpoints
   - Note: CloudFront provides two ways to send authenticated requests to an Amazon S3 origin: origin access control (OAC) and origin access identity (OAI). OAC is recommeded.
+
+```sh
+#Not available with S3 website endpoints
+app-private-bucket-stormit.s3.eu-central-1.amazonaws.com/pics/logo.png
+#Available with CloudFront endpoints
+d2whx7jax6hbi5.cloudfront.net/pics/logo.png
+```
+
+![Origin Access Identity](https://img-c.udemycdn.com/redactor/raw/test_question_description/2021-05-18_05-32-57-0cec77f550d1e2e6100046094949925b.jpg)
+
+##### s3 + Athena
+
 - Use `AWS Athena` (Serverless Query Engine) to perform analytics directly against S3 objects using SQL query and save the analysis report in another S3 bucket.
   - Use Case: one time SQL query on S3 objects, S3 access log analysis, serverless queries on S3, IoT data analytics in S3, etc.
-- Integration with SNS: You can create `S3 event notification` to push events e.g. `s3:ObjectCreated:\*` to SNS topic, SQS queue or execute a Lambda function. It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
+
+##### Amazon S3 Event Notifications
+
+- Enable `S3 event notification` feature to receive notifications when certain events happen in your S3 bucket (eg: push events e.g. `s3:ObjectCreated:\*`) and send to one of the following Destinations:
+  - Amazon SNS topic
+  - Amazon SQS queue (FIFO queue is not supported, use Event Brdige instead)
+  - AWS Lambda function
+- It is possible that you receive single notification for two writes to non-versioned object at the same time. Enable versioning to ensure you get all notifications.
 
 #### S3 Tiered Storage (Storage Classes)
 
@@ -1066,7 +1093,7 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
 | S3 Intelligent Tiering             | 11 9’s     | 99.9%        | ≥3  | 30 days      | millisecond                                              | **N/A**       |
 | S3 Standard-IA (Infrequent Access) | 11 9’s     | 99.9%        | ≥3  | 30 days      | milliseconds                                             | per GB        |
 | S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | **1**  | 30 days      | milliseconds                                             | per GB        |
-|  S3 Glacier Instant Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | milliseconds  | per GB
+| S3 Glacier Instant Retrieval       |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | milliseconds  | per GB
 | S3 Glacier Flexible Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | **minutes**  | per GB
 | S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | **hours**   | per GB
 
@@ -1095,6 +1122,7 @@ https://<bucket-name>.s3-website[.-]<aws-region>.amazonaws.com
   3. Application log files needs to backup from an online ecommerce store to Amazon S3. It is unknown how often the logs will be accessed or which logs will be accessed the most. From the following options "S3 Standard-Infrequent Access (S3 Standard-IA)", "S3 One Zone-Infrequent Access (S3 One Zone-IA)", "S3 Intelligent-Tiering" and "S3 Glacier". Which is the most cost effective? ==> "S3 Intelligent-Tiering" It works by storing objects in two access tiers: one tier that is optimized for frequent access and another lower-cost tier that is optimized for infrequent access. The other options are not valid, because they charge retrieval fees and the accesibility is unknown.
   4. A company migrated a two-tier application from its on-premises data center to AWS Cloud. A Multi-AZ Amazon RDS for Oracle deployment is used for the data tier, along with 12 TB of General Purpose SSD Amazon EBS storage. With an average document size of 6 MB, the application processes, and stores documents as binary large objects (blobs) in the database. Over time, the database size has grown, which has reduced performance and increased storage costs. A highly available and resilient solution is needed to improve database performance. Which solution could meet these requirements MOST cost-effectively?
      - Set up an Amazon S3 bucket. The application should be updated to use S3 buckets to store documents. Store the object metadata in the existing database
+  5. An application runs on Amazon EC2 Linux instances. The application generates log files which are written using standard API calls. A storage solution is required that can be used to store the files indefinitely and must allow concurrent access to all files. Which storage service meets these requirements and is the MOST cost-effective? ==> The application is writing the files using API calls which means it will be compatible with Amazon S3 which uses a REST API and it is the most cost-effective solution that EFS.
 
 #### Sharing S3 buckets Across Accounts
 
@@ -1299,7 +1327,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Lustre
 
-- Keyword: HPC, Linux, Gaming
+- Keyword: HPC, Linux, Gaming, Integration with S3
 
 ![FSx for Lustre AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_Amazon-FSx-for-Lustre.097ed5e5175fa96e8ac77a2470151965774eec32.png)
 
@@ -1318,12 +1346,12 @@ Go to [Index](#index)
 
 ### RDS (Relational Database Service)
 
-- KeyWords: Relation Database (SQL), Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas), Cross Region
+- KeyWords: Relation Database (SQL), Different Enginees, HA/DR (Multi AZ Deployment), Scalable (Read Replicas), Cross Region, Multiple RDBS Enginnes Support
 
 ![AWS RDS](https://d1.awsstatic.com/video-thumbs/RDS/product-page-diagram_Amazon-RDS-Regular-Deployment_HIW-V2.96bc5b3027474538840af756a5f2c636093f311f.png)
 
 - Saas to manage High Available and Scalable Relational databases in the Cloud
-  - It supports multiple Engines: PostgreSQL, MySQL, MariaDB, Oracle, Microsoft SQL Server, and Amazon Aurora
+  - **It supports multiple Engines: PostgreSQL, MySQL, MariaDB, Oracle, Microsoft SQL Server, and Amazon Aurora**
   - RDS runs on Virtual Machines (can’t log in to the OS or SSH in)
   - RDS is not serverless — (one exception Aurora Serverless)
 - RDS Main Features
@@ -1355,23 +1383,24 @@ Go to [Index](#index)
   - Use Case: A company hosts a serverless application on AWS. The application uses Amazon RDS for PostgreSQL. During times of peak traffic and when traffic spikes are experienced, the company notices an increase in application errors caused by database connection timeouts. The company is looking for a solution that will reduce the number of application failures with the least amount of code changes.
     - Amazon RDS Proxy allows applications to pool and share connections established with the database, improving database efficiency and application scalability.
 - It offers **encryption at rest** but **encryption must be specified when creating the RDS DB instance**. Once your RDS instance is encrypted, as are its automated backups, read replicas, and snapshots. But you cannot create an encrypted Read Replica from an unencrypted master DB instance.
-  - Use Cases:
+- Use Cases:
   1. To change the encryption status of an existing RDS DB instance ==> Create a new master DB by taking a snapshot of the existing DB, and then creating the new DB from the snapshot (during creation). You can then create the encrypted cross-region Read Replica of the master DB. Applications must be updated to use the new RDS DB endpoint.
   2. A company uses an Amazon RDS MySQL database instance to store customer order data. The security team have requested that SSL/TLS encryption in transit must be used for encrypting connections to the database from application servers. The data in the database is currently encrypted at rest using an AWS KMS key. How can a Solutions Architect enable encryption in transit? => You can download a root certificate from AWS that works for all Regions or you can download Region-specific intermediate certificates.
 
 ### Amazon Aurora
 
-- KeyWords: Relation Database (SQL), Scalable (Read Replicas - across AZs for HA), Global Database (**across Regions**), AWS proprietary Database, Serveless (optional).
+- KeyWords: Relation Database (SQL), Scalable (Read Replicas - across AZs for HA), Global Database (**across Regions**), AWS proprietary Database, Serveless (optional), RDBS Enginnes Support only MySQL and PostgreSQL
 
 ![AWS Aurora](https://d1.awsstatic.com/Product-Page-Diagram_Amazon-Aurora_How-it-Works.b1c2b37e7548757780b195c6dcceb58511de5b1d.png)
 
 - It is Saas which manages own AWS engine for relational database (Aurora Global Database) **compatible with MySQL and PostgreSQL**
   - Provides 5x better performance than MySQL
   - Provides 3x better performance than Postgres SQL
-- **Replicas**: 2 copies of your data is contained in each Availability Zone (AZ) — minimum of 3 AZ’s and 6 copies.
 
 ![Aurora Replicas](https://digitalcloud.training/wp-content/uploads/2022/01/amazon-aurora-fault-tolerance.jpeg)
 
+- **Replicas**: 2 copies of your data is contained in each Availability Zone (AZ) — minimum of 3 AZ’s and 6 copies.
+  - It works **in-region and cross-regions**
   - Typically operates as a DB cluster consist of one or more DB instances and a cluster volume that manages cluster data with each AZ having a copy of volume.
     - Primary DB instance - Only one primary instance, supports both read and write operation.
     - Read Replicas - There are two types of replication: Aurora replica (up to 15, In-region), MySQL Read Replica (up to 5, Cross-region).
@@ -1381,31 +1410,31 @@ Go to [Index](#index)
     - Start with 10Gb, Scales in 10 GB increments to 64 TB (Storage Autoscaling)
     - Compute resources can scale up tp 32vCPUS and 244GB of Memory
 
-- **Global Database**: For globally distributed applications you can use Global Database, where a single Aurora database can span **multiple AWS regions** to enable fast local reads and quick disaster recovery. You can use a secondary region as a backup option in case you need to recover quickly from a regional degradation or outage.
-
 ![Aurora Global](https://digitalcloud.training/wp-content/uploads/2022/01/aurora-global-database.jpeg)
+
+- **Global Database**: For globally distributed applications you can use Global Database, where a single Aurora database can span **multiple AWS regions** to enable fast local reads and quick disaster recovery.
+  - **Disaster Recovery**: You can use a secondary region as a backup option in case you need to recover quickly from a regional degradation or outage.
+    - It supports a Recovery Point Objective (RPO) of 1 second and a Recovery Time Objective (RTO) of 1 minute
 
 - Backups (Mix)
   - Backups do not impact performance.
   - Automated Backups are Enabled by default.
   - You can also take manual snapshots with Aurora. Snapshots can be shared with other AWS accounts.
 
-- Use Case:
+- Aurora Serverless
+  - **On demand autoscaling configuration of Aurora**
+  - Automatically starts up, shuts down, and scales based on app needs.
+  - Used for simple, cost effective (Only pay for invocation), infrequently used, intermittent or unpredictable workloads.
 
+- Use Cases:
   1. A company runs a web application that store data in an Amazon Aurora database. A solutions architect needs to make the application more resilient to sporadic increases in request rates.
   - To resolve this situation Amazon Aurora Read Replicas can be used to serve read traffic which offloads requests from the main database.
-  2. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
-
-#### Aurora Serverless
-
-- **On demand autoscaling configuration of Aurora**
-- Automatically starts up, shuts down, and scales based on app needs.
-- Used for simple, cost effective infrequently used, intermittent or unpredictable workloads.
-- Only pay for invocation.
+  1. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
+  2. An application requires a MySQL database which will only be used several times a week for short periods. The database needs to provide automatic instantiation and scaling ==> Aurora Severless
 
 ### DynamoDB
 
-- KeyWords: NoSQL, AWS proprietary, Eventual Consistent Read, Strongly Consistent Reads, IoT, Near Real Time Performance
+- KeyWords: NoSQL, AWS proprietary, Eventual Consistent Read, Strongly Consistent Reads, IoT, Near Real Time Performance, key-value database
 
 ![AWS Dynamo DB](https://d1.awsstatic.com/product-page-diagram_Amazon-DynamoDBa.1f8742c44147f1aed11719df4a14ccdb0b13d9a3.png)
 
@@ -1413,7 +1442,7 @@ Go to [Index](#index)
 - It is fully Managed and Serverless (no servers to provision, patch, or manage) database.
 - Its **flexible data model** and reliable performance make it a great fit for mobile, web, gaming, ad-tech, IoT, and many other applications. It supports both:
   - Document (limit of 400KB item size. E.g. JSON documents, or session data.)
-  - Key-value data models.
+  - **Key-value data models**.
 - Stored on SSD Storage.
 - Spread across 3 geographically distinct data centers.
 - It supports eventually consistent and strongly consistent reads (eventual consistency is default).
@@ -1456,8 +1485,8 @@ Go to [Index](#index)
 
 - It is SaaS for **in-memory caching** supporting flexible, real-time use cases. In-memory key/value store, not persistent in the traditional sense.
 - Fully managed implementations of two popular in-memory data stores – Redis and Memcached.
-  - Memcached — designed for simplicity, so used with you need the simplest model possible.
-  - Redis — works for a wide range of use cases and have multi AZ. You can also complete backups/restores of redis.
+  - Memcached — designed for simplicity, so used with you need the **simplest model possible**.
+  - Redis — works for a wide **range of use cases and have multi AZ**. You can also complete backups/restores of redis.
     - Use password/token to access data using Redis Auth.
     - HIPAA Compliant.
 - Uses Cases:
@@ -1629,7 +1658,8 @@ Go to [Index](#index)
 
 ### AWS DataSync
 
-- Data transfer service for **moving large amounts of data into AWS**. Has built in **security capabilities** (e.g. encryption in transit)
+- Data transfer service for **moving large amounts of data into AWS**. It automate and **accelerate the replication** of data to AWS storage services. Has built in **security capabilities** (e.g. encryption in transit)
+- To deploy DataSync an agent must be installed.
 - Types
 
 **A/** FROM an on-premise data center (using NFS and SMB storage protocol) TO AWS Storage: S3 (any storage type) , EFS, or FSx for Windows, AWS Snowcone. => Installing AWS Data Sync Agent on a VM, Amazon s3 Outspots or Snowcone
@@ -1763,9 +1793,9 @@ Go to [Index](#index)
 ![Internet Gateway](https://docs.aws.amazon.com/images/vpc/latest/userguide/images/internet-gateway-basics.png)
 
 - Allows your VPC (**public subnet**) to communicate with the Internet ==> Performs network address translation for instances.
-- It is known as Internet gateway or Virtual Private Gateway
 - 1 VPC <-> 1 Internet Gateway. Each Internet Gateway is associated with one VPC only, and each VPC has one Internet Gateway only (one-to-one mapping)
 - For internet communication, you must set up a route in your route table that directs traffic to the Internet Gateway ==> It becomes a public subnet.
+- **Note:** For Site-to-Site VPN connection, you must use Virtual Private Gateway or Transit Gateway (not Internet Gateway.)
 
 ##### C/ Route Table (Created by default)
 
@@ -1846,10 +1876,10 @@ Go to [Index](#index)
 - Automatically assigned public IP Address.
 - You don’t need to worry about disabling source & destination checks on the instance.
 
-#### Bastion Host
+#### Bastion Host (aka Jump Box)
 
-- A Bastion host is used to **securely administer EC2 instances in private subnet** (using SSH or RDP). (Bastions are called Jump Boxes in Australia).
-- A NAT Gateway or a NAT instance is used to provide **internet traffic** to EC2 instances in a private subnets. **They cannnot be used as Bastion Host**.
+- A Bastion host is used to **securely administer EC2 instances in private subnet** (using SSH or RDP). From the bastion host they are then able to connect to other instances and applications within AWS by using internal routing within the VPC.
+- Exam Tip: A NAT Gateway/Instance is used to provide **outbout traffic** to EC2 instances in a private subnets. **They cannnot be used as Bastion Host**.
 
 #### VPC Flow Logs
 
@@ -1862,41 +1892,61 @@ Go to [Index](#index)
 
 #### VPC Connectivity
 
-There are several methods of connecting to a VPC, **including connection from Datacenters to VPC**.
+- There are several methods of connecting to a VPC, **including connection from Datacenters to VPC**.
+  - External DataCenter - AWS VPC
+    - AWS Managed VPN
+    - AWS Direct Connect
+    - AWS Direct Connect plus a VPN
+    - AWS VPN CloudHub
+    - Software VPN
+    - Transit VPC
+    - Transit Gateway
+  - Among VPCs (Internal to AWS)
+    - VPC Peering
+    - AWS PrivateLink: VPC Endpoints
 
-- External DataCenter - AWS VPC
-  - AWS Managed VPN
-  - AWS Direct Connect
-  - AWS Direct Connect plus a VPN
-  - AWS VPN CloudHub
-  - Software VPN
-  - Transit VPC
-  - Transit Gateway
-- Among VPCs
-  - VPC Peering
-  - AWS PrivateLink
-  - VPC Endpoints
+- Concepts
+  - VPN connection: A secure connection between your on-premises equipment and your VPCs. Each VPN connection includes two VPN tunnels which you can simultaneously use for high availability.
+  - VPN tunnel: An encrypted link where data can pass from the customer network to or from AWS.
+  - Customer gateway: An AWS resource which provides information to AWS about your customer gateway device.
+  - Customer gateway device: A physical device or software application on your side of the Site-to-Site VPN connection.
+  - Target gateway: A generic term for the VPN endpoint on the Amazon side of the Site-to-Site VPN connection.
+  - `Virtual private gateway`: It is the **VPN endpoint on the Amazon side** of your Site-to-Site VPN connection that can be attached to a **single VPC**.
+  - `Transit gateway`:
+    - A transit **hub** that can be used to interconnect **multiple VPCs** and on-premises networks, and as a VPN endpoint for the Amazon side of the Site-to-Site VPN connection.
+    - It simplifies your network (no complex peering relationships).
+    - It acts as a highly scalable cloud router—each new connection is made only once.
+    - Difference with Transit VPC: **Transit VPC is more of a network architecture concept while Transit Gateway is a service**.
 
-##### Case A: External DataCenter - AWS VPC
+![Transit Gateway](https://d1.awsstatic.com/products/transit-gateway/product-page-diagram_AWS-Transit-Gateway%402x.921cf305305867447fcabfc6b7acae9f0e5bc9d5.png)
 
-###### AWS Managed VPN
+- Use Case: A company runs a number of core enterprise applications in an on-premises data center. The data center is connected to an Amazon VPC using AWS Direct Connect. The company will be creating additional AWS accounts and these accounts will also need to be quickly, and cost-effectively connected to the on-premises data center in order to access the core applications. Which solution will cause least overhead?
+  - Configure AWS Transit Gateway between the accounts. Assign Direct Connect to the transit gateway and route network traffic to the on-premises servers. With AWS Transit Gateway, you can quickly add Amazon VPCs, AWS accounts, VPN capacity, or AWS Direct Connect gateways to meet unexpected demand, without having to wrestle with complex connections or massive routing tables. This is the operationally least complex solution and is also cost-effective.
+
+##### Case A: External Nextwork (DataCenter or Cloud) - AWS VPC
+
+###### AWS (Managed) VPN
 
 ![AWS Managed VPN](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-1.jpg)
 
 - What: AWS-provided network connectivity between two VPCs
 - When: Multiple VPCs need to communicate or access each other’s resources
-- Pros: Uses AWS backbone without traversing the public internet
+- Pros: Uses AWS backbone without traversing the public internet, VPNs are quick, easy to deploy, and cost effective.
 - Cons: Transitive peering is not supported
 - How: VPC Peering request made; acceptor accepts request (either within or across accounts)
+- Requirements:
+  - Virtual Private Gateway (VGW) is required on the AWS side.
+  - Customer Gateway is required on the customer side.
+  - For route propagation you need to point your VPN-only subnet’s route tables at the VGW. (Not Nat gateways)
 
 ###### AWS Direct Connect
 
 ![AWS Direct Connect](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-2.jpg)
 
-- What: **Dedicated network connection over private line** straight between AWS and your data center
+- What: **Dedicated PRIVATE network connection over private line** straight between AWS and your Data Center
 - When: Requires a large network link into AWS; lots of resources and services being provided on AWS to your corporate users. It solves a **VPN connection keeping dropping out** because the amount of throughput.
 - Pros: More predictable network performance; potential bandwidth cost reduction; increase in bandwidth throughput (up to 10 Gbps provisioned connections); supports BGP peering and routing
-- Cons: May require additional telecom and hosting provider relationships and/or network circuits; costly; It takes time to set up.
+- Cons: May require additional telecom and hosting provider relationships and/or network circuits; costly; It takes time to set up, AWS Direct Connect **does not encrypt** your traffic that is in transit.
 - How: Work with your existing data networking provider; create Virtual Interfaces (VIFs) to connect to VPCs (private VIFs) or other AWS services like S3 or Glacier (public VIFs)
 
 | AWS VPN | AWS Direct Connect |
@@ -1904,6 +1954,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 | Over the internet connection    | Over the dedicated private connection   |
 | Configured in minutes    | Configured in days |
 | low to modest bandwidth   | high bandwidth 1 to 100 GB/s |
+| encrypted   | no encrypted |
 
 - Use Cases:
   1. A company has acquired another business and needs to migrate their 50TB of data into AWS within 1 month. They also require a secure, reliable and private connection to the AWS cloud ==> AWS Direct Connect provides a secure, reliable and private connection. However, **lead times are often longer than 1 month** so it cannot be used to migrate data within the timeframes.
@@ -1911,25 +1962,28 @@ There are several methods of connecting to a VPC, **including connection from Da
   2. It is required a design for a highly resilient hybrid cloud architecture connecting an on-premises data center and AWS. The network should include AWS Direct Connect (DX). Which DX configuration offers the HIGHEST resiliency?
      - The most resilient solution is to configure DX connections at multiple DX locations. This ensures that any issues impacting a single DX location do not affect availability of the network connectivity to AWS.
 
-###### AWS Direct Connect Plus VPN
+###### AWS Direct Connect + VPN
 
 ![AWS Direct Connect Plus VPN](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-3.jpg)
 
-- What: **IPSec VPN connection** over private lines (Direct Connect)
+- What: **IPSec VPN connection** (encryption) over private lines (Direct Connect), combination of one or more AWS Direct Connect dedicated network connections with the Amazon VPC VPN.
 - When: Need the **added security of encrypted tunnels over Direct Connect**
 - Pros: More secure (in theory) than Direct Connect alone. This combination provides an IPsec-encrypted private connection that also reduces network costs, increases bandwidth throughput, and provides a more consistent network experience than internet-based VPN connections.
 - Cons: More complexity introduced by VPN layer
 - How: Work with your existing data networking provider
+- Use Case: An organization is extending a secure development environment into AWS. They have already secured the VPC including removing the Internet Gateway and setting up a Direct Connect connection. What else needs to be done to add encryption?
+  - Setup a Virtual Private Gateway (VPG) => A VPG is used to setup an AWS VPN which you can use in combination with Direct Connect to encrypt all data that traverses the Direct Connect link.=> This combination provides an IPsec-encrypted private connection
+  - Note: IPSec encryption is not possible to be enabled on the Direct Connect connection => It requires a VPN connection to encrypt the traffic.
 
 ###### VPN CloudHub
 
 ![VPN CloudHub](https://digitalcloud.training/wp-content/uploads/2022/01/VPC-4.jpg)
 
-- What: Connect locations in a **hub and spoke manner** using AWSs Virtual Private Gateway
+- What: Connect locations in a **hub and spoke manner** using AWSs `Virtual Private Gateway`
 - When: Link remote offices for backup or primary WAN access to AWS resources and each other
 - Pros: Reuses existing Internet connections; supports BGP routes to direct traffic
 - Cons: Dependent on Internet connections; no inherent redundancy
-- How: Assign multiple Customer Gateways to a Virtual Private Gateway, each with their own BGP ASN and unique IP ranges
+- How: Assign multiple Customer Gateways to a Virtual Private Gateway, each with their own BGP ASN and unique IP ranges. It can be conbined with Direct Connect.
 
 ###### Software VPN
 
@@ -1940,6 +1994,7 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Pros: Ultimate flexibility and manageability
 - Cons: You must design for any needed redundancy across the whole chain
 - How: Install VPN software via Marketplace on an EC2 instance
+- It is recommended if you must manage both ends of the VPN connection either for compliance purposes or for leveraging gateway devices that are not currently supported by Amazon VPC’s VPN solution.
 
 ###### Transit VPC
 
@@ -1951,16 +2006,6 @@ There are several methods of connecting to a VPC, **including connection from Da
 - Cons: You must design for any redundancy across the whole chain
 - How: Providers like Cisco, Juniper Networks, and Riverbed have offerings which work with their equipment and AWS VPC
 
-###### Transit Gateway
-
-- AWS Transit Gateway connects your Amazon VPCs and on-premises networks through a **central hub**. This connection simplifies your network (no complex peering relationships). Transit Gateway acts as a highly scalable cloud router—each new connection is made only once.
-- Difference with Transit VPC: **Transit VPC is more of a network architecture concept while Transit Gateway is a service**.
-
-![Transit Gateway](https://d1.awsstatic.com/products/transit-gateway/product-page-diagram_AWS-Transit-Gateway%402x.921cf305305867447fcabfc6b7acae9f0e5bc9d5.png)
-
-- Use Case: A company runs a number of core enterprise applications in an on-premises data center. The data center is connected to an Amazon VPC using AWS Direct Connect. The company will be creating additional AWS accounts and these accounts will also need to be quickly, and cost-effectively connected to the on-premises data center in order to access the core applications. Which solution will cause least overhead?
-  - Configure AWS Transit Gateway between the accounts. Assign Direct Connect to the transit gateway and route network traffic to the on-premises servers. With AWS Transit Gateway, you can quickly add Amazon VPCs, AWS accounts, VPN capacity, or AWS Direct Connect gateways to meet unexpected demand, without having to wrestle with complex connections or massive routing tables. This is the operationally least complex solution and is also cost-effective.
-
 ##### Case B: Among VPCs
 
 ######  VPC Peering
@@ -1970,9 +2015,9 @@ There are several methods of connecting to a VPC, **including connection from Da
 - What: AWS-provided network connectivity between VPCs. It connects two VPC over a direct network route using **private IP addresses** (secure). Instances on peered VPCs behave **just like they are on the same network**.
   - It can connect one VPC to another in same or different region (VPC inter-region peering).
   - It can connect one VPC to another in same or different AWS account.
-- When: Multiple VPCs need to connect with one another and access their resources
-- Pros: Uses AWS backbone without traversing the internet
-- Cons: Transitive peering is not supported. Its connections are 1 to 1 (not transitive) i.e. VPC-A peering VPC-B and VPC-B peering to VPC-C doesn’t mean VPC-A peering VPC-C.
+- When: Multiple VPCs need to connect with one another and access their resources.
+- Pros: Uses AWS backbone **without traversing the internet**
+- Cons: **Transitive peering is not supported**. Its connections are 1 to 1 (not transitive) i.e. VPC-A peering VPC-B and VPC-B peering to VPC-C doesn’t mean VPC-A peering VPC-C.
 - How: VPC Peering request made; accepter request (either within or across accounts). Requirements:
   - Route tables must be updated in both VPC that are peered so that instances can communicate.
   - Must have no overlapping CIDR Blocks.
@@ -1990,30 +2035,26 @@ There are several methods of connecting to a VPC, **including connection from Da
   - ClassicLink may come up in exam questions as a possible (incorrect) answer, so you need to know what it is.
   - ClassicLink allows you to link EC2-Classic instances to a VPC in your account, within the same region
   - EC2-Classic is an old platform from before VPCs were introduced and is not available to accounts created after December 2013.
-- Use Case: A shared services VPC is being setup for use by several AWS accounts. An application needs to be securely shared from the shared services VPC. The solution should not allow consumers to connect to other instances in the VPC.
-  - To restrict access so that consumers cannot connect to other instances in the VPC the best solution is to use PrivateLink to create an endpoint for the application. The endpoint type will be an interface endpoint and it uses an NLB in the shared services VPC.
-
-###### VPC endpoints
-
-- Allows you to **privately connect a VPC to other AWS resources** and it is powered by `Private Link`.
-  - Services in your VPC do not require public IP addresses to communicate with resources in the service. So traffic between your VPC and other services does not leave the Amazon network.
-- VPC Endpoints vs PrivateLink
-  - AWS PrivateLink — A technology that provides private connectivity between VPCs and services.
-  - VPC endpoint — The entry point in your VPC that enables you to connect privately to a service.
-- 2 types:
-  - `Interface endpoint` → Attach an Elastic Network Interface (ENI) with a private IP address onto your EC2 instance for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a supported service.
-  - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for **only S3 & Dynamo DB**.
+- VPC endpoints
+  - The entrypoint in your VPC that enables to **privately connect a VPC to AWS resources** and it is powered by `Private Link` technology.
+  - Services in your VPC **do not require public IP** addresses to communicate with resources in the service. So traffic between your VPC and other services **does not leave the Amazon network**.
+  - 2 types:
+    - `Interface endpoint` → Attach an **Elastic Network Interface (ENI)** with a private IP address onto your **EC2 instance** for it to communicate to services using AWS network. It serves as an entry point for traffic destined to a AWS supported service.
+    - `Gateway endpoint` → Create it as a route table target for traffic to services, like NAT gateways — its supported for **only S3 & Dynamo DB**.
 
 ![VPC endpoints](https://docs.aws.amazon.com/images/whitepapers/latest/aws-privatelink/images/connectivity.png)
 
 - **Exam Tip :**
   1. Know which services use interface endpoints and gateway endpoints. The easiest way to remember this is that Gateway Endpoints are for Amazon S3 and DynamoDB only.
-  2. In addition to VPC endpoints, it is require an route table to link the 2 services (e.g EC2 and DynamoDB via Gateway endpoint)
+  2. In addition to VPC endpoints, it is require an route table to link the 2 services (e.g EC2 and DynamoDB via Gateway endpoint).
 
 ![EC2 and DynamoDB via Gateway endpoint](https://img-c.udemycdn.com/redactor/raw/2020-05-21_01-00-45-ac665c89acb1641afb831f1eb795210e.jpg)
 
-- Use Case: A company runs an application on Amazon EC2 instances which requires access to sensitive data in an Amazon S3 bucket. All traffic between the EC2 instances and the S3 bucket must not traverse the internet and must use private IP addresses. Additionally, the bucket must only allow access from services in the VPC.
-  - Private access to public services such as Amazon S3 can be achieved by creating a VPC endpoint in the VPC. For S3 this would be a Gateway endpoint. The bucket policy can then be configured to restrict access to the S3 endpoint only which will ensure that only services originating from the VPC will be granted access.
+- Use Case:
+  - A company runs an application on Amazon EC2 instances which requires access to sensitive data in an Amazon S3 bucket. All traffic between the EC2 instances and the S3 bucket must not traverse the internet and must use private IP addresses. Additionally, the bucket must only allow access from services in the VPC.
+    - Private access to public services such as Amazon S3 can be achieved by creating a VPC endpoint in the VPC. For S3 this would be a Gateway endpoint. The bucket policy can then be configured to restrict access to the S3 endpoint only which will ensure that only services originating from the VPC will be granted access.
+  - A shared services VPC is being setup for use by several AWS accounts. An application needs to be securely shared from the shared services VPC. The solution should not allow consumers to connect to other instances in the VPC.
+    - To restrict access so that consumers cannot connect to other instances in the VPC the best solution is to use PrivateLink to create an endpoint for the application. The endpoint type will be an interface endpoint and it uses an NLB in the shared services VPC.
 
 ### Amazon API Gateway
 
@@ -2021,12 +2062,17 @@ There are several methods of connecting to a VPC, **including connection from Da
 
 - It is Saas that **creates and manages APIs from back-end systems running on AWS Compute** (EC2, AWS Lambda, etc).
   - It makes easy for developers to publish, maintain, monitor and secure APIs at any scale (auto-scaling).
-- Types - HTTP, WebSocket, and REST.
-- It has caching capabilities to increase performance.
-- Allows you to track and control usage of API. Set throttle limit (default 10,000 req/s) to prevent from being overwhelmed by too many requests and returns `429 Too Many Request` error response.
-- You can log results to CloudWatch
+  - Types - HTTP, WebSocket, and REST.
+- Options
+  - It has caching capabilities to increase performance.
+  - Allows you to **track and control usage of API**. Set throttle limit (default 10,000 req/s) to prevent from being overwhelmed by too many requests and returns `429 Too Many Request` error response.
+  - You can log results to CloudWatch
 - If you are using Javascript/AJAX that uses multiple domains with API Gateway, ensure that you have enable CORS on API Gateway.
-- CORS is enforced by the client (Browser)
+  - CORS: Cross-Origin Resource Sharing ==> It is a mechanism that allows restricted resources on a domain (eg: `example.com`) to be requested from another domain outside the domain from which the first resource was served (eg: `fonts.com`).
+  - CORS is enforced by the client (Browser)
+- Use case: A company has created an application that stores data in an Amazon DynamoDB table. A web application is being created to display the data. Find a couple of designs for the web application using managed services that require minimal operational maintenance => 2 possible solutions:
+  - API Gateway REST API that invokes an AWS Lambda function. A Lambda proxy integration can be used, and this will proxy the API requests to the Lambda function which processes the request and accesses the DynamoDB table.
+  - API Gateway REST API to directly access data in DynamoDB. In this case a proxy for the DynamoDB query API can be created using a method in the REST API.
 
 ### AWS Global Accelerator
 
@@ -2121,7 +2167,9 @@ There are several methods of connecting to a VPC, **including connection from Da
   - Currently version of data file
   - Time to live
 - `Name Server (NS) records` → used by top level domain servers to direct traffic to the content DNS server. It specifies which DNS server is authoritative for a domain.
-- `A Records (Address Record)` →  It indicates the **IP address** of a given domain.
+- `Address Record`
+  - `A Records` →  It indicates the **IPv4 address** of a given hostname or domain.
+  - `AAAA Records` →  It indicates the **IPv6 address** of a given hostname or domain.
 
 ```txt
 NAME                    TYPE   VALUE
@@ -2129,7 +2177,7 @@ NAME                    TYPE   VALUE
 foo.example.com.        A      192.0.2.23
 ```
 
-- `Canonical Name (CName)` → It maps one domain name (an alias) to another (the canonical name). It is convenient when running multiple services in the same IP. **Only works with subdomains** e.g. something.mydomain.com
+- `Canonical Name (CName)` → It maps one domain name (an _alias domain_) to another domain (the _canonical name_). It is convenient when running multiple services in the same IP. **Only works with subdomains** e.g. `something.mydomain.com`
 
 ```txt
 NAME                    TYPE   VALUE
@@ -2137,21 +2185,23 @@ NAME                    TYPE   VALUE
 bar.example.com.        CNAME  foo.example.com.
 ```
 
-when an A record lookup for bar.example.com is carried out, the resolver will see a CNAME record and restart the checking at foo.example.com and will then return 192.0.2.23.
+When an A record lookup for bar.example.com is carried out, the resolver will see a CNAME record and restart the checking at foo.example.com and will then return 192.0.2.23.
 
-- `Alias Record (A or AAAA)` → It provide CNAME-like behavior on apex domains (a naked/root domain name e.g. example.com). It works with both **root-domain and subdomains**
-
-Alias records are used to map DNS with AWS resources like ALB, API Gateway, CloudFront, S3 Bucket, Global Accelerator, Elastic Beanstalk, VPC interface endpoint etc. [How do I create alias records for services hosted in AWS](https://repost.aws/knowledge-center/route-53-create-alias-records)
-
-For example, if you created a hosted zone for the domain "example.com", then you **can't** create the following CNAME record with the root domain but you could do with Alias Record.
+- `Alias Record` → It provide CNAME-like behavior on apex domains (a naked/root domain name e.g. example.com). It works with both **root-domain and subdomains**
+  - **Alias records are used to map DNS with AWS resources** like ALB, API Gateway, CloudFront, S3 Bucket, Global Accelerator, Elastic Beanstalk, VPC interface endpoint etc. [How do I create alias records for services hosted in AWS](https://repost.aws/knowledge-center/route-53-create-alias-records)
+  - It is a Route 53 specific feature. This options is available inside the wizard configuration when creating a types of DNS Record. But only `A` and `AAAA` records offers link options to AWS Resources (_ALB_,_Global Accelerator_,_API Gateway_), the rest (e.g `CNAME`, `TXT`) don't, only Alias to _another record in the hosted zone_.
 
 ```txt
 example.com Alias(A) dualstack.elb123.us-east 1.elb.amazonaws.com.
 ```
 
+![CNAME-vs-Alias-Records](https://jayendrapatil.com/wp-content/uploads/2022/04/Route-53-CNAME-vs-Alias-Records.jpg)
+
 - `Time To Live (TTL)` → length of time the DNS record is cached on the server for in seconds. Default is 48 hours.
 
 #### DNS Record: Routing Policy
+
+**Exam Tip**: For Applying any type of Routing Policy is required more that one endpoint (AWS reasource). Exception: Simple Routing Policy.
 
 In order for Route 53 to respond to queries, you need to define one of the following routing policies:
 
@@ -2177,6 +2227,10 @@ In order for Route 53 to respond to queries, you need to define one of the follo
   - You can also optionally choose to route more traffic or less to a given resource by specifying a value, known as a bias A bias expands or shrinks the size of the geographic region from which traffic is routed to a resource.
   - To use Geoproximity Routing, you must use **Route 53 traffic flow**.
 
+- Use Case: A company hosts data in an Amazon S3 bucket that users around the world download from their website using a URL that resolves to a domain name. The company needs to provide low latency access to users and plans to use Amazon Route 53 for hosting DNS records.
+  - The best solution here is to use Amazon CloudFront to cache the content in Edge Locations around the world. This involves creating a web distribution that points to an S3 origin (the bucket) and then create **an Alias** record in Route 53 that resolves the applications URL to the CloudFront distribution endpoint with **Simply routing**.
+  - In this scenarios routing strategies like `Geoproximity` would not work ==> There is only a single endpoint (the Amazon S3 bucket) so this strategy would not work. Much better to use CloudFront to cache in multiple locations.
+
 #### DNS Failover
 
 - `Active-Active` failover when you want all resources to be available the majority of time. All records have same name, same type, and same routing policy such as **weighted or latency**
@@ -2201,8 +2255,23 @@ Go to [Index](#index)
 #### CloudWatch with EC2
 
 - It can monitor EC2 at host level: CPU, Network, Disk, Status Check
-- It Monitors every 5 mins by default (Can switch to every 1min by enabling detailed logs)
+- It Monitors every 5 mins by default (Can switch to every 1min by enabling `Detailed logs`)
 - You can terminate or recover EC2 instance based on CloudWatch Alarm
+
+#### CloudWatch Container Insights
+
+- Use this component to collect, aggregate, and summarize metrics and logs from your **containerized applications and microservices**.
+- It is availabble for: Amazon Elastic Container Service (Amazon ECS), Amazon Elastic Kubernetes Service (Amazon EKS), and Kubernetes platforms on Amazon EC2.
+- It enables to see top contributors by memory or CPU, or the most recently active resources once you select on of the following dashboard: ECS Services, ECS Tasks, EKS Namespaces, EKS Services, EKS Pods.
+
+### AWS X-Ray
+
+- Analyze and debug production and **distributed applications (microservices)** ==> by **Tracing Requests** as they travel through your application and filters visual data across payloads, functions, traces, services, APIs, and more with no-code and low-code motions.
+- Difference with Cloudwatch: It does not use health checks, metrics or central dashboards.
+
+![xray](https://d1.awsstatic.com/Product-Page-Diagram_AWS-X-Ray.6fd8b61bc76bd93741fc209c2afc194b494bff9a.png)
+
+![tracing-output](https://docs.aws.amazon.com/images/xray/latest/devguide/images/scorekeep-PUTrules-timeline.png)
 
 ### AWS CloudTrail
 
