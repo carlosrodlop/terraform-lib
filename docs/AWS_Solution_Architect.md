@@ -380,7 +380,7 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 **Exam Tip :** Encryption keys are regional.
 
 - Use Case: A company is planning to use Amazon S3 to store documents uploaded by its customers. The images must be encrypted at rest in Amazon S3. The company does not want to spend time managing and rotating the keys, but it does want to control who can access those keys.
- -  Server-Side Encryption with AWS KMS-Managed Keys (SSE-KMS) => SSE-KMS requires that AWS manage the data key but you manage the customer master key (CMK) in AWS KMS, chosing customer managed CMK (not AWS Managed) because you want to control who can access the keys (policies).
+- Server-Side Encryption with AWS KMS-Managed Keys (SSE-KMS) => SSE-KMS requires that AWS manage the data key but you manage the customer master key (CMK) in AWS KMS, chosing customer managed CMK (not AWS Managed) because you want to control who can access the keys (policies).
 
 ### AWS CloudHSM
 
@@ -537,7 +537,9 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 - Managed service that provides you with an AWS resource inventory, configuration history, and configuration change notifications to enable **security and governance**. **Assess, audit, and evaluate configurations of your AWS resources** in multi-region, multi-account
 - You are notified via SNS for any configuration change
 - Integrated with CloudTrail, provide resource configuration history
-- Use case: Customers need to comply with standards like PCI-DSS (Payment Card Industry Data Security Standard) or HIPAA (U.S. Health Insurance Portability and Accountability Act) can use this service to assess compliance of AWS infra configurations
+- Use cases:
+  1. Customers need to comply with standards like PCI-DSS (Payment Card Industry Data Security Standard) or HIPAA (U.S. Health Insurance Portability and Accountability Act) can use this service to assess compliance of AWS infra configurations
+  2. A company requires that IAM users must rotate their access keys every 60 days. If an access key is found to older it must be removed. How to create an automated solution that checks the age of access keys and removes any keys that exceed the maximum age defined ==> Create an AWS Config rule to check for the key age. Define an Amazon EventBridge rule to execute an AWS Lambda function that removes the key
 
 ## Compute
 
@@ -572,6 +574,13 @@ Go to [Index](#index)
 - Instance profiles: Use an instance profile to pass an **IAM role to an EC2 instance**.
 
 Exam tip: You can stop and start an EC2 instance to move it to a different physical host if EC2 status checks are failing or there is planned maintenance on the current physical host.
+
+#### EC2 Fleet
+
+- It contains the **configuration information** to launch a fleet or **group of instances**. In a single API call, can include multiple instance types across multiple Availability Zones, using the On-Demand Instance, Reserved Instance, and Spot Instance purchasing options together. Using EC2 Fleet, you can:
+  - Define separate On-Demand and Spot capacity targets and the maximum amount you’re willing to pay per hour
+  - Specify the instance types that work best for your applications
+  - Specify how Amazon EC2 should distribute your fleet capacity within each purchasing option
 
 #### EC2 Hibernate
 
@@ -810,6 +819,8 @@ Predictive is **only available for EC2** auto scaling groups and the scaling can
 - Set `Maximum Capacity`: You specify minimum and maximum instances or desired capacity required and EC2 autoscaling manages the progress of creating/terminating based on what you have specified. min <= desired <= max
 
 - Scale Based on a `Schedule`: Scaling performed as a function of time to reflect forecasted load. For example, if you know there will be increased load on the application at 9am every morning you can choose to scale at this time.
+  - Use Case: A company runs an application using an Amazon EC2 Auto Scaling group behind an ALB. When running month-end reports on a specific day and time each month the application becomes unacceptably slow. Amazon CloudWatch metrics show the CPU utilization hitting 100%.
+    - The best solution ==> Configure an EC2 Auto Scaling scheduled scaling policy based on the monthly schedule. In this case the scaling action can be scheduled to occur just prior to the time that the reports will be run each month.
 
 - Scale based on `Load forecasting`: Auto Scaling analyses the history of your applications load for up to 14 days and then uses this predict to the load for the next 2 days.
 
@@ -988,10 +999,23 @@ There are two types of queues: Standard & FIFO.
 
 ![Amazon MQ](https://d1.awsstatic.com/products/mq/Product-Page-Diagram_Amazon-MQ.17994587d6bf1579ec8c87db2bb3c5a6d485926e.png)
 
-- It Fully managed service for open-source **message brokers** for Apache ActiveMQ and RabbitMQ that streamlines setup, operation, and management of message brokers on AWS.
+- It Fully managed service for open-source **message brokers** for Apache **ActiveMQ and RabbitMQ** that streamlines setup, operation, and management of message brokers on AWS.
 - It allows software systems, which often **use different programming languages on various platforms, to communication and exchange information**.
 - It can be configured in HA mode across to AZs.
 - Exam Tip: Amazon MQ is similar to SQS but is used to Migrate existing applications (using already ActiveMQ and RabbitMQ) into AWS . **SQS should be used for new applications being created** in the cloud.
+
+### Amazon Comprehend
+
+- It is a **Natural Language Processing (NLP)** service that uses machine learning to find insights and relationships in text.
+
+![Amazon Comprehend](https://img-c.udemycdn.com/redactor/raw/practice_test_question_explanation/2022-08-27_11-07-36-05ab4438c3d5079c3dad300424cbea3b.jpg)
+
+### Amazon EventBridge
+
+- Amazon EventBridge is a serverless, fully managed, and scalable **event bus that enables integrations** between AWS services, Software as a services (SaaS), and your applications.
+- It allows ingest, filter, transform and deliver events without writing custom code.
+
+![eventbridge](https://medium.com/awesome-cloud/aws-amazon-eventbridge-overview-what-is-aws-eventbridge-eventbus-introduction-features-use-cases-benefits-41c05f411317)
 
 ## Storage
 
@@ -1115,23 +1139,24 @@ d2whx7jax6hbi5.cloudfront.net/pics/logo.png
 | S3 Standard-IA (Infrequent Access) | 11 9’s     | 99.9%        | ≥3  | 30 days      | milliseconds                                             | per GB        |
 | S3 One Zone-IA (Infrequent Access) | 11 9’s     | 99.5%        | **1**  | 30 days      | milliseconds                                             | per GB        |
 | S3 Glacier Instant Retrieval       |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | milliseconds  | per GB
-| S3 Glacier Flexible Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | **minutes**  | per GB
-| S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | **hours**   | per GB
+| S3 Glacier Flexible Retrieval      |  11 9’s    |  99.99%     |  ≥3 |  **90 days**    | **minutes** to 12 hours | per GB
+| S3 Glacier Deep Archive            |  11 9’s    |  99.99%     |  ≥3 |  **180 days**    | 12 **hours** - 48 hours | per GB
 
 `*` Although there is not minimum time for storage, a Lifecycle requires at least 30 days before you transition objects from the S3 Standard
 
 - Types:
   - `Standard`: **General purpose** storage for any type of frequently used data very high availability, and fast retrieval.
   - `Intelligent Tiering`: Analyze your Object’s usage and move them to the appropriate cost-effective storage class automatically, without performance impact.
-    - Use case: automatic cost savings for data with **unknown/changing access patterns**. It is also suitable for storing objects with changing or unknown access frequency. But you can use S3 Intelligent-Tiering as the default storage class for most workloads.
-  - `Standard-IA` (Infrequently Accessed): Cost effective for **infrequent access files** which **cannot be recreated**.
+    - Use case: automatic cost savings for data with **unknown/changing access patterns or frequency**. But you can use S3 Intelligent-Tiering as the default storage class for most workloads.
+  - `Standard-IA`: Cost effective for **infrequent access files** which **cannot be recreated**.
     - For data that is not accessed very frequently — but once it is accessed it needs to be retrieved rapidly.
     - It is cheaper than standard S3, but you do get charged a retrieval fee.
   - `One-Zone IA`(also called S3 RRS): Cost effective for **infrequent access** files which **can be recreated**.
     - Low cost option for data that is not accessed frequently and does not require the redundancy, **if the zone fails, we loose the data**.
     - Use case: re-creatable infrequently accessed data that needs milliseconds access.
-  - `S3 Glacier Instant Retrieval`: Amazon S3 Glacier Instant Retrieval is an archive storage class that delivers the lowest-cost storage for long-lived data that is rarely accessed and requires retrieval in milliseconds
-  - `S3 Glacier Flexible Retrieval` (Formerly S3 Glacier): S3 Glacier Flexible Retrieval delivers low-cost storage, up to 10% lower cost (than S3 Glacier Instant Retrieval), for archive data that is accessed 1—2 times per year and is retrieved asynchronously. For archive data that does not require immediate access but needs the flexibility to retrieve large sets of data at no cost, such as Backup or Disaster recovery use cases. With S3 Glacier Instant Retrieval, you can save up to 68% on storage costs compared to using the S3 Standard-Infrequent Access (S3 Standard-IA) storage class, when your data is accessed once per quarter.
+  - `S3 Glacier Instant Retrieval`: Amazon S3 Glacier Instant Retrieval is an archive storage class that delivers the **lowest-cost storage for long-lived data** that is rarely accessed and requires retrieval in **milliseconds**
+    - With S3 Glacier Instant Retrieval, you can save up to 68% on storage costs compared to using the S3 Standard-Infrequent Access (S3 Standard-IA) storage class, when your data is accessed once per quarter.
+  - `S3 Glacier Flexible Retrieval` (Formerly S3 Glacier): S3 Glacier Flexible Retrieval delivers low-cost storage, up to 10% lower cost (than S3 Glacier Instant Retrieval), for archive data that is accessed 1—2 times per year and is retrieved asynchronously. For archive data that does not require immediate access but needs the flexibility to retrieve large sets of data at no cost, such as **Backup or Disaster recovery use cases**.
   - `Glacier Deep Archive`: **Cheapest choice** for Long-term storage of large amount of data for compliance.
 
 - Use Case:
@@ -1267,9 +1292,11 @@ mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
 - Instance Store is an **Ephemeral/temporal** block-based storage physically attached to an EC2 instance
   - **Data persists on instance reboot, data doesn’t persist on stop or termination**
 - It can be attached to an EC2 instance only when the instance is launched and cannot be dynamically resized
-- Deliver very low-latency and high random I/O performance
+- Deliver very **low-latency and high random I/O performance**.
+- It is the fastest storage that an EC2 instance can have.
+- It is included in the price of the EC2 instance  so it can also be **more cost-effective than EBS Provisioned IOPS**.
 
-EXAM TIP: Instance stores offer very high performance and low latency. If you can afford to lose an instance, i.e. you are replicating your data, these can be a good solution for high performance/low latency requirements. Look out for questions that mention distributed or replicated databases that need high I/O. Also, remember that the cost of instance stores is included in the instance charges so it can also be more cost-effective than EBS Provisioned IOPS.
+EXAM TIP: If you can afford to lose an instance (i.e. you are **replicating your data, temporal files**) these can be a good solution for high performance/low latency requirements.
 
 ### EBS (Elastic Block Store)
 
@@ -1317,10 +1344,10 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 | Cold _HDD_ (sc1)                 | Lowest cost, infrequently accessed. Max 250 IOPS per volume                  | Used for less frequently accessed workloads and when lowest storage cost is important. Common use could be for file servers |
 | Magnetic (Standard)              | Max 40–200 IOPS per volume.                                                  | Previous generation hard disk drive typically used for infrequently accessed workloads.                                     |
 
-- EBS Volumes with two types of RAID configuration:-
+- EBS Volumes with two types of RAID configuration:
 
-  - RAID 0 (increase performance) two 500GB EBS Volumes with 4000 IOPS - creates 1000GB RAID0 Array with 8000 IOPS and 1000Mbps throughput
-  - RAID 1 (increase fault tolerance) two 500GB EBS Volumes with 4000 IOPS - creates 500GB RAID1 Array with 4000 IOPS and 500Mbps throughput
+  - **RAID 0 (increase performance)** two 500GB EBS Volumes with 4000 IOPS - creates 1000GB RAID0 Array with 8000 IOPS and 1000Mbps throughput
+  - **RAID 1 (increase fault tolerance)** two 500GB EBS Volumes with 4000 IOPS - creates 500GB RAID1 Array with 4000 IOPS and 500Mbps throughput
 
 ### EFS (Elastic File System)
 
@@ -1377,6 +1404,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 ### AWS Lake Formation
 
 - It easily creates secure data lakes, making data available for wide-ranging analytics.
+- With AWS Lake Formation, you can import data from MySQL, PostgreSQL, SQL Server, MariaDB, and Oracle databases running in Amazon Relational Database Service (RDS) or hosted in Amazon Elastic
 
 ![](https://d1.awsstatic.com/diagrams/Lake-formation-HIW.9ea3fab3b2ac697a42ae7a805b986278ffd4f41e.png)
 
@@ -1426,6 +1454,7 @@ Go to [Index](#index)
 - Use Cases:
   1. To change the encryption status of an existing RDS DB instance ==> Create a new master DB by taking a snapshot of the existing DB, and then creating the new DB from the snapshot (during creation). You can then create the encrypted cross-region Read Replica of the master DB. Applications must be updated to use the new RDS DB endpoint.
   2. A company uses an Amazon RDS MySQL database instance to store customer order data. The security team have requested that SSL/TLS encryption in transit must be used for encrypting connections to the database from application servers. The data in the database is currently encrypted at rest using an AWS KMS key. How can a Solutions Architect enable encryption in transit? => You can download a root certificate from AWS that works for all Regions or you can download Region-specific intermediate certificates.
+  3. A team uses an Amazon RDS MySQL database running for running resource-intensive tests each month. The instance has Performance Insights enabled and is only used once a month for up to 48 hours. The team wants to reduce the cost of running the tests without reducing the memory and compute attributes of the DB instance. Which solution meets these requirements MOST cost-effectively? ==> Create a snapshot of the database when the tests are completed. Terminate the DB instance. Create a new DB instance from the snapshot when required
 
 ### Amazon Aurora
 
@@ -1472,6 +1501,7 @@ Go to [Index](#index)
   2. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
   3. An application requires a MySQL database which will only be used several times a week for short periods. The database needs to provide automatic instantiation and scaling ==> Aurora Severless
   4. An store uses an Amazon Aurora database. The database is deployed as a Multi-AZ deployment. Recently, metrics have shown that database read requests are high and causing performance issues which result in latency for write requests. How to separate the read requests from the write requests? ==> Update the application to read from the Aurora Replica. An Aurora Replica already exists as this is a Multi-AZ configuration and the standby is an Aurora Replica that can be used for read traffic.
+  5. A company runs a business-critical application in the us-east-1 Region. The application uses an Amazon Aurora MySQL database cluster. A disaster recovery strategy is required for failover to the us-west-2 Region. The strategy must provide a recovery time objective (RTO) of 10 minutes and a recovery point objective (RPO) of 5 minutes. ==> Recreate the database as an Aurora global database with the primary DB cluster in us-east-1 and a secondary DB cluster in us-west-2. Use an Amazon EventBridge rule that invokes an AWS Lambda function to promote the DB cluster in us-west-2 when failure is detected
 
 ### DynamoDB
 
@@ -1696,7 +1726,7 @@ Go to [Index](#index)
 
 ![snowball](<https://d1.awsstatic.com/hiw_snowball%402x%20(3).afde317ee4d3d8abe9a7ecc4fe52fefb9f454683.png>)
 
-  - AWS Snowball Edge comes with on-board storage and compute power for select AWS capabilities. Snowball Edge can do **local processing and edge-computing workloads** in addition to transferring data between your local environment and the AWS Cloud.
+- AWS Snowball Edge comes with on-board storage and compute power for select AWS capabilities. Snowball Edge can do **local processing and edge-computing workloads** in addition to transferring data between your local environment and the AWS Cloud.
 
 | Family Member | Storage | RAM | Migration Type | DataSync | Migration Size |
 | ------------- | ------- | --- | -------------- | -------- | -------------- |
@@ -1761,6 +1791,7 @@ Go to [Index](#index)
 ![dms_heterogeneous](https://d1.awsstatic.com/reInvent/reinvent-2022/data-migration-services/product-page-diagram_AWS-DMS_Heterogenous-Brief.e64d5fda98f36a79ab5ffcefa82b2735f94540ea.png)
 
 Exam Tip: Migration from on-premises Databases to AWS RDS (e.g Microsoft SQL Server)
+
 - Select the same Database Engine in the origin and destination
 - Move data using [AWS DMS](#database-migration-service-dms)
   - You only need the Schema Conversion Tool (SCT) if origin and destination are different enginees
@@ -2176,6 +2207,9 @@ Go to [Index](#index)
   4. An Amazon S3 bucket in the us-east-1 Region hosts the static website content of a company. The content is made available through an Amazon CloudFront origin pointing to that bucket. A second copy of the bucket is created in the ap-southeast-1 Region using cross-region replication. The chief solutions architect wants a solution that provides greater availability for the website. Which combination of actions should be taken to increase availability?
      - You can set up CloudFront with origin failover for scenarios that require high availability. To get started, you create an origin group with two origins: a primary and a secondary. If the primary origin is unavailable or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.
   5. A company runs a dynamic website that is hosted on an on-premises server in the United States. The company is expanding to Europe and is investigating how they can optimize the performance of the website for European users. The website’s backed must remain in the United States. The company requires a solution that can be implemented within a few days. Best Practice => A custom origin can point to an on-premises server and CloudFront is able to cache content for dynamic websites. Additionally, connections are routed from the nearest Edge Location to the user across the AWS global network. If the on-premises server is connected via a Direct Connect (DX) link this can further improve performance.
+  6. An application generates **unique files** that are returned to customers after they submit requests to the application. The application uses an Amazon CloudFront distribution for sending the files to customers. The company wishes to reduce data transfer costs without modifying the application. How can this be accomplished?
+     - Use Lambda@Edge to compress the files as they are sent to users
+     - Using caching capabilities on the CloudFront is not an valid option as the files are unique and will not be cached.
 
 #### Restricting Access to CloudFront: (Pre-)Signed URL or (Pre-)Signed Cookies
 
@@ -2197,6 +2231,11 @@ Go to [Index](#index)
 - Has an associated policy statement (JSON) specifying restrictions on the URL.
 - Contains additional information e.g. expiration date/time.
 - Can have different origins and can utilise caching features.
+
+##### Lambda@Edge
+
+- It is a feature of Amazon CloudFront that lets you run code closer to users of your application, which improves performance and reduces latency.
+- It runs code in response to events generated by the Amazon CloudFront.
 
 ### Amazon Route 53
 
@@ -2306,7 +2345,7 @@ Go to [Index](#index)
   - Alarms: Allows you to set Alarms that notify you when particular metric thresholds are hit
   - Events: CloudWatch Events helps you to respond to state changes in your AWS resources.
   - Logs: CloudWatch Logs helps you to aggregate, monitor and store logs.
-- Exam Tip: custom Metrics cannot be created.
+- Exam Tip: **custom Metrics cannot be created**.
 
 #### CloudWatch with EC2
 
