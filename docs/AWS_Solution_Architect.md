@@ -1214,19 +1214,26 @@ mybucketname/folder1/subfolder1/myfile.jpg >  /folder1/subfolder1 is the prefix
 
 ![storagegateway](https://d1.awsstatic.com/pdp-how-it-works-assets/product-page-diagram_AWS-Storage-Gateway_HIW@2x.6df96d96cdbaa61ed3ce935262431aabcfb9e52d.png)
 
-- It is a set of **hybrid cloud storage** services that provide on-premises access to unlimited cloud storage (**S3 based**), object-based storage system.
-- How? Applications connect to the Storage Gateway service through a virtual machine or hardware appliance that is installed on site (the data center) and uses standard protocols such as NFS, SMB, and iSCSI. to **connects to AWS S3 storage services** (Amazon S3, Amazon S3 Glacier, Amazon S3 Glacier Deep Archive and Amazon EBS). This device is also used as a **local cache** to provide low latency access to the most active data. Since our priority at AWS is security, the connection to the AWS Storage Gateway service is made through a secure channel using HTTPS.
+- It enables hybrid storage between on-premises environments and the AWS Cloud.
+- How?
+  - AWS Storage Gateway is installed on site datacenter => Implemented using a VM (VMware or Hyper-V virtual appliance).
+  - On premises applications are connected to AWS Storage Gateway
+  - It provides low-latency performance by caching frequently accessed data on premises (**local cache**)
+  - It replicates data storage securely and durably into Amazon S3 and Glacier.
+- Security:
+  - Data transfers between gateway appliance and AWS storage is encrypted using SSL.
+  - Bby Default, data stored by AWS Storage Gateway in S3 is encrypted (SSE-S3). Optionally, encrypted KMS-Managed Keys using SSE-KMS.
 
-![storagegateway_how](https://d2908q01vomqb2.cloudfront.net/4d134bc072212ace2df385dae143139da74ec0ef/2020/11/05/image002-2.png)
+![storagegateway_how](https://img-c.udemycdn.com/redactor/raw/test_question_description/2021-05-18_05-19-32-45d0ef2489b4ea2fb6fae5b15c844aa0.jpg)
 
-- Types:
+- Interfaces:
 
-| Storage Gateway  | Protocol   | Backed by                               | Use Case                                                                                                                             |
-| ---------------- | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| File Gateway     | NFS & SMB  | S3 -> S3-IA, S3 One Zone-IA             | Store files as object in S3, with a local cache for low-latency access, with user auth using Active Directory. On-premise backup to the cloud  |
-| FSx File Gateway | SMB & NTFS | FSx -> S3                               | Windows or Lustre File Server, integration with Microsoft AD |
-| Volume Gateway   | iSCSI (block protocol) | S3 -> EBS  | Block storage in S3 with **backups as EBS snapshots**. Use `Cached Volume`  (for low-latency) Dataset is stored on S3 and the most frequently accessed data is cached on site and `Stored Volume` for (scheduled backups) Dataset is stored on site and is asynchronously backed up to S3|
-| Tape Gateway     | VTL  | S3 -> S3 Glacier & Glacier Deep Archive | Durable, cost effective archiving. Backup data in S3 and archive in Glacier using tape-based process. It is a way of replacing physical tapes with a virtual tape interface in AWS without changes existing backup workflows.                                                                    |
+| Storage Gateway  | Interface   | Use Case                                                                                                                             |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| File Gateway     | NFS & SMB  | Allow on-prem or EC2 instances to store objects in S3 via NFS or SMB mount points |
+| Volume Gateway Stored Mode | iSCSI (Block Storage) | Asynchronous replication of on-prem data to S3 |
+| Volume Gateway Cached Mode  | iSCSI (Block Storage) | Primary data stored in S3 with frequently accessed data cached locally on-prem |
+| Tape Gateway     | iSCSI  | Virtual media changer and tape library for use with existing backup software |
 
 - Use Cases:
   1. Storage capacity has become an issue for a company that runs application servers on-premises. The servers are connected to a combination of block storage and NFS storage solutions. The company requires a solution that supports local caching without re-architecting its existing applications.
@@ -1316,11 +1323,13 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Windows
 
-- Keyword: NAS, NTFS
+- Keyword: NAS, NTFS (SMB), Windows, Active Directory, Multiple Access
 
 ![FSx for Windows AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/Product-Page-Diagram_Managed-File-System-How-it-Works_Updated@2x.c0c4e846c0fca27e8f43bd1651883b21b4cc1eec.png)
 
-- Fully managed, highly performant, native Microsoft Windows file system that supports **SMB protocol & Windows NTFS**. It also supports Microsoft Active Directory (AD) integration, ACLs, User quotas, Distributed File System Namespace (DFSN) and Distributed File System Replication (DFSR)
+- Fully managed, HA (multiple AZ), native **Microsoft Windows file system** that supports **SMB protocol, Windows NTFS, Microsoft Active Directory (AD) integration**. And it also support Windows Features like ACLs, user quotas. shawdow copies
+  - User quotas give you the option to better monitor and control costs. You pay for only the resources used, with no upfront costs, or licensing fees.
+- NTFS file systems that can be accessed from up to thousands of compute instances using the SMB protocol.
 - Use cases:
   1. When you need **centralised storage for Windows-based applications** such as Sharepoint, Microsoft SQL Server, Workspaces, IIS Web Server or any other native Microsoft Application.
   2. **Migration from on-premises a Microsoft Windows file server farm to the cloud**
@@ -1623,6 +1632,15 @@ Go to [Index](#index)
 - Integration with Kinesis Data Firehose, AWS IoT, and CloudWatch logs
 - Use case: Search, indexing, partial or fuzzy search
 
+### Amazon Quantum Ledger Database (QLDB)
+
+- KeyWord: Ledger database, Immutable, NoSQL
+
+![QLDB](https://d1.awsstatic.com/r2018/h/99Product-Page-Diagram_AWS-Quantum.f03953678ba33a2d1b12aee6ee530e45507e7ac9.png)
+
+- It is a fully managed ledger database that provides a transparent, immutable, and **cryptographically verifiable transaction log**.
+- It has a built-in immutable journal that stores an accurate and sequenced entry of every data change. The journal is append-only, meaning that data can only be added to a journal, and it cannot be overwritten or deleted.
+
 ## Migration
 
 Go to [Index](#index)
@@ -1659,6 +1677,7 @@ Go to [Index](#index)
 ### AWS DataSync
 
 - Data transfer service for **moving large amounts of data into AWS**. It automate and **accelerate the replication** of data to AWS storage services. Has built in **security capabilities** (e.g. encryption in transit)
+- Note: Its name can be consfusing ==> It syncs on one way only (from source to destination) for migration purpose.
 - To deploy DataSync an agent must be installed.
 - Types
 
@@ -1911,8 +1930,8 @@ Go to [Index](#index)
   - Customer gateway: An AWS resource which provides information to AWS about your customer gateway device.
   - Customer gateway device: A physical device or software application on your side of the Site-to-Site VPN connection.
   - Target gateway: A generic term for the VPN endpoint on the Amazon side of the Site-to-Site VPN connection.
-  - `Virtual private gateway`: It is the **VPN endpoint on the Amazon side** of your Site-to-Site VPN connection that can be attached to a **single VPC**.
-  - `Transit gateway`:
+  - `Virtual Private Gateway`: It is the **VPN endpoint on the Amazon side** of your Site-to-Site VPN connection that can be attached to a **single VPC**.
+  - `Transit Gateway`:
     - A transit **hub** that can be used to interconnect **multiple VPCs** and on-premises networks, and as a VPN endpoint for the Amazon side of the Site-to-Site VPN connection.
     - It simplifies your network (no complex peering relationships).
     - It acts as a highly scalable cloud router—each new connection is made only once.
