@@ -143,6 +143,23 @@ Go to [Index](#index)
   - Deploying resources on-premises, using virtualization and resource management tools, is sometimes called “private cloud”.
   - It does not provide many of the benefits of cloud computing.
 
+## Events/Operations: Data Plane vs Control Plane
+
+### Data Plane Operations
+
+- Data Plane Operations (or Data Events) provide visibility into the resource operations performed on or **within a resource**
+- They are often high-volume activities
+- Example of data events include:
+  - Amazon S3 object-level API activity (for example, GetObject, DeleteObject, and PutObject API operations).
+  - AWS Lambda function execution activity (the Invoke API).
+
+### Control Plane Operations
+
+- Control Plane Operations (or Management Events) provide visibility into management operations that are performed **on resources in your AWS account**.
+- Example management events include:
+  - Configuring security (for example, IAM AttachRolePolicy API operations)
+  - Registering devices (for example, Amazon EC2 CreateDefaultVpc API operations)
+
 ## Security
 
 Go to [Index](#index)
@@ -473,24 +490,27 @@ Steps: You first authenticate user using `Cognito User Pools` and then exchange 
 
 ### AWS GuardDuty
 
-- Keywords: **Anomalous Behaviour**, Machine Learning
+- Keywords: **Anomalous Behaviour**, Exiting Treat Exploided, Compromised, Detect and Remediate
 
 ![AWS GuardDuty](https://d1.awsstatic.com/Security/Amazon-GuardDuty/Amazon-GuardDuty_HIW.057a144483974cb73ab5f3f87a50c7c79f6521fb.png)
 
-- A treat detection service that applys **machine learning** that monitors for compromised accounts, anomalous baheviour and malware
-- Once it is activated, it monitors continously: VPC Flow Logs, DNS Logs, and CloudTrail events.
+- A **treat detection** service that applys **machine learning** that monitors for compromised **AWS Accounts** (Multiple EC2 services), anomalous baheviour and malware (**"vulnerability that was exploited"**)
+- The primary detection categories include reconnaissance, instance compromise, account compromise, and bucket compromise.
+- Once it is activated, it monitors continously: VPC Flow Logs, DNS Logs, and CloudTrail events. And based on its findings you can setup **automated preventive actions or remediation’s**. For example, you can automate the response workflow by using CloudWatch Events as an event source to trigger an AWS Lambda function.
 - Use case: CryptoCurrency attacks protection.
+
+![AWS GuardDuty -2](https://cloudkatha.com/ezoimgfmt/i0.wp.com/cloudkatha.com/wp-content/uploads/2022/02/TempCK-Amazon-GuardDuty.jpg?w=829&ssl=1&ezimgfmt=ng:webp/ngcb2)
 
 ### Amazon Inspector
 
-- Keywords: Software Vulnerabilities, Network Exposure
+- Keywords: Workload, Software Vulnerabilities, Network Exposure, Agent, Prevention, Only detects
 
 ![Amazon Inspector](https://d1.awsstatic.com/reInvent/re21-pdp-tier1/amazon-inspector/Amazon-Inspector_HIW%402x.c26d455cb7e4e947c5cb2f9a5e0ab0238a445227.png)
 
-- Automated Security Assessment service running **EC2 instances** (via agent) that evalus resources for software vulnerabilities and uninteded network exposure.
-- The inspector comes with pre-defined rules packages:
-  - `Network Reachability` rules package checks for unintended network accessibility of EC2 instances
-  - `Host Assessment rules` package checks for vulnerabilities and insecure configurations on EC2 instance. Includes Common Vulnerabilities and Exposures (CVE), Center for Internet Security (CIS) Operating System configuration benchmarks, and security best practices.
+- It is and **Agent based** vulnerability **scanning** tool that you can use to identify potential security issues **within your EC2 worloads (EC2, ECS, EKS)**
+- It detects vulnerabilities and insecure configurations in your applications (software vulnerabilities) and network (uninteded network exposure), **event if it was not exploited yet** (preventation).
+
+![Amazon Inspector -2](https://cloudkatha.com/ezoimgfmt/i0.wp.com/cloudkatha.com/wp-content/uploads/2022/02/Amazon-GuardDuty-Vs-Inspector.png?w=739&ssl=1&ezimgfmt=ng:webp/ngcb2)
 
 ### Amazon Macie
 
@@ -654,7 +674,6 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 #### EC2 Placement Groups Strategy
 
 - A way of **placing EC2 Instances** so that instances are spread **across the underlying hardware to minimise failures**.
-- AWS recommend homogeneous instances within clustered placement groups.
 - Placement group names need to be unique within your account.
 - Only certain types of instances can be launched in a placement group (Compute Optimised, GPU, Memory Optimised, Storage Optimised)
 - You can’t merge placement groups, but you can move an existing instance into a placement group (the instance must be in the stopped state before moving it)
@@ -662,6 +681,7 @@ You can choose EC2 instance type based on requirement for e.g. `m5.2xlarge` has 
 - There is no charge associated with creating placement groups
 - Types (A clustered placement group can't span multiple AZ's, others can)
   - **Cluster** - Grouping instances close together within a **single Availability Zone, Same Rack**. It is used to achieve **low Network latency & high throughput, High Performance Computing (HPC)**.
+  - AWS recommend homogeneous instances within clustered placement groups.
   - **Spread** - Opposite to clustered placement group. Instance are placed on **Different AZ, Distinct Rack**. It used for Critical Applications that requires to be seperated on each other to ensure **High Availability** in case of failure. Spread placement groups can span multiple Availability Zones.
   - **Partition** - EC2 creates partitions by dividing each group into logical segments. Each partition has its own set of racks, network and power source to help isolate the impact of a hardware failure. Same or Different AZ, Different Rack (or Partition), Distributed Applications like Hadoop, Cassandra, Kafka, etc.
 
@@ -891,7 +911,8 @@ Services that help to **decouple components**.
 - It **decouples infraestructure** (acts like a buffer between) the software component producing/saving data and the component receiving data for processing.
 - Specification for Standard SQS:
   - SQS guarantees that your **messages will be processed at least once**.
-  - Can have unlimited number of messages waiting in queue
+  - Can have unlimited number of messages waiting in queue however, there is a quota of 120,000 for the number of inflight messages for a standard queue and 20,000 for a FIFO queue
+    - Messages are inflight ==> consuming by component, but have not yet been deleted from the queue.
   - Default retention period is 4 days (min 1 min. and max 14 days)
   - Can send message upto 256KB in size (To send messages larger than 256 KB -up tp 2GB- using library allows you to send an Amazon SQS message that contains a reference to a message payload in Amazon S3)
   - Unlimited throughput and low latency (<10ms on publish and receive)
@@ -1285,7 +1306,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 | SSD VolumeTypes                  |  Description                         |  Usage                                                                                                             |
 | -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| General Purpose _SSD_ (gp2/gp3)  | Max **16000 IOPS**                       | Balances price and performance and can be used for most workloads (boot volumes, dev environment, virtual desktop) |
+| General Purpose _SSD_ (gp2/gp3)  | Max **16000 IOPS**                       | Balances price and performance (most cost-effective) and can be used for most workloads (boot volumes, dev environment, virtual desktop) |
 | Provisioned IOPS _SSD_ (io1/io2) | 16000 - 64000 IOPS, EBS Multi-Attach | Mission critical business application, Databases (large SQL and NoSQL database workloads)                          |
 
 **B/ HDD** (Hard Disk Drive) or Magnectic for large/sequential IO operations, High Throughput means number of bytes read and write per second
@@ -1303,6 +1324,8 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### EFS (Elastic File System)
 
+- Keyword: Shared Mount (NFSv4.x), Only Linux, High Scalable, High Available, POSIX-compliant, NFSv4.x, Concurrent access (simultaneously)
+
 ![EFS AWS diagram](https://d1.awsstatic.com/legal/AmazonEFS/product-page-diagram_Amazon-EFS-Replication_HIW%402x.ccbabcc8777609fc0d23d7ff5ee1d52d5000dbf5.png)
 
 - Fully managed, High scalable (Elastic) and Distributed (available) file storage that supports **Network File Storage version 4 (NFSv4.x)** and can be mounted to your EC2 instance.
@@ -1311,7 +1334,7 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
   - Highly Available - stores data redundantly across multiple Availability Zones.
   - Network File System (NFS) that can be mounted on and accessed concurrently in multiple AZs without sacrificing performance.
   - EFS file systems can be accessed by Amazon EC2 Linux instances, Amazon ECS, Amazon EKS, AWS Fargate, and AWS Lambda functions via a file system interface such as NFS protocol. (EBS only for EC2 instances)
-    - Native to Unix & Linux, but not supported on Windows instances.
+    - Native to Unix & Linux, **but not supported on Windows instances**.
 - EFS is a POSIX-compliant file-based storage.
 - EFS supports file systems semantics - strong read after write consistency and file locking.
 - Only pay for what you use
@@ -1323,16 +1346,18 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
 
 ### FSx for Windows
 
-- Keyword: NAS, NTFS (SMB), Windows, Active Directory, Multiple Access
+- Keyword: Shared Mount (NAS, NTFS (SMB)), Windows (also Linux with cifs-utils), Active Directory
 
 ![FSx for Windows AWS diagram](https://d1.awsstatic.com/pdp-how-it-works-assets/Product-Page-Diagram_Managed-File-System-How-it-Works_Updated@2x.c0c4e846c0fca27e8f43bd1651883b21b4cc1eec.png)
 
 - Fully managed, HA (multiple AZ), native **Microsoft Windows file system** that supports **SMB protocol, Windows NTFS, Microsoft Active Directory (AD) integration**. And it also support Windows Features like ACLs, user quotas. shawdow copies
   - User quotas give you the option to better monitor and control costs. You pay for only the resources used, with no upfront costs, or licensing fees.
 - NTFS file systems that can be accessed from up to thousands of compute instances using the SMB protocol.
+- You can easily connect Linux instances to the file system by installing the cifs-utils package. The Linux instances can then mount an SMB/CIFS file system.
 - Use cases:
   1. When you need **centralised storage for Windows-based applications** such as Sharepoint, Microsoft SQL Server, Workspaces, IIS Web Server or any other native Microsoft Application.
   2. **Migration from on-premises a Microsoft Windows file server farm to the cloud**
+  3. A company requires a high-performance file system that can be mounted on Amazon EC2 Windows instances and Amazon EC2 Linux instances. Applications running on the EC2 instances perform separate processing of the same files and the solution must provide a file system that can be mounted by all instances simultaneously. Which solution meets these requirements? ==> Amazon FSx for Windows File Server provides a native Microsoft Windows file system so you can easily move your Windows-based applications that require shared file storage to AWS. You can easily connect Linux instances to the file system by installing the cifs-utils package (mount an SMB/CIFS file system).
 
 ### FSx for Lustre
 
@@ -1348,6 +1373,12 @@ EXAM TIP: Instance stores offer very high performance and low latency. If you ca
   - **Scratch file systems** - for temporary storage and short term processing
   - **Persistent file systems** - for high available & persist storage and long term processing
 - Use case: When you need high speed or high capacity distributed storage for compute-intensive workloads, such as for Machine learning (ML), High performance computing (HPC), video processing, financial modeling, genome sequencing, and electronic design automation (EDA).
+
+### AWS Lake Formation
+
+- It easily creates secure data lakes, making data available for wide-ranging analytics.
+
+![](https://d1.awsstatic.com/diagrams/Lake-formation-HIW.9ea3fab3b2ac697a42ae7a805b986278ffd4f41e.png)
 
 ## Database
 
@@ -1438,8 +1469,9 @@ Go to [Index](#index)
 - Use Cases:
   1. A company runs a web application that store data in an Amazon Aurora database. A solutions architect needs to make the application more resilient to sporadic increases in request rates.
   - To resolve this situation Amazon Aurora Read Replicas can be used to serve read traffic which offloads requests from the main database.
-  1. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
-  2. An application requires a MySQL database which will only be used several times a week for short periods. The database needs to provide automatic instantiation and scaling ==> Aurora Severless
+  2. An insurance company has a web application that serves users in the United Kingdom and Australia. The application includes a database tier using a MySQL database hosted in eu-west-2. The web tier runs from eu-west-2 and ap-southeast-2. Amazon Route 53 geoproximity routing is used to direct users to the closest web tier. It has been noted that Australian users receive slow response times to queries. How to improve the performance? ==> Migrate the database to an Amazon Aurora global database in MySQL compatibility mode. Configure read replicas in ap-southeast-2
+  3. An application requires a MySQL database which will only be used several times a week for short periods. The database needs to provide automatic instantiation and scaling ==> Aurora Severless
+  4. An store uses an Amazon Aurora database. The database is deployed as a Multi-AZ deployment. Recently, metrics have shown that database read requests are high and causing performance issues which result in latency for write requests. How to separate the read requests from the write requests? ==> Update the application to read from the Aurora Replica. An Aurora Replica already exists as this is a Multi-AZ configuration and the standby is an Aurora Replica that can be used for read traffic.
 
 ### DynamoDB
 
@@ -1494,8 +1526,8 @@ Go to [Index](#index)
 
 - It is SaaS for **in-memory caching** supporting flexible, real-time use cases. In-memory key/value store, not persistent in the traditional sense.
 - Fully managed implementations of two popular in-memory data stores – Redis and Memcached.
-  - Memcached — designed for simplicity, so used with you need the **simplest model possible**.
-  - Redis — works for a wide **range of use cases and have multi AZ**. You can also complete backups/restores of redis.
+  - Memcached — designed for simplicity, so used with you need the **simplest model possible**. No data replication or HA.
+  - Redis — works for a wide **range of use cases and have multi AZ** (HA). You can also complete backups/restores of redis and data replication.
     - Use password/token to access data using Redis Auth.
     - HIPAA Compliant.
 - Uses Cases:
@@ -1846,7 +1878,7 @@ Go to [Index](#index)
   - If you associate with new NACL, auto remove previous association
 - Rules
   - **Support both Allow and Deny rules**
-  - **Evaluate rules in number order**, starting with lowest numbered rule. NACL rules have number (1 to 32766) and higher precedence to lowest number for e.g. #100 ALLOW <IP> and #200 DENY <IP> means IP is allowed
+  - **Evaluate rules in number order**, starting with lowest numbered rule. NACL rules have number (1 to 32766) and **higher precedence to lowest number** for e.g. #100 ALLOW <IP> and #200 DENY <IP> means IP is allowed
     - Tip: It is recommended to create numbered rules in increments (for example, increments of 10 or 100) so that you can insert new rules where you need to later on.
   - Each network ACL also includes a rule with rule number as asterisk *. If any of the numbered rule doesn’t match, it’s denies the traffic. You can't modify or remove this rule.
 
@@ -1928,9 +1960,9 @@ Go to [Index](#index)
   - VPN connection: A secure connection between your on-premises equipment and your VPCs. Each VPN connection includes two VPN tunnels which you can simultaneously use for high availability.
   - VPN tunnel: An encrypted link where data can pass from the customer network to or from AWS.
   - Customer gateway: An AWS resource which provides information to AWS about your customer gateway device.
-  - Customer gateway device: A physical device or software application on your side of the Site-to-Site VPN connection.
+  - Customer gateway device: **One physical device or software application** on the on-premises Data Center side (out of AWS) of the Site-to-Site VPN connection.
   - Target gateway: A generic term for the VPN endpoint on the Amazon side of the Site-to-Site VPN connection.
-  - `Virtual Private Gateway`: It is the **VPN endpoint on the Amazon side** of your Site-to-Site VPN connection that can be attached to a **single VPC**.
+  - `Virtual Private Gateway`: It is the **VPN endpoint on the Amazon side** of your Site-to-Site VPN connection that can be attached to a **single VPC**. It is a **redundant** device.
   - `Transit Gateway`:
     - A transit **hub** that can be used to interconnect **multiple VPCs** and on-premises networks, and as a VPN endpoint for the Amazon side of the Site-to-Site VPN connection.
     - It simplifies your network (no complex peering relationships).
@@ -1939,8 +1971,11 @@ Go to [Index](#index)
 
 ![Transit Gateway](https://d1.awsstatic.com/products/transit-gateway/product-page-diagram_AWS-Transit-Gateway%402x.921cf305305867447fcabfc6b7acae9f0e5bc9d5.png)
 
-- Use Case: A company runs a number of core enterprise applications in an on-premises data center. The data center is connected to an Amazon VPC using AWS Direct Connect. The company will be creating additional AWS accounts and these accounts will also need to be quickly, and cost-effectively connected to the on-premises data center in order to access the core applications. Which solution will cause least overhead?
-  - Configure AWS Transit Gateway between the accounts. Assign Direct Connect to the transit gateway and route network traffic to the on-premises servers. With AWS Transit Gateway, you can quickly add Amazon VPCs, AWS accounts, VPN capacity, or AWS Direct Connect gateways to meet unexpected demand, without having to wrestle with complex connections or massive routing tables. This is the operationally least complex solution and is also cost-effective.
+- Use Case:
+  1. A company runs a number of core enterprise applications in an on-premises data center. The data center is connected to an Amazon VPC using AWS Direct Connect. The company will be creating additional AWS accounts and these accounts will also need to be quickly, and cost-effectively connected to the on-premises data center in order to access the core applications. Which solution will cause least overhead?
+     - Configure AWS Transit Gateway between the accounts. Assign Direct Connect to the transit gateway and route network traffic to the on-premises servers. With AWS Transit Gateway, you can quickly add Amazon VPCs, AWS accounts, VPN capacity, or AWS Direct Connect gateways to meet unexpected demand, without having to wrestle with complex connections or massive routing tables. This is the operationally least complex solution and is also cost-effective.
+  2.A company has a Production VPC and a Pre-Production VPC. The Production VPC uses VPNs through a customer gateway to connect to a single device in an on-premises data center. The Pre-Production VPC uses a virtual private gateway attached to two AWS Direct Connect (DX) connections. Both VPCs are connected using a single VPC peering connection. How can this architecture be improved by removing any single point of failure?
+     - The only single point of failure in this architecture is the customer gateway device in the on-premises data center. If this device is a single device, then if it fails the VPN connections will fail.  ==> Add additional VPNs to the Production VPC from a second customer gateway device
 
 ##### Case A: External Nextwork (DataCenter or Cloud) - AWS VPC
 
@@ -2095,17 +2130,17 @@ Go to [Index](#index)
 
 ### AWS Global Accelerator
 
-- KeyWord: Global Redirecction (Non-cache), Optimal routes
+- KeyWord: Global Redirecction (Non-cache), Optimal routes, HTTP nd non-HTTP
 
 ![global_accelerator](https://d1.awsstatic.com/product-page-diagram_AWS-Global-Accelerator%402x.dd86ff5885ab5035037ad065d54120f8c44183fa.png)
 
 - It is a **global service**.
 - It Saas which you create accelerators to improve availability and performance of your applications for **global users**.
-  - How? It **redirects traffic to closest AWS Region to the user** over the AWS Global network to **reduce latency**.
+  - How? It **redirects traffic to closest Edge Location to the user** over the AWS Global network to **reduce latency**.
 - Steps:
   - First you create global accelerator, which provisions two anycast **static IP addresses**.
     - Seamless failover is ensured => IP does not change when failing over between regions so there are no issues with client caches having incorrect entries that need to expire
-  - Then you register one or more endpoints with Global Accelerator. Each endpoint can have one or more AWS resources such as NLB, ALB, EC2, S3 Bucket or Elastic IP.
+  - Then you register one or more endpoints with Global Accelerator (HTTP nd non-HTTP). Each endpoint can have one or more AWS resources such as NLB, ALB, EC2, S3 Bucket or Elastic IP.
 - Within endpoint, global accelerator monitor health checks of all AWS resources to send traffic to healthy resources only
 - Adjustment in the Endpoints
   - You can control traffic using traffic dials. This is done within the endpoint group.
@@ -2263,13 +2298,15 @@ Go to [Index](#index)
 
 ![cloudwatch](https://d1.awsstatic.com/reInvent/reinvent-2022/cloudwatch/Product-Page-Diagram_Amazon-CloudWatch.095eb618193be7422d2d34e3abd5fdf178b6c0e2.png)
 
-- CloudWatch is Saas for **monitoring & observability** of AWS resources (EC2, ALB, S3, Lambda, DynamoDB, RDS etc.) and applications to watch **performance**.
-  - It can collect these Inputs: **Metrics and Log files**.
-  - It allows you to create these Outputs:
-    - Dashboards: Creates dashboards to see what is happening with your AWS environment
-    - Alarms: Allows you to set Alarms that notify you when particular metric thresholds are hit
-    - Events: CloudWatch Events helps you to respond to state changes in your AWS resources.
-    - Logs: CloudWatch Logs helps you to aggregate, monitor and store logs.
+- It is Saas for **monitoring & observability** of AWS resources (EC2, ALB, S3, Lambda, DynamoDB, RDS etc.) and applications to watch **performance**.
+- It can collect these Inputs: **Metrics and Log files**.
+- It agent collect both system metrics and log files from Amazon EC2 instances (Linux and Windows) and on-premises servers, enables you to select the metrics to be collected, including sub-resource metrics such as per-CPU core.
+- It allows you to create these Outputs:
+  - Dashboards: Creates dashboards to see what is happening with your AWS environment
+  - Alarms: Allows you to set Alarms that notify you when particular metric thresholds are hit
+  - Events: CloudWatch Events helps you to respond to state changes in your AWS resources.
+  - Logs: CloudWatch Logs helps you to aggregate, monitor and store logs.
+- Exam Tip: custom Metrics cannot be created.
 
 #### CloudWatch with EC2
 
