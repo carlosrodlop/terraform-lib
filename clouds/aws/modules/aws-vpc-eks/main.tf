@@ -1,20 +1,14 @@
-locals {
-  tags = merge(var.tags, {
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-  })
-}
-
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 4.0"
 
   name = var.name
   cidr = var.cidr
 
   azs = var.azs
   # Ensure HA by creating different subnets in each AZ and connecting to an Autocaling Group
-  public_subnets  = [for k, v in var.azs : cidrsubnet(var.cidr, 8, k)]
-  private_subnets = [for k, v in var.azs : cidrsubnet(var.cidr, 8, k + 10)]
+  public_subnets  = [for k, v in var.azs : cidrsubnet(var.cidr, 4, k)]
+  private_subnets = [for k, v in var.azs : cidrsubnet(var.cidr, 8, k + 48)]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
@@ -32,6 +26,6 @@ module "vpc" {
 
   private_subnet_tags = var.private_subnet_tags
 
-  tags = local.tags
+  tags = var.tags
 
 }
