@@ -27,3 +27,9 @@
 - [Cloud comparison Tables](https://media.licdn.com/dms/image/C5622AQEWNRJe_IJN1Q/feedshare-shrink_2048_1536/0/1678887625639?e=1681948800&v=beta&t=izj3rSdiOc4iMoqd8UuYScEzZXp6epoSSb7x9tFLFOc)
 - [Cloud Design Patterns - Awesome Software Architecture](https://awesome-architecture.com/cloud-design-patterns/cloud-design-patterns/)
 - [Cloud Best Practices - Awesome Software Architecture](https://awesome-architecture.com/cloud-best-practices/)
+
+### References Architectures
+
+#### AWS
+
+- [EKS reference](https://imgur.com/a/WVxr0kZ)
