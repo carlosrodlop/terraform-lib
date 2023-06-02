@@ -6,9 +6,10 @@ ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
 # SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
 # DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
-# ENC_KEY	  	  	:= $(shell age-keygen -y $(SOPS_KEY))
+# ENC_KEY	  	:= $(shell age-keygen -y $(SOPS_KEY))
+TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
-ROOT 			?= eks-bp-v5
+ROOT 			?= eks-bp-v4-31-k8s
 BACKEND         ?= false
 
 include $(PARENT_MKFILE)
@@ -57,15 +58,15 @@ tf_apply: ## Apply Terraform root passing as parameter (ROOT, default to eks-bp-
 tf_apply: check_aws_env guard-ROOT
 	@rm -rf $(TF_LOG_PATH)
 	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars"
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(ROOT).plan"
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(TIMESTAMP)-$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars"
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(TIMESTAMP)-$(ROOT).plan"
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
 tf_destroy: guard-ROOT check_aws_env
 	$(call print_title,Destroy $(ROOT) Cluster) |tee -a $(TF_LOG_PATH)
 	@rm -rf $(TF_LOG_PATH)
-	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
-	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints -var-file="$(ENV_SHARED)/shared.tfvars"
+	@terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
+	@terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks -var-file="$(ENV_SHARED)/shared.tfvars"
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.vpc -var-file="$(ENV_SHARED)/shared.tfvars"
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
