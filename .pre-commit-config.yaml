@@ -54,9 +54,9 @@ repos:
           - "--args=--only=terraform_required_providers"
           - "--args=--only=terraform_standard_module_structure"
           - "--args=--only=terraform_workspace_remote"
-      # - id: terraform_tfsec #https://github.com/aquasecurity/tfsec
-      #   files: ^terraform/
-      #   exclude: /.terraform # Not working. I would like to exclude files downloaded inside .terraform/
-      #   args:
-      #     - --args=--config-file=__GIT_WORKING_DIR__/tfsec.yaml
-      #     - --args=--concise-output
+      - id: terraform_tfsec #https://github.com/aquasecurity/tfsec
+        files: ^terraform/
+        exclude: /.terraform # Not working. I would like to exclude files downloaded inside .terraform/
+        args:
+          - --args=--config-file=__GIT_WORKING_DIR__/tfsec.yaml
+          - --args=--concise-output
