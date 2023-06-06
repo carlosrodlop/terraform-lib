@@ -1,6 +1,6 @@
 variable "namespace" {
   description = "value of the namespace to install node-problem-detector"
-  default     = "node-problem-detector"
+  default     = "kube-system"
   type        = string
 }
 
