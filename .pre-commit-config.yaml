@@ -26,12 +26,12 @@ repos:
     hooks:
       - id: terraform_fmt
         files: ^clouds/
-      #- id: terraform_validate
-      - id: terraform_checkov #https://www.checkov.io/
-        files: ^clouds/
-        args:
-          - --args=--quiet
-          - --args=--skip-check CKV2_AWS_8
+      - id: terraform_validate
+      # - id: terraform_checkov #https://www.checkov.io/
+      #   files: ^clouds/
+      #   args:
+      #     - --args=--quiet
+      #     - --args=--skip-check CKV2_AWS_8
       - id: terraform_docs
         files: ^(clouds/aws/modules/|clouds/aws/root)
         args:
