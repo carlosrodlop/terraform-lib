@@ -1,0 +1,7 @@
+tags = {
+  "owner" : "cloud-team"
+  "user" : "crodriguezlopez"
+  "environment" : "demo"
+  "tf:repo" : "https://github.com/carlosrodlop/terraform-lib"
+  "tf:folder" : "clouds/aws"
+}
