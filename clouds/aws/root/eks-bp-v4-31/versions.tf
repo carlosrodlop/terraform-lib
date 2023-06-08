@@ -16,7 +16,8 @@ terraform {
     }
   }
 
-  # backend "s3" {
-  #   encrypt = true
-  # }
+  backend "s3" {
+    key     = "aws/key/prod"
+    encrypt = true
+  }
 }

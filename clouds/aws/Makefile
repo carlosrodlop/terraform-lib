@@ -48,8 +48,6 @@ else #TODO Test this!
 		-backend-config="bucket=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw backend_name)" \
 		-backend-config="region=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw aws_region)" \
 		-backend-config="dynamodb_table=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw dynamo_table_lock_name)"
-		-backend-config="key=state/$(ROOT).tfstate"
-		-backend-config="kms_key_id=alias/$(ROOT)-bucket-key"
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
 endif
 
