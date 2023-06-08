@@ -1,4 +1,4 @@
-preffix = "my-example"
+preffix = "example"
 tags = {
   "owner" : "cloud-team"
   "user" : "crodriguezlopez"
