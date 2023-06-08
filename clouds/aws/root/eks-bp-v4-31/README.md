@@ -1,6 +1,5 @@
 # eks-bp-v4-31
 
-[aws-ia/terraform-aws-eks-blueprints at v4.31.0](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/v4.31.0)
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
@@ -23,7 +22,7 @@
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | ~> 4.3.2 |
-| <a name="module_aws_s3_backups"></a> [aws\_s3\_backups](#module\_aws\_s3\_backups) | terraform-aws-modules/s3-bucket/aws | 3.4.0 |
+| <a name="module_aws_s3_bucket"></a> [aws\_s3\_bucket](#module\_aws\_s3\_bucket) | ../../modules/aws-s3-bucket | n/a |
 | <a name="module_efs"></a> [efs](#module\_efs) | terraform-aws-modules/efs/aws | ~> 1.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | ~> 19.12 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ../../modules/aws-vpc-eks | n/a |
@@ -61,4 +60,5 @@
 | <a name="output_eks_cluster_version"></a> [eks\_cluster\_version](#output\_eks\_cluster\_version) | EKS cluster version |
 | <a name="output_eks_oidc_provider"></a> [eks\_oidc\_provider](#output\_eks\_oidc\_provider) | EKS cluster OIDC issuer URL |
 | <a name="output_kubeconfig_file"></a> [kubeconfig\_file](#output\_kubeconfig\_file) | Kubeconfig full file path |
+| <a name="output_route53_zone_id"></a> [route53\_zone\_id](#output\_route53\_zone\_id) | Route53 zone ID |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

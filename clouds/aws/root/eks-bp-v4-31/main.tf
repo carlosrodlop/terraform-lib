@@ -22,15 +22,17 @@ data "aws_route53_zone" "this" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  root             = basename(abspath(path.module))
-  workspace_suffix = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
-  name             = "${var.preffix}${local.workspace_suffix}"
-  vpc_name         = "${local.name}-vpc"
-  cluster_name     = "${local.name}-eks"
-  s3_backup_name   = "${local.name}.backups"
-  #s3_artifacts_name = "${local.name}.artifacts"
-  route53_zone_id = data.aws_route53_zone.this.id
-  azs             = slice(data.aws_availability_zones.available.names, 0, 3)
+  root              = basename(abspath(path.module))
+  workspace_suffix  = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
+  name              = "${var.preffix}${local.workspace_suffix}"
+  vpc_name          = "${local.name}-vpc"
+  cluster_name      = "${local.name}-eks"
+  s3_backup_name    = "${local.name}-backups"
+  s3_artifacts_name = "${local.name}-artifacts"
+  s3_bucket_list    = [local.s3_backup_name, local.s3_artifacts_name]
+  route53_zone_id   = data.aws_route53_zone.this.id
+  azs               = slice(data.aws_availability_zones.available.names, 0, 3)
+
 
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
@@ -41,46 +43,20 @@ locals {
 }
 
 ################################################################################
-# EKS Integrations
+# Buckets
 ################################################################################
 
-module "aws_s3_backups" {
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "3.4.0"
+module "aws_s3_bucket" {
+  source      = "../../modules/aws-s3-bucket"
+  count       = 0
+  bucket_name = element(local.s3_bucket_list, count.index)
 
-  bucket = local.s3_backup_name
-
-  # Allow deletion of non-empty bucket
-  # NOTE: This is enabled for example usage only, you should not enable this for production workloads
   force_destroy = true
+  #TODO: Fix InsufficientS3BucketPolicyException
+  #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
+  enable_logging = false
+  tags           = local.tags
 
-  attach_deny_insecure_transport_policy = true
-  attach_require_latest_tls_policy      = true
-
-  #acl = "private"
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-
-  control_object_ownership = true
-  object_ownership         = "BucketOwnerPreferred"
-
-  versioning = {
-    status     = true
-    mfa_delete = false
-  }
-
-  server_side_encryption_configuration = {
-    rule = {
-      apply_server_side_encryption_by_default = {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  tags = local.tags
 }
 
 ################################################################################

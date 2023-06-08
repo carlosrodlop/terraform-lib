@@ -1,6 +1,4 @@
-# eks-bp-v4-31
-
-[aws-ia/terraform-aws-eks-blueprints at v4.31.0](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/v4.31.0)
+# eks-bp-v4-31-k8s
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -50,6 +48,7 @@
 | <a name="input_grafana_admin_password"></a> [grafana\_admin\_password](#input\_grafana\_admin\_password) | Grafana admin password. | `string` | n/a | yes |
 | <a name="input_kubeconfig_file"></a> [kubeconfig\_file](#input\_kubeconfig\_file) | Kubeconfig file path to be used as context | `string` | `"~/.kube/config"` | no |
 | <a name="input_lb_type"></a> [lb\_type](#input\_lb\_type) | Type of load balancer to use. | `string` | `"alb"` | no |
+| <a name="input_route53_zone_id"></a> [route53\_zone\_id](#input\_route53\_zone\_id) | Route53 zone ID | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
 
 ## Outputs

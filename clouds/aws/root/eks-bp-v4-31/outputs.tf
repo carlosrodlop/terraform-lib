@@ -32,3 +32,8 @@ output "efs_id" {
   description = "EFS ID"
   value       = module.efs.id
 }
+
+output "route53_zone_id" {
+  description = "Route53 zone ID"
+  value       = local.route53_zone_id
+}

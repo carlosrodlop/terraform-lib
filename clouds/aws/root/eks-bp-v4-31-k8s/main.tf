@@ -18,7 +18,6 @@ locals {
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
   })
-
   helm_values_path = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
   helm_charts_path = "${path.module}/../../../../libs/k8s/helm/charts"
 }
@@ -63,7 +62,7 @@ module "eks_blueprints_kubernetes_addons" {
   enable_external_dns = true
   external_dns_helm_config = {
     values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
-      zoneIdFilter = local.route53_zone_id
+      zoneIdFilter = var.route53_zone_id
     })]
   }
   enable_ingress_nginx = var.lb_type == "nlb" ? true : false
