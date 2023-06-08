@@ -33,7 +33,6 @@ locals {
   route53_zone_id   = data.aws_route53_zone.this.id
   azs               = slice(data.aws_availability_zones.available.names, 0, 3)
 
-
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
   })

@@ -49,5 +49,8 @@ Reference [Terraform S3 Backend Best Practices](https://technology.doximity.com/
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_backend_name"></a> [backend\_name](#output\_backend\_name) | AWS S3 Bucket state |
+| <a name="output_dynamo_table_lock_name"></a> [dynamo\_table\_lock\_name](#output\_dynamo\_table\_lock\_name) | AWS Dynamo Table lock |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

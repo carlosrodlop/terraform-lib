@@ -1,9 +1,14 @@
 output "backend_name" {
   description = "AWS S3 Bucket state"
-  value       = var.backend_name
+  value       = module.aws_s3_backend.backend_name
 }
 
 output "dynamo_table_lock_name" {
   description = "AWS Dynamo Table lock"
-  value       = local.table_lock_name
+  value       = module.aws_s3_backend.dynamo_table_lock_name
+}
+
+output "aws_region" {
+  description = "AWS Dynamo Table lock"
+  value       = data.aws_region.current.name
 }

@@ -1,6 +1,7 @@
 locals {
   cloudtrail_name   = "${var.bucket_name}-s3s"
   cloudtrail_bucket = "${var.bucket_name}-logs"
+  dynamo_tf_lock    = "${var.bucket_name}-tf-lock"
 }
 
 module "aws_s3" {
@@ -213,7 +214,7 @@ resource "aws_dynamodb_table" "block_table" {
   # checkov:skip=CKV2_AWS_16:"Ensure that Auto Scaling is enabled on your DynamoDB tables"
 
   count          = var.is_tf_backend ? 1 : 0
-  name           = "${var.bucket_name}-tf-lock"
+  name           = local.dynamo_tf_lock
   read_capacity  = 20
   write_capacity = 20
   hash_key       = "LockID"
