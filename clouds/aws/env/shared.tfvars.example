@@ -1,3 +1,4 @@
+preffix = "my-example"
 tags = {
   "owner" : "cloud-team"
   "user" : "crodriguezlopez"

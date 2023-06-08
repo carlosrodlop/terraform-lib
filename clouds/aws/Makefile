@@ -11,6 +11,7 @@ TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
 ROOT 			?= eks-bp-v4-31
 BACKEND         ?= false
+AUTOPROVE	    ?= false
 
 include $(PARENT_MKFILE)
 
@@ -57,7 +58,11 @@ tf_apply: check_aws_env guard-ROOT
 	@rm -rf $(TF_LOG_PATH)
 	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(TIMESTAMP)-$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars"
+ifeq ($(AUTOPROVE),true)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(TIMESTAMP)-$(ROOT).plan"
+else
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply
+endif
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
