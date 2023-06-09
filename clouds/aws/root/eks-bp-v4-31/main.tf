@@ -46,6 +46,7 @@ locals {
 ################################################################################
 
 module "bastion" {
+  count  = var.enable_bastion_host ? 1 : 0
   source = "../../modules/aws-bastion"
 
   key_name                 = var.key_name

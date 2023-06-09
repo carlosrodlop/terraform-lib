@@ -53,3 +53,9 @@ variable "key_name" {
   description = "Name of the Key Pair to use for ssh into the Bastion Host instance"
   type        = string
 }
+
+variable "enable_bastion_host" {
+  description = "Enable Bastion Host for Private only EKS endpoints"
+  type        = bool
+  default     = true
+}

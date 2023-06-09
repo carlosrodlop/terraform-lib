@@ -38,7 +38,7 @@ output "route53_zone_id" {
   value       = local.route53_zone_id
 }
 
-output "bastion_ssh_connection_string" {
+/* output "bastion_ssh_connection_string" {
   description = "SSH connection string for the Bastion Host. Replace <pathToTheKey> to the path to the public key."
-  value       = module.bastion.bastion_ssh_connection_string
-}
+  value       = var.enable_bastion_host ? module.bastion.bastion_ssh_connection_string[0] : null
+} */

@@ -45,6 +45,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | An existing domain name maped to a Route 53 Hosted Zone | `string` | n/a | yes |
+| <a name="input_enable_bastion_host"></a> [enable\_bastion\_host](#input\_enable\_bastion\_host) | Enable Bastion Host for Private only EKS endpoints | `bool` | `true` | no |
 | <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Name of the Key Pair to use for ssh into the Bastion Host instance | `string` | n/a | yes |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24. | `string` | `"1.24"` | no |
 | <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo | `string` | n/a | yes |
@@ -57,7 +58,6 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | ACM certificate ARN |
-| <a name="output_bastion_ssh_connection_string"></a> [bastion\_ssh\_connection\_string](#output\_bastion\_ssh\_connection\_string) | SSH connection string for the Bastion Host. Replace <pathToTheKey> to the path to the public key. |
 | <a name="output_efs_id"></a> [efs\_id](#output\_efs\_id) | EFS ID |
 | <a name="output_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#output\_eks\_cluster\_endpoint) | EKS cluster endpoint |
 | <a name="output_eks_cluster_id"></a> [eks\_cluster\_id](#output\_eks\_cluster\_id) | ACM certificate ARN |

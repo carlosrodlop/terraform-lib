@@ -1,0 +1,5 @@
+domain_name        = "example.com"
+preffix            = "my-resources-prefix"
+kubernetes_version = "1.24"
+key_name           = "my-key-pair-name"
+enable_bastion_host  = true
