@@ -40,7 +40,6 @@ resource "aws_security_group_rule" "egress" {
   to_port           = 65535
   type              = "egress"
 
-  tags = var.tags
 }
 
 resource "aws_security_group_rule" "ingress" {
@@ -52,7 +51,6 @@ resource "aws_security_group_rule" "ingress" {
   to_port           = 22
   type              = "ingress"
 
-  tags = var.tags
 }
 
 resource "aws_security_group_rule" "source" {
@@ -64,5 +62,4 @@ resource "aws_security_group_rule" "source" {
   to_port                  = 22
   type                     = "ingress"
 
-  tags = var.tags
 }
