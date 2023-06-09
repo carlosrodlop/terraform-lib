@@ -41,3 +41,4 @@ secrets.*
 kubeconfig-*.yaml
 !kubeconfig-*.yaml.enc
 #*values*.yaml
+backend.tf

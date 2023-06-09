@@ -53,8 +53,8 @@ module "bastion" {
   resource_prefix          = local.cluster_name
   source_security_group_id = module.eks.node_security_group_id
   ssh_cidr_blocks          = var.ssh_cidr_blocks
-  subnet_id                = module.vpc.first_public_subnet
-  vpc_id                   = module.vpc.vpc_id
+  subnet_id                = var.subnet_id_bastion == "" ? module.vpc[0].first_public_subnet : var.subnet_id_bastion
+  vpc_id                   = var.vpc_id == "" ? module.vpc[0].vpc_id : var.vpc_id
 }
 
 ################################################################################
@@ -79,6 +79,7 @@ module "aws_s3_bucket" {
 ################################################################################
 
 module "acm" {
+  count   = var.create_acm ? 1 : 0
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.3.2"
 
@@ -98,6 +99,7 @@ module "acm" {
 #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
 #https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
 module "vpc" {
+  count  = var.vpc_id == "" ? 1 : 0
   source = "../../modules/aws-vpc-eks"
 
   name = local.vpc_name
@@ -137,8 +139,8 @@ module "eks" {
     vpc-cni    = {}
   }
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id     = var.vpc_id == "" ? module.vpc[0].vpc_id : var.vpc_id
+  subnet_ids = length(var.subnet_id_list_eks) == 0 ? module.vpc[0].private_subnets : var.subnet_id_list_eks
 
   node_security_group_additional_rules = {
     egress_self_all = {
@@ -235,7 +237,8 @@ module "eks" {
   }
 }
 
-module "efs" {
+/* module "efs" {
+  count   = var.create_efs ? 1 : 0
   source  = "terraform-aws-modules/efs/aws"
   version = "~> 1.0"
 
@@ -244,21 +247,22 @@ module "efs" {
 
   # Mount targets / security group
   mount_targets = {
-    for k, v in zipmap(local.azs, module.vpc.private_subnets) : k => { subnet_id = v }
+    for k, v in zipmap(local.azs, length(var.subnet_id_list_eks) == 0 ? module.vpc[0].private_subnets : var.subnet_id_list_eks) : k => { subnet_id = v }
   }
   security_group_description = "${local.name} EFS security group"
-  security_group_vpc_id      = module.vpc.vpc_id
-  performance_mode           = "maxIO" #Jenkins Requires High IO
+  security_group_vpc_id      = var.vpc_id == "" ? module.vpc[0].vpc_id : var.vpc_id
+  #https://d1.awsstatic.com/events/reinvent/2021/Amazon_EFS_performance_best_practices_STG403.pdf
+  performance_mode = "generalPurpose"
   security_group_rules = {
     vpc = {
       # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
       description = "NFS ingress from VPC private subnets"
-      cidr_blocks = module.vpc.private_subnets_cidr_blocks
+      cidr_blocks = module.vpc[0].private_subnets_cidr_blocks
     }
   }
 
   tags = local.tags
-}
+} */
 
 #---------------------------------------------------------------
 # Custom IAM roles for Node Group Cloudbees Apps

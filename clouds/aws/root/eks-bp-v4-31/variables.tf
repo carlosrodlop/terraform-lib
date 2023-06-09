@@ -59,3 +59,33 @@ variable "enable_bastion_host" {
   type        = bool
   default     = true
 }
+
+variable "create_acm" {
+  description = "Create ACM Certificate for the EKS cluster ingress"
+  type        = bool
+  default     = true
+}
+
+/* variable "create_efs" {
+  description = "Create EFS Storage for the EKS cluster"
+  type        = bool
+  default     = true
+} */
+
+variable "vpc_id" {
+  description = "Existing VPC ID. If not provided, a new VPC will be created."
+  type        = string
+  default     = ""
+}
+
+variable "subnet_id_bastion" {
+  description = "Existing Public Subnet ID to place the Bastion Host. If not provided, the first public subnet from the created VPC is taken."
+  type        = string
+  default     = ""
+}
+
+variable "subnet_id_list_eks" {
+  description = "A list of subnet IDs where the EKS nodes/node groups will be provisioned. If not provided, the private subnets from the created VPC are taken."
+  type        = list(string)
+  default     = []
+}

@@ -24,7 +24,6 @@
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | ~> 4.3.2 |
 | <a name="module_aws_s3_bucket"></a> [aws\_s3\_bucket](#module\_aws\_s3\_bucket) | ../../modules/aws-s3-bucket | n/a |
 | <a name="module_bastion"></a> [bastion](#module\_bastion) | ../../modules/aws-bastion | n/a |
-| <a name="module_efs"></a> [efs](#module\_efs) | terraform-aws-modules/efs/aws | ~> 1.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | ~> 19.12 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ../../modules/aws-vpc-eks | n/a |
 
@@ -44,6 +43,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_create_acm"></a> [create\_acm](#input\_create\_acm) | Create ACM Certificate for the EKS cluster ingress | `bool` | `true` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | An existing domain name maped to a Route 53 Hosted Zone | `string` | n/a | yes |
 | <a name="input_enable_bastion_host"></a> [enable\_bastion\_host](#input\_enable\_bastion\_host) | Enable Bastion Host for Private only EKS endpoints | `bool` | `true` | no |
 | <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Name of the Key Pair to use for ssh into the Bastion Host instance | `string` | n/a | yes |
@@ -51,14 +51,15 @@
 | <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo | `string` | n/a | yes |
 | <a name="input_ssh_cidr_blocks"></a> [ssh\_cidr\_blocks](#input\_ssh\_cidr\_blocks) | SSH CIDR blocks with access to the EKS cluster from Bastion Host | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_ssh_cidr_blocks_k8s_whitelist"></a> [ssh\_cidr\_blocks\_k8s\_whitelist](#input\_ssh\_cidr\_blocks\_k8s\_whitelist) | SSH CIDR blocks with access to the EKS cluster K8s API | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_subnet_id_bastion"></a> [subnet\_id\_bastion](#input\_subnet\_id\_bastion) | Existing Public Subnet ID to place the Bastion Host. If not provided, the first public subnet from the created VPC is taken. | `string` | `""` | no |
+| <a name="input_subnet_id_list_eks"></a> [subnet\_id\_list\_eks](#input\_subnet\_id\_list\_eks) | A list of subnet IDs where the EKS nodes/node groups will be provisioned. If not provided, the private subnets from the created VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Existing VPC ID. If not provided, a new VPC will be created. | `string` | `""` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | ACM certificate ARN |
-| <a name="output_efs_id"></a> [efs\_id](#output\_efs\_id) | EFS ID |
 | <a name="output_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#output\_eks\_cluster\_endpoint) | EKS cluster endpoint |
 | <a name="output_eks_cluster_id"></a> [eks\_cluster\_id](#output\_eks\_cluster\_id) | ACM certificate ARN |
 | <a name="output_eks_cluster_version"></a> [eks\_cluster\_version](#output\_eks\_cluster\_version) | EKS cluster version |

@@ -3,10 +3,10 @@ output "kubeconfig_file" {
   value       = local.kubeconfig_file_path
 }
 
-output "acm_certificate_arn" {
+/* output "acm_certificate_arn" {
   description = "ACM certificate ARN"
   value       = module.acm.acm_certificate_arn
-}
+} */
 
 output "eks_cluster_id" {
   description = "ACM certificate ARN"
@@ -28,10 +28,10 @@ output "eks_cluster_version" {
   value       = module.eks.cluster_version
 }
 
-output "efs_id" {
+/* output "efs_id" {
   description = "EFS ID"
   value       = module.efs.id
-}
+} */
 
 output "route53_zone_id" {
   description = "Route53 zone ID"
