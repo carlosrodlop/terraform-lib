@@ -8,7 +8,7 @@ ENV_SHARED		:= $(MKFILE)/env
 # ENC_KEY	  	:= $(shell age-keygen -y $(SOPS_KEY))
 TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
-ROOT 			?= eks-bp-v4-31
+ROOT 			?= eks-bp-v4-31-k8s
 BACKEND         ?= false
 AUTOPROVE	    ?= false
 
@@ -55,6 +55,11 @@ ifeq ($(AUTOPROVE),true)
 else
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply
 endif
+
+.PHONY: tf_cleanup_plans
+tf_cleanup_plans: ## Delete Old plans for ROOT passed as parameter. Usage: ROOT=eks-bp-v4 make tf_apply
+tf_cleanup_plans: guard-ROOT
+	@rm -rf $(ROOT_SHARED)/$(ROOT)/*.plan
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy

@@ -1,7 +1,8 @@
 provider "aws" {
-  default_tags {
+  #https://github.com/hashicorp/terraform-provider-aws/issues/19583
+  /* default_tags {
     tags = local.tags
-  }
+  } */
 }
 
 data "aws_region" "current" {}
