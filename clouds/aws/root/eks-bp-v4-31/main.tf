@@ -42,6 +42,21 @@ locals {
 }
 
 ################################################################################
+# EC2. Bastion Host
+################################################################################
+
+module "bastion" {
+  source = "../../modules/aws-bastion"
+
+  key_name                 = var.key_name
+  resource_prefix          = local.cluster_name
+  source_security_group_id = module.eks.node_security_group_id
+  ssh_cidr_blocks          = var.ssh_cidr_blocks
+  subnet_id                = module.vpc.first_public_subnet
+  vpc_id                   = module.vpc.vpc_id
+}
+
+################################################################################
 # Buckets
 ################################################################################
 

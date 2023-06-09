@@ -37,6 +37,7 @@ No resources.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_first_public_subnet"></a> [first\_public\_subnet](#output\_first\_public\_subnet) | First public subnet of the VPC |
 | <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | The private subnets of the VPC |
 | <a name="output_private_subnets_cidr_blocks"></a> [private\_subnets\_cidr\_blocks](#output\_private\_subnets\_cidr\_blocks) | The private subnets of the VPC |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The ID of the VPC |

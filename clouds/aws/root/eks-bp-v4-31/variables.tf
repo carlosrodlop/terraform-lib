@@ -26,6 +26,17 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "ssh_cidr_blocks" {
+  description = "SSH CIDR blocks with access to the EKS cluster from Bastion Host"
+  default     = ["0.0.0.0/0"]
+  type        = list(string)
+
+  validation {
+    condition     = contains([for block in var.ssh_cidr_blocks : try(cidrhost(block, 0), "")], "") == false
+    error_message = "List of SSH CIDR blocks contains an invalid CIDR block."
+  }
+}
+
 variable "ssh_cidr_blocks_k8s_whitelist" {
   description = "SSH CIDR blocks with access to the EKS cluster K8s API"
   # Any IP address
@@ -36,4 +47,9 @@ variable "ssh_cidr_blocks_k8s_whitelist" {
     condition     = contains([for block in var.ssh_cidr_blocks_k8s_whitelist : try(cidrhost(block, 0), "")], "") == false
     error_message = "List of SSH CIDR blocks contains an invalid CIDR block."
   }
+}
+
+variable "key_name" {
+  description = "Name of the Key Pair to use for ssh into the Bastion Host instance"
+  type        = string
 }
