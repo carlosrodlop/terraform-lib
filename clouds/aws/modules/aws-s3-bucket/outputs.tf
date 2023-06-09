@@ -5,5 +5,5 @@ output "backend_name" {
 
 output "dynamo_table_lock_name" {
   description = "AWS Dynamo Table lock"
-  value       = aws_dynamodb_table.block_table[0].id
+  value       = var.is_tf_backend ? aws_dynamodb_table.block_table[0].id : null
 }

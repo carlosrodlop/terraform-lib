@@ -63,7 +63,7 @@ module "bastion" {
 
 module "aws_s3_bucket" {
   source      = "../../modules/aws-s3-bucket"
-  count       = 0
+  count       = 2
   bucket_name = element(local.s3_bucket_list, count.index)
 
   force_destroy = true
