@@ -15,10 +15,10 @@ variable "kubernetes_version" {
   }
 }
 
-variable "domain_name" {
+/* variable "domain_name" {
   description = "An existing domain name maped to a Route 53 Hosted Zone"
   type        = string
-}
+} */
 
 variable "tags" {
   description = "Tags to apply to resources"
@@ -60,11 +60,11 @@ variable "enable_bastion_host" {
   default     = true
 }
 
-variable "create_acm" {
+/* variable "create_acm" {
   description = "Create ACM Certificate for the EKS cluster ingress"
   type        = bool
   default     = true
-}
+} */
 
 /* variable "create_efs" {
   description = "Create EFS Storage for the EKS cluster"

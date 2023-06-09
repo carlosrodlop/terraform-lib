@@ -33,10 +33,10 @@ output "eks_cluster_version" {
   value       = module.efs.id
 } */
 
-output "route53_zone_id" {
+/* output "route53_zone_id" {
   description = "Route53 zone ID"
   value       = local.route53_zone_id
-}
+} */
 
 /* output "bastion_ssh_connection_string" {
   description = "SSH connection string for the Bastion Host. Replace <pathToTheKey> to the path to the public key."

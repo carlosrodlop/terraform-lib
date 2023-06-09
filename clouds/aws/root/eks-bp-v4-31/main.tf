@@ -15,9 +15,9 @@ data "aws_eks_cluster_auth" "this" {
   name = module.eks.cluster_name
 }
 
-data "aws_route53_zone" "this" {
+/* data "aws_route53_zone" "this" {
   name = var.domain_name
-}
+} */
 
 data "aws_availability_zones" "available" {}
 
@@ -30,8 +30,8 @@ locals {
   s3_backup_name    = "${local.name}-backups"
   s3_artifacts_name = "${local.name}-artifacts"
   s3_bucket_list    = [local.s3_backup_name, local.s3_artifacts_name]
-  route53_zone_id   = data.aws_route53_zone.this.id
-  azs               = slice(data.aws_availability_zones.available.names, 0, 3)
+  #route53_zone_id   = data.aws_route53_zone.this.id
+  azs = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = merge(var.tags, {
     "tf:blueprint_root" = local.root
@@ -78,7 +78,7 @@ module "aws_s3_bucket" {
 # EKS Pre-requisites
 ################################################################################
 
-module "acm" {
+/* module "acm" {
   count   = var.create_acm ? 1 : 0
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.3.2"
@@ -94,7 +94,7 @@ module "acm" {
   zone_id = local.route53_zone_id
 
   tags = local.tags
-}
+} */
 
 #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
 #https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
