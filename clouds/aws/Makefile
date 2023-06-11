@@ -8,6 +8,9 @@ ENV_SHARED		:= $(MKFILE)/env
 # ENC_KEY	  	:= $(shell age-keygen -y $(SOPS_KEY))
 TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
+AWS_RESOURCES  	:= eks-bp-v4-31
+K8S_RESOURCES  	:= eks-bp-v4-31-k8s
+
 ROOT 			?= eks-bp-v4-31-k8s
 BACKEND         ?= false
 AUTOPROVE	    ?= false
@@ -66,7 +69,11 @@ tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks
 tf_destroy: guard-ROOT check_aws_env
 	$(call print_title,Destroy $(ROOT) Cluster) |tee -a $(TF_LOG_PATH)
 	rm -rf $(TF_LOG_PATH)
-	@#terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
-	@#terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks -var-file="$(ENV_SHARED)/shared.tfvars"
-	@#terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.vpc -var-file="$(ENV_SHARED)/shared.tfvars"
+ifeq ($(ROOT),$(K8S_RESOURCES))
+	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
+else
+ifeq ($(ROOT),$(AWS_RESOURCES))
+	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks -var-file="$(ENV_SHARED)/shared.tfvars"
+	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.vpc -var-file="$(ENV_SHARED)/shared.tfvars"
+else
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
