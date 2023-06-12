@@ -12,7 +12,6 @@
 | [Documentation](https://github.com/carlosrodlop/carlosrodlop-docs/tree/main/hashicorp) | [References](https://github.com/carlosrodlop/carlosrodlop-docs#terraform) |
 | ------------- | ------------- |
 
-- Documentation: [Terraform Certification 2022](https://github.com/carlosrodlop/carlosrodlop-docs/tree/main/hashicorp)
 - It contains deployments for Kubernetes Cluster for different Cloud providers.
 - Command and Processes are orchestrated via `Makefile` into any cloud provider. It is tested to be used with asdf images from [Docker Library](https://github.com/carlosrodlop/docker-lib) making its content portable.
 - Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
