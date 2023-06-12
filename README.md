@@ -17,3 +17,6 @@
   - ⚠️ IMPORTANT - It requires `git submodule update --init --recursive`
   - Helm provider is separated from the creation of the K8s cluster [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
 - It uses [Pre-commits](.pre-commit-config.yaml) for Validations and Documentation
+
+| [Documentation](https://github.com/carlosrodlop/carlosrodlop-docs/tree/main/hashicorp) | [References](https://github.com/carlosrodlop/carlosrodlop-docs#terraform) |
+| ------------- | ------------- |
