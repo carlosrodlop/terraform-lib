@@ -235,6 +235,8 @@ module "eks" {
       }
     }
   }
+
+  tags = var.tags
 }
 
 /* module "efs" {
