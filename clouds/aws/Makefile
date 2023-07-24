@@ -1,21 +1,20 @@
 MKFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PARENT_MKFILE   := $(HOME)/.Makefile
-DEBUG			:= true
 ROOT_SHARED 	:= $(MKFILE)/root
 ENV_SHARED		:= $(MKFILE)/env
+TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
+
+include $(PARENT_MKFILE)
+
+DEBUG			:= $(shell echo $(call getEnvProperty,DEBUG))
+AUTOPROVE	    ?= $(shell echo $(call getEnvProperty,AUTOPROVE))
+BACKEND         ?= $(shell echo $(call getEnvProperty,BACKEND))
+AWS_RESOURCES  	:= $(shell echo $(call getEnvProperty,AWS_RESOURCES))
+K8S_RESOURCES  	:= $(shell echo $(call getEnvProperty,K8S_RESOURCES))
+ROOT 			?= $(shell echo $(call getEnvProperty,ROOT))
 # SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
 # DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
 # ENC_KEY	  	:= $(shell age-keygen -y $(SOPS_KEY))
-TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
-
-AWS_RESOURCES  	:= eks-bp-v4-31
-K8S_RESOURCES  	:= eks-bp-v4-31-k8s
-
-ROOT 			?= eks-bp-v4-31-k8s
-BACKEND         ?= false
-AUTOPROVE	    ?= false
-
-include $(PARENT_MKFILE)
 
 export TF_LOG_PATH=terraform.log
 
@@ -38,11 +37,11 @@ tf_init: guard-ROOT guard-BACKEND
 ifeq ($(BACKEND),false)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
 else #IMPORTANT: It requires backend.tf file in the root folder
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
-		-backend-config="bucket=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw backend_name)" \
-		-backend-config="region=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw aws_region)" \
-		-backend-config="dynamodb_table=$(shell terraform -chdir=$(ROOT_SHARED)/state-bucket output --raw dynamo_table_lock_name)" \
-		-backend-config="key=state/$(ROOT).tfstate" \
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -migrate-state \
+		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,backend_name))" \
+		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
+		-backend-config="dynamodb_table=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,dynamo_table_lock_name))" \
+		-backend-config="key=state/$(AWS_RESOURCES).tfstate" \
 		-backend-config="encrypt=true"
 endif
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
@@ -67,13 +66,13 @@ tf_cleanup_plans: guard-ROOT
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
 tf_destroy: guard-ROOT check_aws_env
-	$(call print_title,Destroy $(ROOT) Cluster) |tee -a $(TF_LOG_PATH)
+	$(call print_title,Destroy $(ROOT) Cluster) | tee -a $(TF_LOG_PATH)
 	rm -rf $(TF_LOG_PATH)
 ifeq ($(ROOT),$(K8S_RESOURCES))
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
-else
+endif
 ifeq ($(ROOT),$(AWS_RESOURCES))
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks -var-file="$(ENV_SHARED)/shared.tfvars"
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.vpc -var-file="$(ENV_SHARED)/shared.tfvars"
-else
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
+endif
