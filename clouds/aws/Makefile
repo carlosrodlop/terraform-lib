@@ -7,7 +7,7 @@ TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 include $(PARENT_MKFILE)
 
 DEBUG			:= $(shell echo $(call getEnvProperty,DEBUG))
-AUTOPROVE	    ?= $(shell echo $(call getEnvProperty,AUTOPROVE))
+AUTOPROVE	    := $(shell echo $(call getEnvProperty,AUTOPROVE))
 BACKEND         ?= $(shell echo $(call getEnvProperty,BACKEND))
 AWS_RESOURCES  	:= $(shell echo $(call getEnvProperty,AWS_RESOURCES))
 K8S_RESOURCES  	:= $(shell echo $(call getEnvProperty,K8S_RESOURCES))
@@ -34,15 +34,15 @@ tf_init: ## Init Terraform root passing as parameter. It can accept a remote BAC
 tf_init: guard-ROOT guard-BACKEND
 	$(call print_title,Init $(ROOT) resources)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
-ifeq ($(BACKEND),false)
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
-else #IMPORTANT: It requires backend.tf file in the root folder
+ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -migrate-state \
 		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,backend_name))" \
 		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
 		-backend-config="dynamodb_table=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,dynamo_table_lock_name))" \
 		-backend-config="key=state/$(AWS_RESOURCES).tfstate" \
 		-backend-config="encrypt=true"
+else
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
 endif
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
 
@@ -70,9 +70,10 @@ tf_destroy: guard-ROOT check_aws_env
 	rm -rf $(TF_LOG_PATH)
 ifeq ($(ROOT),$(K8S_RESOURCES))
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks_blueprints_kubernetes_addons -var-file="$(ENV_SHARED)/shared.tfvars"
-endif
-ifeq ($(ROOT),$(AWS_RESOURCES))
+else ifeq ($(ROOT),$(AWS_RESOURCES))
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.eks -var-file="$(ENV_SHARED)/shared.tfvars"
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -target=module.vpc -var-file="$(ENV_SHARED)/shared.tfvars"
+	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
+else
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
 endif
