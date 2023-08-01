@@ -8,7 +8,12 @@
 
 ## Configuration
 
-* This configuration relies on defining [Environment variables to configure the AWS CLI - AWS Command Line Interface](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+- This configuration relies on defining [Environment variables to configure the AWS CLI - AWS Command Line Interface](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html): `AWS_PROFILE` and `AWS_DEFAULT_REGION`.
+
+## Backends
+
+- Firstly, apply the Root `state-bucket` creates an s3 bucket to store the Terraform state files
+- Secondly, copy `backend.tf.example` to `backend.tf` in every Root to use the S3 bucket created in the previous step.
 
 ## EKS
 
