@@ -42,3 +42,7 @@ kubeconfig-*.yaml
 !kubeconfig-*.yaml.enc
 #*values*.yaml
 backend.tf
+
+#For testing
+clouds/aws/root/tmp/*.*
+!clouds/aws/root/tmp/README.md
