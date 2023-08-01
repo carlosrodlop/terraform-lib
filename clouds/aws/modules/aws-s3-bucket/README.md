@@ -21,7 +21,6 @@ Reference [Terraform S3 Backend Best Practices](https://technology.doximity.com/
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_aws_s3"></a> [aws\_s3](#module\_aws\_s3) | terraform-aws-modules/s3-bucket/aws | 3.4.0 |
-| <a name="module_aws_s3_logs"></a> [aws\_s3\_logs](#module\_aws\_s3\_logs) | terraform-aws-modules/s3-bucket/aws | 3.4.0 |
 
 ## Resources
 
@@ -31,11 +30,6 @@ Reference [Terraform S3 Backend Best Practices](https://technology.doximity.com/
 | [aws_dynamodb_table.block_table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
 | [aws_kms_alias.key_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.bucket_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_s3_bucket_policy.cloudtrail_s3_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
-| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_iam_policy_document.cloudtrail_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
-| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 

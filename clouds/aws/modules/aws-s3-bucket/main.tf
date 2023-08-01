@@ -1,7 +1,6 @@
 locals {
-  cloudtrail_name   = "${var.bucket_name}-s3s"
-  cloudtrail_bucket = "${var.bucket_name}-logs"
-  dynamo_tf_lock    = "${var.bucket_name}-tf-lock"
+  cloudtrail_name = "${var.bucket_name}-s3s"
+  dynamo_tf_lock  = "${var.bucket_name}-tf-lock"
 }
 
 module "aws_s3" {
@@ -43,8 +42,6 @@ module "aws_s3" {
     }
   }
 
-  # Note: Object Lock configuration can be enabled only on new buckets
-  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object_lock_configuration
   object_lock_enabled = true
   object_lock_configuration = {
     rule = {
@@ -75,14 +72,15 @@ resource "aws_kms_alias" "key_alias" {
 }
 
 ########################
-# CloudTrail Logging
+# Auditing: CloudTrail
 ########################
 
 resource "aws_cloudtrail" "s3_cloudtrail" {
-  count          = var.enable_logging ? 1 : 0
-  name           = local.cloudtrail_name
-  s3_bucket_name = module.aws_s3_logs.s3_bucket_id
-  depends_on     = [aws_s3_bucket_policy.cloudtrail_s3_policy]
+  count = var.enable_logging ? 1 : 0
+  name  = local.cloudtrail_name
+  # TODO: This bucket should should match with this spec https://github.com/tmknom/terraform-aws-s3-cloudtrail/blob/master/README.md
+  # The CloudTrail bucket must be created before this Bucket and its common for all cloudtrail logs https://docs.aws.amazon.com/es_es/AmazonS3/latest/userguide/enable-cloudtrail-logging-for-s3.html
+  s3_bucket_name = "cloudtrail-logs-example"
 
   event_selector {
     read_write_type = "All"
@@ -93,116 +91,6 @@ resource "aws_cloudtrail" "s3_cloudtrail" {
     }
   }
 }
-
-module "aws_s3_logs" {
-  # checkov:skip=CKV_AWS_144: "Ensure that S3 bucket has cross-region replication enabled"
-  # checkov:skip=CKV_AWS_18: "Ensure the S3 bucket has access logging enabled"
-  source        = "terraform-aws-modules/s3-bucket/aws"
-  version       = "3.4.0"
-  create_bucket = var.enable_logging
-
-  bucket = local.cloudtrail_bucket
-
-  force_destroy = var.force_destroy
-
-  #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
-  policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AWSCloudTrailAclCheck",
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "cloudtrail.amazonaws.com"
-            },
-            "Action": "s3:GetBucketAcl",
-            "Resource": "arn:aws:s3:::${local.cloudtrail_bucket}",
-            "Condition": {
-                "StringEquals": {
-                    "aws:SourceArn": "arn:aws:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${local.cloudtrail_name}"
-                }
-            }
-        },
-        {
-            "Sid": "AWSCloudTrailWriteAccount",
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "cloudtrail.amazonaws.com"
-            },
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::${local.cloudtrail_bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": "bucket-owner-full-control",
-                    "AWS:SourceArn" : "arn:aws:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${local.cloudtrail_name}"
-                }
-            }
-        }
-    ]
-}
-POLICY
-
-
-  tags = var.tags
-}
-
-data "aws_iam_policy_document" "cloudtrail_s3" {
-  statement {
-    sid    = "AWSCloudTrailAclCheck"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudtrail.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetBucketAcl"]
-    resources = [module.aws_s3_logs.s3_bucket_arn]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${local.cloudtrail_name}"]
-    }
-  }
-
-  statement {
-    sid    = "AWSCloudTrailWrite"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudtrail.amazonaws.com"]
-    }
-
-    actions   = ["s3:PutObject"]
-    resources = ["${module.aws_s3_logs.s3_bucket_arn}/prefix/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = ["arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${local.cloudtrail_name}"]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "cloudtrail_s3_policy" {
-  /* count  = var.enable_logging ? 1 : 0 */
-  count  = 0
-  bucket = module.aws_s3_logs.s3_bucket_id
-  policy = data.aws_iam_policy_document.cloudtrail_s3.json
-}
-
-data "aws_caller_identity" "current" {}
-
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
 
 ########################################
 # Terraform Backend only: Block state
