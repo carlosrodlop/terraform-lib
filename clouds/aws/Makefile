@@ -29,11 +29,16 @@ check_aws_env:
 	$(call exitsEnvVariable,AWS_PROFILE,export AWS_PROFILE=example-profile)
 	$(call exitsEnvVariable,AWS_DEFAULT_REGION,export AWS_DEFAULT_REGION=us-east-1)
 
+.PHONY: tf_fmtval
+tf_fmtval: ## Format and Validate Terraform root passing as parameter. It can accept a remote BACKEND (default to false). Usage: [ROOT=eks][BACKEND=true] make tf_init
+tf_fmtval: guard-ROOT
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
+
 .PHONY: tf_init
-tf_init: ## Init Terraform root passing as parameter. It can accept a remote BACKEND (default to false). Usage: ROOT=eks BACKEND=true make tf_init
+tf_init: ## Init Terraform root passing as parameter. It can accept a remote BACKEND (default to false). Usage: [ROOT=eks][BACKEND=true] make tf_init
 tf_init: guard-ROOT guard-BACKEND
 	$(call print_title,Init $(ROOT) resources)
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) fmt
 ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -migrate-state \
 		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,backend_name))" \
@@ -44,28 +49,22 @@ ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folde
 else
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
 endif
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) validate
 
 .PHONY: tf_apply
-tf_apply: ## Apply Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_apply
-tf_apply: check_aws_env guard-ROOT
+tf_apply: ## Apply Terraform root passing as parameter (ROOT). Usage: [ROOT=eks-bp-v4] make tf_apply
+tf_apply: check_aws_env guard-ROOT tf_fmtval
 	@rm -rf $(TF_LOG_PATH)
 	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(TIMESTAMP)-$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars"
-ifeq ($(AUTOPROVE),true)
+ifeq ($(AUTOPROVE),true) # NOTE: Passing plan file does not require to pass var-file
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply "$(TIMESTAMP)-$(ROOT).plan"
 else
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply -var-file="$(ENV_SHARED)/shared.tfvars"
 endif
-
-.PHONY: tf_cleanup_plans
-tf_cleanup_plans: ## Delete Old plans for ROOT passed as parameter. Usage: ROOT=eks-bp-v4 make tf_apply
-tf_cleanup_plans: guard-ROOT
-	@rm -rf $(ROOT_SHARED)/$(ROOT)/*.plan
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
-tf_destroy: guard-ROOT check_aws_env
+tf_destroy: guard-ROOT check_aws_env tf_fmtval
 	$(call print_title,Destroy $(ROOT) Cluster) | tee -a $(TF_LOG_PATH)
 	rm -rf $(TF_LOG_PATH)
 ifeq ($(ROOT),$(K8S_RESOURCES))
@@ -77,3 +76,14 @@ else ifeq ($(ROOT),$(AWS_RESOURCES))
 else
 	terraform -chdir="$(ROOT_SHARED)/$(ROOT)" destroy -var-file="$(ENV_SHARED)/shared.tfvars"
 endif
+
+.PHONY: tf_action
+tf_action: ## Generic Terraform Action. Usage: [ROOT=eks-bp-v4] [ACTION="status list"] make tf_action
+tf_action: check_aws_env guard-ROOT guard-ACTION
+	@rm -rf $(TF_LOG_PATH)
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) $(ACTION)
+
+.PHONY: cleanup_plans
+cleanup_plans: ## Delete plans for ROOT passed as parameter. Usage: [ROOT=eks-bp-v4] make cleanup_plans
+cleanup_plans: guard-ROOT
+	@rm -rf $(ROOT_SHARED)/$(ROOT)/*.plan
