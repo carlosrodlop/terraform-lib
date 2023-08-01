@@ -1,10 +1,20 @@
-domain_name        = "example.com"
-preffix            = "my-resources-prefix"
-kubernetes_version = "1.24"
-key_name           = "my-key-pair-name"
-enable_bastion_host  = true
-subnet_id_bastion = ""
-create_acm = true
-create_efs = false
-vpc_id = ""
-subnet_id_list_eks = []
+
+preffix = "my-demo" # Required. This is the preffix for the AWS resources
+# k8s_instance_types = { # Optional. K8s Node Groups instance types. Default set to:
+    "k8s-apps"   = ["m5d.4xlarge"]
+    "cb-apps"    = ["m5.8xlarge"]
+    "agent"      = ["m5.4xlarge"]
+    "agent-spot" = ["m5.4xlarge"]
+}
+# k8s_api_public = true # Optional. K8s API public access. Default set to true
+# k8s_api_private = false # Optional. K8s API private access. Default set to false
+# ssh_cidr_blocks_k8s = ["0.0.0.0/0"] # Optional. K8s SSH CIDR blocks with access to the EKS cluster. Default set to all IPs
+# enable_bastion = false # Optional. Enable Bastion Host. Default set to false
+# ssh_cidr_blocks_bastion = ["0.0.0.0/0"] # Optional. Bastion Host SSH CIDR blocks with access to the EKS cluster. Default set to all IPs
+# key_name_bastion = "crodriguezlopez-aws-ps" # Required when bastion host is enabled. Bastion Host EC2 SSH Key Name
+# vpc_id = "vpc-123example" # Optional (Use only when using a existing VPC). VPC ID
+# public_subnet_id_bastion = "" # Optional (Use only when using a existing VPC and Bastion is Enabled). Public Subnet ID for the Bastion Host
+# private_subnets_ids = ["subnet-1234exampleA","subnet-567exampleB"] # Optional (Use only when using a existing VPC). Private Subnets IDs. Default set to empty
+# private_subnets_cidr_blocks = ["10.0.48.0/24", "10.0.49.0/24"] # Optional (Use only when using a existing VPC). Private Subnets CIDR blocks with access to the EKS cluster. Default set to empty
+# azs_number = 3 # Optional. Number of Availability Zones to use for the VPC for the Selected Region. Default set to 3
+# enable_acm = true # Optional. Enable creation ACM Certificate. Default set to true
