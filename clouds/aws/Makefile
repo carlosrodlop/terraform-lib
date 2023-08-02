@@ -6,7 +6,7 @@ TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
 include $(PARENT_MKFILE)
 
-DEBUG			:= $(shell echo $(call getEnvProperty,DEBUG))
+TDEBUG			:= $(shell echo $(call getEnvProperty,TDEBUG))
 AUTOPROVE	    := $(shell echo $(call getEnvProperty,AUTOPROVE))
 BACKEND         ?= $(shell echo $(call getEnvProperty,BACKEND))
 AWS_RESOURCES  	:= $(shell echo $(call getEnvProperty,AWS_RESOURCES))
@@ -18,9 +18,20 @@ ROOT 			?= $(shell echo $(call getEnvProperty,ROOT))
 
 export TF_LOG_PATH=terraform.log
 
-ifeq ($(DEBUG),true)
+ifeq ($(TDEBUG),true)
 	export TF_LOG=DEBUG
 endif
+
+.PHONY: check_vars
+check_vars: ## Check existing values in .env file
+check_vars: check_envfile
+	@echo "ROOT: $(ROOT)"
+	@echo "AWS_REGION: $$AWS_DEFAULT_REGION"
+	@echo "AWS_PROFILE: $$AWS_PROFILE"
+	@echo "BACKEND: $(BACKEND)"
+	@echo "TDEBUG: $(TDEBUG)"
+	@echo "AUTOPROVE: $(AUTOPROVE)"
+	@echo -n "Are you sure? [yes/No] " && read ans && [ $${ans:-No} = yes ]
 
 #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 .PHONY: check_aws_env
@@ -37,11 +48,11 @@ tf_fmtval: guard-ROOT
 
 .PHONY: tf_init
 tf_init: ## Init Terraform root passing as parameter. It can accept a remote BACKEND (default to false). Usage: [ROOT=eks][BACKEND=true] make tf_init
-tf_init: guard-ROOT guard-BACKEND
+tf_init: guard-ROOT guard-BACKEND check_vars
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -migrate-state \
-		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,backend_name))" \
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -reconfigure \
+		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,bucket_name))" \
 		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
 		-backend-config="dynamodb_table=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,dynamo_table_lock_name))" \
 		-backend-config="key=state/$(AWS_RESOURCES).tfstate" \
@@ -52,7 +63,7 @@ endif
 
 .PHONY: tf_apply
 tf_apply: ## Apply Terraform root passing as parameter (ROOT). Usage: [ROOT=eks-bp-v4] make tf_apply
-tf_apply: check_aws_env guard-ROOT tf_fmtval
+tf_apply: check_aws_env guard-ROOT check_vars tf_fmtval
 	@rm -rf $(TF_LOG_PATH)
 	$(call print_title,Apply $(ROOT) resources) | tee -a $(TF_LOG_PATH)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) plan -out="$(TIMESTAMP)-$(ROOT).plan" -var-file="$(ENV_SHARED)/shared.tfvars"
@@ -64,7 +75,7 @@ endif
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy
-tf_destroy: guard-ROOT check_aws_env tf_fmtval
+tf_destroy: guard-ROOT check_aws_env check_vars tf_fmtval
 	$(call print_title,Destroy $(ROOT) Cluster) | tee -a $(TF_LOG_PATH)
 	rm -rf $(TF_LOG_PATH)
 ifeq ($(ROOT),$(K8S_RESOURCES))
@@ -79,7 +90,7 @@ endif
 
 .PHONY: tf_action
 tf_action: ## Generic Terraform Action. Usage: [ROOT=eks-bp-v4] [ACTION="status list"] make tf_action
-tf_action: check_aws_env guard-ROOT guard-ACTION
+tf_action: check_aws_env guard-ROOT guard-ACTION check_vars print_vars
 	@rm -rf $(TF_LOG_PATH)
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) $(ACTION)
 
