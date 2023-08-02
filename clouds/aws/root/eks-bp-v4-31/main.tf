@@ -40,6 +40,7 @@ locals {
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
 
   tags = merge(var.tags, {
+    "tf:preffix"        = var.preffix
     "tf:blueprint_root" = local.root
   })
 

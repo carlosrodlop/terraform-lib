@@ -54,7 +54,7 @@
 | <a name="input_k8s_instance_types"></a> [k8s\_instance\_types](#input\_k8s\_instance\_types) | Map with instance types to use for the EKS cluster nodes for each node group. | `map(list(string))` | <pre>{<br>  "agent": [<br>    "m5.4xlarge"<br>  ],<br>  "agent-spot": [<br>    "m5.4xlarge"<br>  ],<br>  "cb-apps": [<br>    "m5.8xlarge"<br>  ],<br>  "k8s-apps": [<br>    "m5d.4xlarge"<br>  ]<br>}</pre> | no |
 | <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24. | `string` | `"1.24"` | no |
 | <a name="input_key_name_bastion"></a> [key\_name\_bastion](#input\_key\_name\_bastion) | Name of the Existing Key Pair Name from EC2 to use for ssh into the Bastion Host instance | `string` | n/a | yes |
-| <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo | `string` | n/a | yes |
+| <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo. Used for tagging and naming resources. Must be unique. | `string` | n/a | yes |
 | <a name="input_private_subnets_cidr_blocks"></a> [private\_subnets\_cidr\_blocks](#input\_private\_subnets\_cidr\_blocks) | SSH CIDR blocks for existing Private Subnets. If not provided, the private subnets CIDR blocks from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_private_subnets_ids"></a> [private\_subnets\_ids](#input\_private\_subnets\_ids) | Existing Private Subnet IDs. If not provided, the private subnets from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_public_subnet_id_bastion"></a> [public\_subnet\_id\_bastion](#input\_public\_subnet\_id\_bastion) | Existing Public Subnet ID to place the Bastion Host. When this value it is empty, the first public subnet from a new VPC is taken. | `string` | `""` | no |
@@ -68,9 +68,11 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | ACM certificate ARN |
+| <a name="output_buckets"></a> [buckets](#output\_buckets) | Buckets IDs |
 | <a name="output_efs_id"></a> [efs\_id](#output\_efs\_id) | EFS ID |
 | <a name="output_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#output\_eks\_cluster\_endpoint) | EKS cluster endpoint |
 | <a name="output_eks_cluster_id"></a> [eks\_cluster\_id](#output\_eks\_cluster\_id) | EKS cluster ID |
+| <a name="output_eks_cluster_version"></a> [eks\_cluster\_version](#output\_eks\_cluster\_version) | EKS cluster version |
 | <a name="output_eks_oidc_provider"></a> [eks\_oidc\_provider](#output\_eks\_oidc\_provider) | EKS cluster OIDC issuer URL |
 | <a name="output_kubeconfig_file"></a> [kubeconfig\_file](#output\_kubeconfig\_file) | Kubeconfig full file path |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

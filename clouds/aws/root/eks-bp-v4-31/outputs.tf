@@ -8,6 +8,11 @@ output "efs_id" {
   value       = var.enable_efs ? module.efs[0].id : null
 }
 
+output "buckets" {
+  description = "Buckets IDs"
+  value       = [for bucket in module.aws_s3_bucket : bucket.bucket_name]
+}
+
 output "kubeconfig_file" {
   description = "Kubeconfig full file path"
   value       = local.kubeconfig_file_path
@@ -16,6 +21,11 @@ output "kubeconfig_file" {
 output "eks_cluster_id" {
   description = "EKS cluster ID"
   value       = module.eks.cluster_name
+}
+
+output "eks_cluster_version" {
+  description = "EKS cluster version"
+  value       = module.eks.cluster_version
 }
 
 output "eks_cluster_endpoint" {

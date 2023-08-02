@@ -4,7 +4,7 @@
 ################################################################################
 
 variable "preffix" {
-  description = "Preffix of the demo"
+  description = "Preffix of the demo. Used for tagging and naming resources. Must be unique."
   type        = string
 }
 
