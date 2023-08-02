@@ -1,4 +1,4 @@
-output "backend_name" {
+output "bucket_name" {
   description = "AWS S3 Bucket state"
   value       = module.aws_s3.s3_bucket_id
 }
