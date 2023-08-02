@@ -38,6 +38,6 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_aws_region"></a> [aws\_region](#output\_aws\_region) | AWS Dynamo Table lock |
-| <a name="output_backend_name"></a> [backend\_name](#output\_backend\_name) | AWS S3 Bucket state |
+| <a name="output_bucket_name"></a> [bucket\_name](#output\_bucket\_name) | AWS S3 Bucket state |
 | <a name="output_dynamo_table_lock_name"></a> [dynamo\_table\_lock\_name](#output\_dynamo\_table\_lock\_name) | AWS Dynamo Table lock |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

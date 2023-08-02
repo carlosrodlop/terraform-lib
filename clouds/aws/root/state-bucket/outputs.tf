@@ -1,6 +1,6 @@
-output "backend_name" {
+output "bucket_name" {
   description = "AWS S3 Bucket state"
-  value       = module.aws_s3_backend.backend_name
+  value       = module.aws_s3_backend.bucket_name
 }
 
 output "dynamo_table_lock_name" {

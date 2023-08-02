@@ -14,6 +14,7 @@ locals {
   backend_name     = "${local.name}-tf-state"
 
   tags = merge(var.tags, {
+    "tf:preffix"        = var.preffix
     "tf:blueprint_root" = local.root
   })
 
