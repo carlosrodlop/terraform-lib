@@ -29,7 +29,6 @@ check_vars: check_envfile
 	@echo "AWS_REGION: $$AWS_DEFAULT_REGION"
 	@echo "AWS_PROFILE: $$AWS_PROFILE"
 	@echo "BACKEND: $(BACKEND)"
-	@echo "TDEBUG: $(TDEBUG)"
 	@echo "AUTOPROVE: $(AUTOPROVE)"
 	@echo -n "Are you sure? [yes/No] " && read ans && [ $${ans:-No} = yes ]
 
@@ -51,11 +50,11 @@ tf_init: ## Init Terraform root passing as parameter. It can accept a remote BAC
 tf_init: guard-ROOT guard-BACKEND check_vars
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init -reconfigure \
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
 		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,bucket_name))" \
 		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
 		-backend-config="dynamodb_table=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,dynamo_table_lock_name))" \
-		-backend-config="key=state/$(AWS_RESOURCES).tfstate" \
+		-backend-config="key=state/$(ROOT).tfstate" \
 		-backend-config="encrypt=true"
 else
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
