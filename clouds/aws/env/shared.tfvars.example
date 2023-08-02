@@ -6,5 +6,3 @@ tags = { # Optional. Tags for the resources created. Default set to empty.
   "tf:folder" : "clouds/aws"
 }
 domain_name = "example.com" # Required. An existing domain name maped to a Route 53 Hosted Zone
-k8s_version = "1.24" # Optional. K8s cluster version. Default is 1.24
-enable_efs = true # Optional. Enable EFS Storage for the EKS cluster. Default set to true
