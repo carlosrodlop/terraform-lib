@@ -1,5 +1,4 @@
 
-preffix = "my-demo" # Required. This is the preffix for the AWS resources
 # k8s_version = "1.24" # Optional. K8s cluster version. Default is 1.24
 # k8s_instance_types = { # Optional. K8s Node Groups instance types. Default set to:
     "k8s-apps"   = ["m5d.4xlarge"]

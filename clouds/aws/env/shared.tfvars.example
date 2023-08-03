@@ -1,3 +1,4 @@
+preffix = "pr-000592-v3" # Required. This is the preffix for the AWS resources. Shared among state-bucket and AWS Resources.
 tags = { # Optional. Tags for the resources created. Default set to empty.
   "cb:owner" : "professional-services"
   "cb:user" : "crodriguezlopez"

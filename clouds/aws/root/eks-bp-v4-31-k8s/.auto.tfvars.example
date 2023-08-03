@@ -1,0 +1,16 @@
+
+kubeconfig_file = "/root/labs/terraform-lib/clouds/aws/root/eks-bp-v4-31/kubeconfig-example-v3-eks.yaml" # Required. Kubecofig file path fro Kuberntes Provider. Default to ~/.kube/config.
+eks_cluster_version = "1.24" # Required. Kubernetes version to use for the EKS cluster.
+eks_cluster_id = "pr-example-v3-eks" # Required. EKS Cluster ID
+eks_cluster_endpoint = "https://12345EXAMPLE.gr7.us-east-1.eks.amazonaws.com" # Required. EKS Cluster Endpoint
+eks_oidc_provider = "oidc.eks.us-east-1.amazonaws.com/id/12345EXAMPLE" # Required. EKS OIDC Provider
+lb_type = "alb" # Optional. Load Balancer Type. Default to alb. Valid values: alb, nlb
+efs_id = "fs-12345EXAMPLE" # Optional. EFS Resource ID. Default to empty string.
+acm_certificate_arn = "arn:aws:acm:us-east-1:12345:certificate/12345EXAMPLE-789" # Required. ACM Certificate ARN for the EKS cluster ingress.
+enable_addon_cluster_autoscaler = true # Optional. Enable Cluster Autoscaler Addon. Default to true.
+enable_addon_external_dns = false # Optional. Enable External DNS Addon. Default to true.
+hosted_zone_type = "public" # Optional. Hosted Zone Type. Default to public. Valid values: public, private
+enable_addon_kube_prometheus_stack = false # Optional. Enable Kube Prometheus Stack Addon. Default to false.
+#grafana_admin_password = "change.me" # Optional. Grafana Admin Password. Default to change.me.
+enable_addon_velero = true # Optional. Enable Velero Addon. Default to true.
+velero_bucket_id = "pr-example-v3-velero" # Optional. Velero Bucket Name. Default to pr-000592-eks-velero.
