@@ -1,5 +1,5 @@
 ################################################################################
-# General
+# Shared
 ################################################################################
 
 variable "preffix" {
@@ -16,6 +16,17 @@ variable "tags" {
 variable "domain_name" {
   description = "An existing domain name maped to a Route 53 Hosted Zone"
   type        = string
+}
+
+variable "hosted_zone_type" {
+  description = "Route 53 Hosted Zone Type."
+  default     = "public"
+  type        = string
+
+  validation {
+    condition     = contains(["public", "private"], var.hosted_zone_type)
+    error_message = "Hosted zone type must be either 'public' or 'private'."
+  }
 }
 
 ################################################################################
@@ -95,17 +106,6 @@ variable "enable_addon_external_dns" {
   description = "Enable External DNS."
   default     = true
   type        = bool
-}
-
-variable "hosted_zone_type" {
-  description = "Route 53 Hosted Zone Type."
-  default     = "public"
-  type        = string
-
-  validation {
-    condition     = contains(["public", "private"], var.hosted_zone_type)
-    error_message = "Hosted zone type must be either 'public' or 'private'."
-  }
 }
 
 variable "enable_addon_kube_prometheus_stack" {

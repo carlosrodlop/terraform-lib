@@ -16,7 +16,8 @@ data "aws_eks_cluster_auth" "this" {
 }
 
 data "aws_route53_zone" "this" {
-  name = var.domain_name
+  name         = var.domain_name
+  private_zone = local.private_zone
 }
 
 data "aws_availability_zones" "available" {}
@@ -38,6 +39,7 @@ locals {
   vpc_id                      = trim(var.vpc_id, " ") == "" ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
   private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
+  private_zone                = var.hosted_zone_type == "private" ? true : false
 
   tags = merge(var.tags, {
     "tf:preffix"        = var.preffix

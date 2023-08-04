@@ -9,7 +9,6 @@ efs_id = "fs-12345EXAMPLE" # Optional. EFS Resource ID. Default to empty string.
 acm_certificate_arn = "arn:aws:acm:us-east-1:12345:certificate/12345EXAMPLE-789" # Required. ACM Certificate ARN for the EKS cluster ingress.
 enable_addon_cluster_autoscaler = true # Optional. Enable Cluster Autoscaler Addon. Default to true.
 enable_addon_external_dns = false # Optional. Enable External DNS Addon. Default to true.
-hosted_zone_type = "public" # Optional. Hosted Zone Type. Default to public. Valid values: public, private
 enable_addon_kube_prometheus_stack = false # Optional. Enable Kube Prometheus Stack Addon. Default to false.
 #grafana_admin_password = "change.me" # Optional. Grafana Admin Password. Default to change.me.
 enable_addon_velero = true # Optional. Enable Velero Addon. Default to true.
