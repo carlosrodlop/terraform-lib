@@ -5,6 +5,10 @@
 variable "preffix" {
   description = "Preffix of the demo. Used for tagging and naming resources. Must be unique."
   type        = string
+  validation {
+    condition     = trim(var.preffix, " ") != ""
+    error_message = "Preffix must not be en empty string."
+  }
 }
 
 variable "tags" {
@@ -16,6 +20,10 @@ variable "tags" {
 variable "domain_name" {
   description = "An existing domain name maped to a Route 53 Hosted Zone"
   type        = string
+  validation {
+    condition     = trim(var.domain_name, " ") != ""
+    error_message = "Domain name must not be en empty string."
+  }
 }
 
 variable "hosted_zone_type" {

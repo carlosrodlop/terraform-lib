@@ -16,7 +16,8 @@ provider "helm" {
 }
 
 data "aws_route53_zone" "this" {
-  name = var.domain_name
+  name         = var.domain_name
+  private_zone = local.private_zone
 }
 
 locals {
@@ -26,6 +27,7 @@ locals {
     "tf:blueprint_root" = local.root
   })
   route53_zone_id   = data.aws_route53_zone.this.id
+  private_zone      = var.hosted_zone_type == "private" ? true : false
   enable_efs_driver = trim(var.efs_id, " ") == "" ? false : true
   helm_values_path  = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
   helm_charts_path  = "${path.module}/../../../../libs/k8s/helm/charts"

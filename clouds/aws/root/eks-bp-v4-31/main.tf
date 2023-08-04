@@ -40,6 +40,10 @@ locals {
   private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
   private_zone                = var.hosted_zone_type == "private" ? true : false
+  enable_bastion              = alltrue([var.enable_bastion, trim(var.key_name_bastion, " ") != "", length(var.ssh_cidr_blocks_bastion) > 0])
+  enable_acm                  = alltrue([var.enable_acm])
+  enable_vpc                  = alltrue([length(local.azs) > 0])
+  enable_efs                  = alltrue([var.enable_efs, length(local.private_subnet_ids) > 0, length(local.azs) > 0, length(local.private_subnets_cidr_blocks) > 0])
 
   tags = merge(var.tags, {
     "tf:preffix"        = var.preffix
@@ -55,7 +59,7 @@ locals {
 ################################################################################
 
 module "bastion" {
-  count  = var.enable_bastion ? 1 : 0
+  count  = local.enable_bastion ? 1 : 0
   source = "../../modules/aws-bastion"
 
   key_name                 = var.key_name_bastion
@@ -83,7 +87,7 @@ module "aws_s3_bucket" {
 }
 
 module "acm" {
-  count   = var.enable_acm ? 1 : 0
+  count   = local.enable_acm ? 1 : 0
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.3.2"
 
@@ -103,7 +107,7 @@ module "acm" {
 #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
 #https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
 module "vpc" {
-  count  = trim(var.vpc_id, " ") == "" ? 1 : 0
+  count  = local.enable_vpc ? 1 : 0
   source = "../../modules/aws-vpc-eks"
 
   name = local.vpc_name
@@ -122,7 +126,7 @@ module "vpc" {
 
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
 module "efs" {
-  count   = var.enable_efs ? 1 : 0
+  count   = local.enable_efs ? 1 : 0
   source  = "terraform-aws-modules/efs/aws"
   version = "~> 1.0"
 
