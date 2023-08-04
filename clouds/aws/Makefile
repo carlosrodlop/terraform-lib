@@ -50,6 +50,7 @@ tf_init: ## Init Terraform root passing as parameter. It can accept a remote BAC
 tf_init: guard-ROOT guard-BACKEND check_vars
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
+	@echo -n "Is there a backend.tf inside $(ROOT)? [yes/No] " && read ans && [ $${ans:-No} = yes ]
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
 		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,bucket_name))" \
 		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
