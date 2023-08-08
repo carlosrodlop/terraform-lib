@@ -1,4 +1,4 @@
-preffix = "pr-000592-v3" # Required. This is the preffix for the AWS resources. Shared among state-bucket and AWS Resources.
+preffix = "my-demo" # Required. This is the preffix for the AWS resources. Shared among state-bucket and AWS Resources.
 tags = { # Optional. Tags for the resources created. Default set to empty.
   "cb:owner" : "professional-services"
   "cb:user" : "crodriguezlopez"
@@ -6,5 +6,5 @@ tags = { # Optional. Tags for the resources created. Default set to empty.
   "tf:repo" : "https://github.com/carlosrodlop/terraform-lib"
   "tf:folder" : "clouds/aws"
 }
-domain_name = "example.com" # Required. An existing domain name maped to a Route 53 Hosted Zone
-hosted_zone_type = "public" # Optional. Hosted Zone Type. Default to public. Valid values: public, private
+domain_name      = "example.com" # Required. An existing domain name maped to a Route 53 Hosted Zone.
+hosted_zone_type = "public"     # Optional. Hosted Zone Type. Default to public. Valid values: public, private

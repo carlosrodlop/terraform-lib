@@ -16,7 +16,7 @@
 - Terraform operations use makefile inside every cloud provider (e.g. `aws`) to give you examples of the most common operation command set. There are targets for the most common scenarios: init (with backend), plan/apply and destroy but also a general action target to run any terraform command.
   - Copy `.env.example` to `.env` to customize the environment variables. Although, some variables can be passed as arguments to target in the make command (`ROOT` for example).
 - Values Customization:
-  - Variables: Copy `.auto.tfvars.example` to `.auto.tfvars` inside the root folders and replace it with your values. It relies on Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
+  - Variables: Copy `shared.tfvars.example` to `shared.tfvars` inside the cloud/provider/env folder. Then, copy `.auto.tfvars.example` to `.auto.tfvars` inside the root folders. Customize files with your values. It relies on Variables inheritance. See [Terraform - Variable Precedence - Learning-Ocean](https://learning-ocean.com/tutorials/terraform/terraform-variable-precedence)
   - Backend:
     1. Apply the Root `state-bucket` creates a remote backend
     2. Copy `backend.tf.example` to `backend.tf` in every Root to use the backend created in the previous step.

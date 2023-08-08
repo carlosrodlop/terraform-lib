@@ -48,20 +48,33 @@ variable "k8s_version" {
   default     = "1.24"
   type        = string
 
+  #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_kubernetes
   validation {
-    condition     = contains(["1.23", "1.24"], var.k8s_version)
+    condition     = contains(["1.23", "1.24", "1.25"], var.k8s_version)
     error_message = "Provided Kubernetes version is not supported by EKS and/or CloudBees."
   }
 }
 
 variable "k8s_instance_types" {
-  description = "Map with instance types to use for the EKS cluster nodes for each node group."
+  description = "Map with instance types to use for the EKS cluster nodes for each node group. See https://aws.amazon.com/ec2/instance-types/"
   type        = map(list(string))
   default = {
-    "k8s-apps"   = ["m5d.4xlarge"]
-    "cb-apps"    = ["m5.8xlarge"]
-    "agent"      = ["m5.4xlarge"]
-    "agent-spot" = ["m5.4xlarge"]
+    # Not Scalable
+    "k8s-apps" = ["m5.8xlarge"]
+    # Scalable
+    "cb-apps"    = ["m5d.4xlarge"] #Use Md5 https://aws.amazon.com/about-aws/whats-new/2018/06/introducing-amazon-ec2-m5d-instances/
+    "agent"      = ["m5.2xlarge"]
+    "agent-spot" = ["m5.2xlarge"]
+  }
+}
+
+variable "k8s_apps_node_size" {
+  description = "Desired number of nodes for the k8s-apps node group. Node group is not scalable."
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.k8s_apps_node_size >= 1
+    error_message = "Accepted values: 1 or more Nodes."
   }
 }
 
@@ -89,6 +102,12 @@ variable "ssh_cidr_blocks_k8s" {
   }
 }
 
+variable "refresh_kubeconfig" {
+  description = "Refresh kubeconfig file with the new EKS cluster configuration."
+  type        = bool
+  default     = false
+}
+
 ################################################################################
 # Bastion Host
 ################################################################################
@@ -98,13 +117,13 @@ variable "ssh_cidr_blocks_k8s" {
 - Instance Connect Endpoint https://aws.amazon.com/blogs/compute/secure-connectivity-from-public-to-private-introducing-ec2-instance-connect-endpoint-june-13-2023/
 */
 variable "enable_bastion" {
-  description = "Enable Bastion Host for Private only EKS endpoints"
+  description = "Enable Bastion Host for Private only EKS endpoints."
   type        = bool
   default     = false
 }
 
 variable "ssh_cidr_blocks_bastion" {
-  description = "SSH CIDR blocks with access to the EKS cluster from Bastion Host"
+  description = "SSH CIDR blocks with access to the EKS cluster from Bastion Host."
   default     = ["0.0.0.0/0"]
   type        = list(string)
 
@@ -115,7 +134,7 @@ variable "ssh_cidr_blocks_bastion" {
 }
 
 variable "key_name_bastion" {
-  description = "Name of the Existing Key Pair Name from EC2 to use for ssh into the Bastion Host instance"
+  description = "Name of the Existing Key Pair Name from EC2 to use for ssh into the Bastion Host instance."
   type        = string
   default     = ""
 }
@@ -127,7 +146,7 @@ variable "public_subnet_id_bastion" {
 }
 
 ################################################################################
-# VPC
+# Supported Infrastructure
 ################################################################################
 
 variable "vpc_id" {
@@ -165,18 +184,14 @@ variable "azs_number" {
   }
 }
 
-################################################################################
-# Others resources
-################################################################################
-
 variable "enable_acm" {
-  description = "Enable ACM Certificate for the EKS cluster ingress"
+  description = "Enable ACM Certificate for the EKS cluster ingress."
   type        = bool
   default     = true
 }
 
 variable "enable_efs" {
-  description = "Enable EFS Storage for the EKS cluster"
+  description = "Enable EFS Storage for the EKS cluster."
   type        = bool
   default     = true
 }

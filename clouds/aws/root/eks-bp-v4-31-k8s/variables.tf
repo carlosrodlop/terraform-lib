@@ -12,13 +12,13 @@ variable "preffix" {
 }
 
 variable "tags" {
-  description = "Tags to apply to resources"
+  description = "Tags to apply to resources."
   default     = {}
   type        = map(string)
 }
 
 variable "domain_name" {
-  description = "An existing domain name maped to a Route 53 Hosted Zone"
+  description = "An existing domain name maped to a Route 53 Hosted Zone."
   type        = string
   validation {
     condition     = trim(var.domain_name, " ") != ""
@@ -48,27 +48,28 @@ variable "kubeconfig_file" {
 }
 
 variable "eks_cluster_version" {
-  description = "EKS cluster version"
+  description = "EKS cluster version."
   type        = string
 }
 
 variable "eks_cluster_id" {
-  description = "EKS cluster ID"
+  description = "EKS cluster ID."
   type        = string
 }
 
 variable "eks_cluster_endpoint" {
-  description = "EKS cluster endpoint"
+  description = "EKS cluster endpoint."
   type        = string
 }
 
 variable "eks_oidc_provider" {
-  description = "EKS cluster OIDC issuer URL"
+  description = "EKS cluster OIDC issuer URL."
   type        = string
 }
 
+
 ################################################################################
-# Storage
+# EKS Add-ons
 ################################################################################
 
 variable "efs_id" {
@@ -76,10 +77,6 @@ variable "efs_id" {
   type        = string
   default     = ""
 }
-
-################################################################################
-# EKS Add-ons
-################################################################################
 
 variable "lb_type" {
   description = "Type of load balancer to use."
@@ -99,25 +96,26 @@ variable "acm_certificate_arn" {
   validation {
     # regex(...) fails if it cannot find a match
     condition     = can(regex("^arn", var.acm_certificate_arn))
-    error_message = "For the certificate_arn should start with arn"
+    error_message = "For the certificate_arn should start with arn."
   }
 
 }
 
 variable "enable_addon_cluster_autoscaler" {
-  description = "Enable cluster-autoscaler."
+  description = "Enable cluster-autoscaler. Chart: ."
   default     = true
   type        = bool
 }
 
 variable "enable_addon_external_dns" {
-  description = "Enable External DNS."
+  description = "Enable External DNS. Chart: https://artifacthub.io/packages/helm/bitnami/external-dns."
   default     = true
   type        = bool
 }
 
+
 variable "enable_addon_kube_prometheus_stack" {
-  description = "Enable kube-prometheus-stack."
+  description = "Enable kube-prometheus-stack. Chart: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack"
   default     = true
   type        = bool
 }
@@ -129,7 +127,7 @@ variable "grafana_admin_password" {
 }
 
 variable "enable_addon_velero" {
-  description = "Enable Velero. It requires a valid S3 bucket."
+  description = "Enable Velero. It requires a valid S3 bucket. Chart: https://artifacthub.io/packages/helm/vmware-tanzu/velero"
   default     = true
   type        = bool
 }

@@ -72,6 +72,7 @@ ifeq ($(AUTOPROVE),true) # NOTE: Passing plan file does not require to pass var-
 else
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) apply -var-file="$(ENV_SHARED)/shared.tfvars"
 endif
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) output > $(ROOT_SHARED)/$(ROOT)/$(ROOT).output
 
 .PHONY: tf_destroy
 tf_destroy: ## Destroy Terraform root passing as parameter (ROOT, default to eks-bp-v4). Usage: ROOT=eks-bp-v4 make tf_destroy

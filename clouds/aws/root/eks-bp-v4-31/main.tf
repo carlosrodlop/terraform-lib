@@ -8,11 +8,12 @@ provider "aws" {
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.this.token
-}
-
-data "aws_eks_cluster_auth" "this" {
-  name = module.eks.cluster_name
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    # This requires the awscli to be installed locally where Terraform is executed
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+  }
 }
 
 data "aws_route53_zone" "this" {
@@ -21,6 +22,8 @@ data "aws_route53_zone" "this" {
 }
 
 data "aws_availability_zones" "available" {}
+
+data "aws_region" "current" {}
 
 locals {
   root                        = basename(abspath(path.module))
@@ -35,8 +38,10 @@ locals {
   s3_artifacts_name           = "${local.name}-artifacts"
   s3_bucket_list              = [local.s3_ci_backup_name, local.s3_artifacts_name, local.s3_velero_name]
   route53_zone_id             = data.aws_route53_zone.this.id
+  current_region              = data.aws_region.current.name
   azs                         = slice(data.aws_availability_zones.available.names, 0, var.azs_number)
   vpc_id                      = trim(var.vpc_id, " ") == "" ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
+  vpc_cidr                    = "10.0.0.0/16"
   private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
   private_zone                = var.hosted_zone_type == "private" ? true : false
@@ -89,7 +94,7 @@ module "aws_s3_bucket" {
 module "acm" {
   count   = local.enable_acm ? 1 : 0
   source  = "terraform-aws-modules/acm/aws"
-  version = "~> 4.3.2"
+  version = "4.3.2"
 
   domain_name = var.domain_name
   subject_alternative_names = [
@@ -104,15 +109,33 @@ module "acm" {
   tags = local.tags
 }
 
-#https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
-#https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
 module "vpc" {
-  count  = local.enable_vpc ? 1 : 0
-  source = "../../modules/aws-vpc-eks"
+  count   = local.enable_vpc ? 1 : 0
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.0.0"
 
   name = local.vpc_name
-  azs  = local.azs
+  cidr = local.vpc_cidr
 
+  azs = local.azs
+  # Ensure HA by creating different subnets in each AZ and connecting to an Autocaling Group
+  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
+
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
+
+  # Manage so we can name
+  manage_default_network_acl    = true
+  default_network_acl_tags      = { Name = "${local.vpc_name}-default" }
+  manage_default_route_table    = true
+  default_route_table_tags      = { Name = "${local.vpc_name}-default" }
+  manage_default_security_group = true
+  default_security_group_tags   = { Name = "${local.vpc_name}-default" }
+
+  #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
+  #https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1
   }
@@ -121,14 +144,15 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = 1
   }
 
-  tags = local.tags
+  tags = var.tags
+
 }
 
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
 module "efs" {
   count   = local.enable_efs ? 1 : 0
   source  = "terraform-aws-modules/efs/aws"
-  version = "~> 1.0"
+  version = "1.2.0"
 
   creation_token = local.efs_name
   name           = local.efs_name
@@ -157,7 +181,7 @@ module "efs" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.12"
+  version = "19.15.3" #Note for EKS Blueprint v5 "~> 19.13"
 
   cluster_name    = local.cluster_name
   cluster_version = var.k8s_version
@@ -167,15 +191,22 @@ module "eks" {
   cluster_endpoint_private_access      = var.k8s_api_private
   cluster_endpoint_public_access_cidrs = var.ssh_cidr_blocks_k8s
 
-  # EKS Addons
-  cluster_addons = {
-    coredns    = {}
-    kube-proxy = {}
+  # EKS Addons.
+  /* cluster_addons = {
+    coredns    = {} # Installed by default
+    kube-proxy = {} # Installed by default
     vpc-cni    = {}
-  }
+  } */
 
   vpc_id     = local.vpc_id
   subnet_ids = local.private_subnet_ids
+
+  eks_managed_node_group_defaults = {
+    iam_role_additional_policies = {
+      # Not required, but used in the example to access the nodes to inspect mounted volumes
+      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    }
+  }
 
   node_security_group_additional_rules = {
     egress_self_all = {
@@ -218,19 +249,20 @@ module "eks" {
       source_cluster_security_group = true
     }
   }
+
+  #IMPORTANT: Desired Sized cannot be changed https://github.com/terraform-aws-modules/terraform-aws-eks/issues/835
+  #Only Node Groups with Taints can use Autoscaling. Pods requires Selector
   eks_managed_node_groups = {
+    #Not scalable for hosting EKS Add-ons. They cannot be tainted
     mg_k8sApps = {
       node_group_name = "managed-k8s-apps"
-      #https://aws.amazon.com/ec2/instance-types/
-      instance_types = var.k8s_instance_types["k8s-apps"]
-      capacity_type  = "ON_DEMAND"
-      min_size       = 1
-      max_size       = 6
-      desired_size   = 1
+      instance_types  = var.k8s_instance_types["k8s-apps"]
+      capacity_type   = "ON_DEMAND"
+      desired_size    = var.k8s_apps_node_size
     },
+    #Managed by Autoscaling
     mg_cbApps = {
       node_group_name = "managed-cb-apps"
-      #https://aws.amazon.com/ec2/instance-types/
       instance_types  = var.k8s_instance_types["cb-apps"]
       capacity_type   = "ON_DEMAND"
       create_iam_role = false # Changing `create_iam_role=false` to bring your own IAM Role
@@ -350,6 +382,10 @@ resource "aws_iam_instance_profile" "managed_ng" {
 
 #https://www.bitslovers.com/terraform-null-resource/
 resource "null_resource" "create_kubeconfig" {
+  triggers = var.refresh_kubeconfig ? {
+    always_run = timestamp() #Force to recreate on every apply
+  } : {}
+
   depends_on = [module.eks]
 
   provisioner "local-exec" {

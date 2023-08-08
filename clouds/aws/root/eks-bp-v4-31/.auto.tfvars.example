@@ -6,6 +6,7 @@
     "agent"      = ["m5.4xlarge"]
     "agent-spot" = ["m5.4xlarge"]
 }
+# k8s_apps_node_size = 1 # Optional. Desired number of nodes for the k8s-apps node group. Node group is not scalable. Default set to 1
 # k8s_api_public = true # Optional. K8s API public access. Default set to true
 # k8s_api_private = false # Optional. K8s API private access. Default set to false
 # ssh_cidr_blocks_k8s = ["0.0.0.0/0"] # Optional. K8s SSH CIDR blocks with access to the EKS cluster. Default set to all IPs

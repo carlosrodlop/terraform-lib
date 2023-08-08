@@ -18,6 +18,11 @@ output "kubeconfig_file" {
   value       = local.kubeconfig_file_path
 }
 
+output "kubeconfig_update" {
+  description = "Update KUBECONFIG file"
+  value       = "aws eks update-kubeconfig --region ${local.current_region} --name ${local.cluster_name}"
+}
+
 output "eks_cluster_id" {
   description = "EKS cluster ID"
   value       = module.eks.cluster_name

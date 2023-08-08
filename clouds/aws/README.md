@@ -10,13 +10,14 @@
 
 - This configuration relies on defining [Environment variables to configure the AWS CLI - AWS Command Line Interface](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html): `AWS_PROFILE` and `AWS_DEFAULT_REGION`.
 
-## EKS
+## AWS EKS Blueprints (Migration to version 5)
 
-- Deploy anything on the top of [Amazon EKS Blueprints for Terraform](https://aws-ia.github.io/terraform-aws-eks-blueprints/)
-  - Using ![version](https://img.shields.io/badge/version-v4.32.1-blue)
-  - It focuses more on the deployment and configuration of your target application and 3rd party integrations. It focuses less on the deployment of EKS, its add-ons and well-known cloud applications.
+- [AWS EKS Blueprints](https://aws-ia.github.io/terraform-aws-eks-blueprints/main/getting-started/) is a collection of examples for common use cases of Amazon EKS which uses mainly:
+  - [AWS EKS Infraestructure Modules](https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest)
+  - [AWS EKS Addons Modules](https://aws-ia.github.io/terraform-aws-eks-blueprints-addons/main/)
+    - Before version 5, the [AWS EKS Blueprints](https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.32.1/)
+  - Other AWS Modules and Resources.
 
-### Bookmarks
+## AWS Quick Start with CloudFormation
 
-- [EKS Blueprints outputs](https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/main/outputs.tf)
-- [EKS Examples](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/main/examples)
+- [CloudBees CI on AWS](https://aws-quickstart.github.io/quickstart-cloudbees-ci/). NOTE: At the moment of writting this note that code do not follow latest recommendations for CloudBees CI on AWS (like using ALB instead of CLB).
