@@ -25,6 +25,7 @@ endif
 .PHONY: check_vars
 check_vars: ## Check existing values in .env file
 check_vars: check_envfile
+	@#printenv | grep -e PAGER -e HOME
 	@echo "ROOT: $(ROOT)"
 	@echo "AWS_REGION: $$AWS_DEFAULT_REGION"
 	@echo "AWS_PROFILE: $$AWS_PROFILE"

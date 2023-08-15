@@ -16,7 +16,6 @@
   - [AWS EKS Infraestructure Modules](https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest)
   - [AWS EKS Addons Modules](https://aws-ia.github.io/terraform-aws-eks-blueprints-addons/main/)
     - Before version 5, the [AWS EKS Blueprints](https://aws-ia.github.io/terraform-aws-eks-blueprints/v4.32.1/)
-  - Other AWS Modules and Resources.
 
 ## AWS Quick Start with CloudFormation
 

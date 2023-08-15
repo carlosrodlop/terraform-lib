@@ -340,7 +340,7 @@ resource "aws_iam_role" "managed_ng" {
     policy = jsonencode(
       {
         "Version" : "2012-10-17",
-        "Statement" : [
+        "Statement" : [ #https://docs.cloudbees.com/docs/cloudbees-ci/latest/backup-restore/cloudbees-backup-plugin#_amazon_s3
           {
             "Sid" : "CBCIBackupPolicy1",
             "Effect" : "Allow",
