@@ -50,4 +50,4 @@ kubeconfig-*.yaml
 backend.tf
 
 #For testing
-clouds/aws/root/tmp/*.*
+clouds/aws/root/v4/tmp/*.*
