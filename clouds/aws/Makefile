@@ -1,8 +1,5 @@
 MKFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 PARENT_MKFILE   := $(HOME)/.Makefile
-ROOT_SHARED 	:= $(MKFILE)/root
-ENV_SHARED		:= $(MKFILE)/env
-TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
 include $(PARENT_MKFILE)
 
@@ -11,10 +8,11 @@ AUTOPROVE	    := $(shell echo $(call getEnvProperty,AUTOPROVE))
 BACKEND         ?= $(shell echo $(call getEnvProperty,BACKEND))
 AWS_RESOURCES  	:= $(shell echo $(call getEnvProperty,AWS_RESOURCES))
 K8S_RESOURCES  	:= $(shell echo $(call getEnvProperty,K8S_RESOURCES))
-ROOT 			?= $(shell echo $(call getEnvProperty,ROOT))
-# SOPS_KEY 	    := $(HOME)/.sops-age-key.txt
-# DEC_KEY 	  	:= $(shell cat $(SOPS_KEY))
-# ENC_KEY	  	:= $(shell age-keygen -y $(SOPS_KEY))
+ROOT 			?= $(shell echo $(call getEnvProperty,TARGET_ROOT))
+ROOT_SHARED 	:= $(MKFILE)/$(shell echo $(call getEnvProperty,ROOT_PATH))
+TF_INIT_OPTS 	:= $(shell echo $(call getEnvProperty,TF_INIT_OPTS))
+ENV_SHARED		:= $(MKFILE)/env
+TIMESTAMP		:= $(shell date +%Y%m%d%H%M)
 
 export TF_LOG_PATH=terraform.log
 
@@ -52,14 +50,14 @@ tf_init: guard-ROOT guard-BACKEND check_vars
 	$(call print_title,Init $(ROOT) resources)
 ifeq ($(BACKEND),true) #IMPORTANT: It requires backend.tf file in the root folder
 	@echo -n "Is there a backend.tf inside $(ROOT)? [yes/No] " && read ans && [ $${ans:-No} = yes ]
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init \
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init $(TF_INIT_OPTS) \
 		-backend-config="bucket=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,bucket_name))" \
 		-backend-config="region=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,aws_region))" \
 		-backend-config="dynamodb_table=$(shell echo $(call getTFValue,$(ROOT_SHARED)/state-bucket,dynamo_table_lock_name))" \
 		-backend-config="key=state/$(ROOT).tfstate" \
 		-backend-config="encrypt=true"
 else
-	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init
+	terraform -chdir=$(ROOT_SHARED)/$(ROOT) init $(TF_INIT_OPTS)
 endif
 
 .PHONY: tf_apply

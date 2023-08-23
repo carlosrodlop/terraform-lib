@@ -65,7 +65,7 @@ locals {
 
 module "bastion" {
   count  = local.enable_bastion ? 1 : 0
-  source = "../../modules/aws-bastion"
+  source = "../../../modules/aws-bastion"
 
   key_name                 = var.key_name_bastion
   resource_prefix          = local.ec2_bastion_name
@@ -80,7 +80,7 @@ module "bastion" {
 ################################################################################
 
 module "aws_s3_bucket" {
-  source      = "../../modules/aws-s3-bucket"
+  source      = "../../../modules/aws-s3-bucket"
   for_each    = toset(local.s3_bucket_list)
   bucket_name = each.key
 
@@ -329,12 +329,14 @@ resource "aws_iam_role" "managed_ng" {
   assume_role_policy    = data.aws_iam_policy_document.managed_ng_assume_role_policy.json
   path                  = "/"
   force_detach_policies = true
+  # Mandatory for EKS Managed Node Group
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   ]
+  # Additional Permissions for for EKS Managed Node Group
   inline_policy {
     name = "CloudBees_CI"
     policy = jsonencode(

@@ -1,6 +1,6 @@
 output "acm_certificate_arn" {
   description = "ACM certificate ARN"
-  value       = var.enable_acm ? module.acm.acm_certificate_arn : null
+  value       = var.enable_acm ? module.acm[0].acm_certificate_arn : null
 }
 
 output "efs_id" {

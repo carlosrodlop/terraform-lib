@@ -12,13 +12,13 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.9.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.11.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_aws_s3_backend"></a> [aws\_s3\_backend](#module\_aws\_s3\_backend) | ../../modules/aws-s3-bucket | n/a |
+| <a name="module_aws_s3_backend"></a> [aws\_s3\_backend](#module\_aws\_s3\_backend) | ../../../modules/aws-s3-bucket | n/a |
 
 ## Resources
 

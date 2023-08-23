@@ -21,7 +21,7 @@ locals {
 }
 
 module "aws_s3_backend" {
-  source = "../../modules/aws-s3-bucket"
+  source = "../../../modules/aws-s3-bucket"
 
   bucket_name    = local.backend_name
   force_destroy  = true

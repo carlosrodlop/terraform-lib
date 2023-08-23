@@ -14,16 +14,16 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.11.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.13.1 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 2.10.1 |
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.22.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.23.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.32.1 |
-| <a name="module_node_problem_detector"></a> [node\_problem\_detector](#module\_node\_problem\_detector) | ../../../shared/modules/k8s-node-problem-detector | n/a |
+| <a name="module_node_problem_detector"></a> [node\_problem\_detector](#module\_node\_problem\_detector) | ../../../../shared/modules/k8s-node-problem-detector | n/a |
 
 ## Resources
 

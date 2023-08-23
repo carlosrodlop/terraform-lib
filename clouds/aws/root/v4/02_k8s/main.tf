@@ -35,8 +35,8 @@ locals {
       value = "linux"
     }
   ]
-  helm_values_path                    = "${path.module}/../../../../libs/k8s/helm/values/aws-tf-blueprints"
-  helm_charts_path                    = "${path.module}/../../../../libs/k8s/helm/charts"
+  helm_values_path                    = "${path.module}/../../../../../libs/k8s/helm/values/aws-tf-blueprints"
+  helm_charts_path                    = "${path.module}/../../../../../libs/k8s/helm/charts"
   enable_addon_external_dns           = alltrue([var.enable_addon_external_dns, trim(var.hosted_zone_type, " ") != "", trim(local.route53_zone_id, " ") != ""])
   enable_aws_load_balancer_controller = alltrue([trim(var.lb_type, " ") == "alb"])
   enable_ingress_nginx                = alltrue([trim(var.lb_type, " ") == "nlb", trim(var.acm_certificate_arn, " ") != ""])
@@ -137,7 +137,7 @@ resource "helm_release" "kube_prometheus_stack_local" {
 
 module "node_problem_detector" {
   depends_on = [module.eks_blueprints_kubernetes_addons]
-  source     = "../../../shared/modules/k8s-node-problem-detector"
+  source     = "../../../../shared/modules/k8s-node-problem-detector"
 }
 
 ######################################################
