@@ -88,7 +88,9 @@ module "aws_s3_bucket" {
   #TODO: Fix InsufficientS3BucketPolicyException
   #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
   enable_logging = false
-  tags           = local.tags
+  #SECO-3109
+  enable_object_lock = false
+  tags               = local.tags
 }
 
 module "acm" {
@@ -336,7 +338,8 @@ resource "aws_iam_role" "managed_ng" {
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   ]
-  # Additional Permissions for for EKS Managed Node Group
+  # Additional Permissions for for EKS Managed Node Group per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
+  # For backup it does not work and it should be done with https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html
   inline_policy {
     name = "CloudBees_CI"
     policy = jsonencode(

@@ -42,15 +42,15 @@ module "aws_s3" {
     }
   }
 
-  object_lock_enabled = true
-  object_lock_configuration = {
+  object_lock_enabled = var.enable_object_lock
+  object_lock_configuration = var.enable_object_lock ? {
     rule = {
       default_retention = {
         mode = "GOVERNANCE"
         days = 1
       }
     }
-  }
+  } : {}
 
   tags = var.tags
 }
