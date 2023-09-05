@@ -204,6 +204,7 @@ resource "kubernetes_storage_class_v1" "efs" {
     provisioningMode = "efs-ap" # Dynamic provisioning
     fileSystemId     = var.efs_id
     directoryPerms   = "700"
+    #uid              = "1000" #For CloudBees CI and CD
   }
 
   mount_options = [
