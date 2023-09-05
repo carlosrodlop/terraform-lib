@@ -20,9 +20,7 @@
   - Backend:
     1. Apply the Root `state-bucket` creates a remote backend
     2. Copy `backend.tf.example` to `backend.tf` in every Root to use the backend created in the previous step.
-- Companion Repositories:
-  - [Docker Library](https://github.com/carlosrodlop/docker-lib) for testing using the image
-  - The Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib)
-    - ⚠️ IMPORTANT - It requires `git submodule update --init --recursive`
-    - Helm provider is separated from the creation of the K8s cluster [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
-- It uses [Pre-commits](.pre-commit-config.yaml) for Validations and Documentation
+- It has been developed using tools provided in [asdf.ubuntu](https://github.com/carlosrodlop/docker-lib/tree/v1.1.0/docker/asdf.ubuntu) image for testing.
+- It uses submodules. For example, the Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib). Helm provider is separated from the creation of the K8s cluster [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
+  - ⚠️ IMPORTANT - It requires `git submodule update --init --recursive`
+- It uses [Pre-commits](.pre-commit-config.yaml) for Validations and Documentation.
