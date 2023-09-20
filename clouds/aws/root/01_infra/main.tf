@@ -223,7 +223,7 @@ module "eks" {
   subnet_ids = local.private_subnet_ids
 
   #NOTE: In EKS blueprint v5 it is managed via eks_addons
-  /* cluster_addons = {
+  cluster_addons = {
     coredns = {
       most_recent = true
     }
@@ -233,7 +233,7 @@ module "eks" {
     vpc-cni = {
       most_recent = true
     }
-  } */
+  }
 
   eks_managed_node_group_defaults = {
     iam_role_additional_policies = {
