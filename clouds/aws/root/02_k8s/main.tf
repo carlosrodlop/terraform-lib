@@ -25,8 +25,8 @@ locals {
 }
 
 module "aws_eks_addons" {
-  #source = "../../modules/aws-eks-addons-v4"
-  source = "../../modules/aws-eks-addons-v5"
+  source = "../../modules/aws-eks-addons-v4"
+  #source = "../../modules/aws-eks-addons-v5"
 
   eks_cluster_version                = var.eks_cluster_version
   eks_cluster_id                     = var.eks_cluster_id
@@ -51,7 +51,7 @@ module "aws_eks_addons" {
 ################################################################################
 
 resource "kubernetes_annotations" "gp2" {
-  depends_on  = [module.aws-eks-addons]
+  depends_on  = [module.aws_eks_addons]
   api_version = "storage.k8s.io/v1"
   kind        = "StorageClass"
   # This is true because the resources was already created by the ebs-csi-driver addon
@@ -65,11 +65,10 @@ resource "kubernetes_annotations" "gp2" {
     # Modify annotations to remove gp2 as default storage class still reatain the class
     "storageclass.kubernetes.io/is-default-class" = "false"
   }
-
 }
 
 resource "kubernetes_storage_class_v1" "gp3" {
-  depends_on = [module.aws-eks-addons]
+  depends_on = [module.aws_eks_addons]
   metadata {
     name = "gp3"
 
@@ -91,7 +90,7 @@ resource "kubernetes_storage_class_v1" "gp3" {
 }
 
 resource "kubernetes_storage_class_v1" "efs" {
-  depends_on = [module.aws-eks-addons]
+  depends_on = [module.aws_eks_addons]
   count      = local.eks_efs_driver ? 1 : 0
   metadata {
     name = "efs"
@@ -111,5 +110,4 @@ resource "kubernetes_storage_class_v1" "efs" {
   mount_options = [
     "iam"
   ]
-
 }
