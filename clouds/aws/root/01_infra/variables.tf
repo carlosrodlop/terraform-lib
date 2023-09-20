@@ -27,15 +27,10 @@ variable "domain_name" {
   }
 }
 
-variable "hosted_zone_type" {
-  description = "Route 53 Hosted Zone Type."
-  default     = "public"
-  type        = string
-
-  validation {
-    condition     = contains(["public", "private"], var.hosted_zone_type)
-    error_message = "Hosted zone type must be either 'public' or 'private'."
-  }
+variable "private_hosted_zone" {
+  description = "Private Route 53 Hosted Zone Type."
+  default     = false
+  type        = bool
 }
 
 ################################################################################
@@ -45,7 +40,7 @@ variable "hosted_zone_type" {
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud
 variable "k8s_version" {
   description = "Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24."
-  default     = "1.24"
+  default     = "1.25"
   type        = string
 
   #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_kubernetes

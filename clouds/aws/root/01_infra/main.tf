@@ -18,10 +18,12 @@ provider "kubernetes" {
 
 data "aws_route53_zone" "this" {
   name         = var.domain_name
-  private_zone = local.private_zone
+  private_zone = var.private_hosted_zone
 }
 
 data "aws_availability_zones" "available" {}
+
+data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
@@ -44,10 +46,9 @@ locals {
   vpc_cidr                    = "10.0.0.0/16"
   private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
-  private_zone                = var.hosted_zone_type == "private" ? true : false
   enable_bastion              = alltrue([var.enable_bastion, trim(var.key_name_bastion, " ") != "", length(var.ssh_cidr_blocks_bastion) > 0])
   enable_acm                  = alltrue([var.enable_acm])
-  enable_vpc                  = alltrue([length(local.azs) > 0])
+  enable_vpc                  = alltrue([trim(var.vpc_id, " ") == ""])
   enable_efs                  = alltrue([var.enable_efs, length(local.private_subnet_ids) > 0, length(local.azs) > 0, length(local.private_subnets_cidr_blocks) > 0])
 
   tags = merge(var.tags, {
@@ -65,7 +66,7 @@ locals {
 
 module "bastion" {
   count  = local.enable_bastion ? 1 : 0
-  source = "../../../modules/aws-bastion"
+  source = "../../modules/aws-bastion"
 
   key_name                 = var.key_name_bastion
   resource_prefix          = local.ec2_bastion_name
@@ -80,7 +81,7 @@ module "bastion" {
 ################################################################################
 
 module "aws_s3_bucket" {
-  source      = "../../../modules/aws-s3-bucket"
+  source      = "../../modules/aws-s3-bucket"
   for_each    = toset(local.s3_bucket_list)
   bucket_name = each.key
 
@@ -150,6 +151,10 @@ module "vpc" {
 
 }
 
+################################################################################
+# Storage
+################################################################################
+
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
 module "efs" {
   count   = local.enable_efs ? 1 : 0
@@ -177,6 +182,27 @@ module "efs" {
   tags = local.tags
 }
 
+module "ebs_kms_key" {
+  source  = "terraform-aws-modules/kms/aws"
+  version = "~> 1.5"
+
+  description = "Customer managed key to encrypt EKS managed node group volumes"
+
+  # Policy
+  key_administrators = [data.aws_caller_identity.current.arn]
+  key_service_roles_for_autoscaling = [
+    # required for the ASG to manage encrypted volumes for nodes
+    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+    # required for the cluster / persistentvolume-controller to create encrypted PVCs
+    module.eks.cluster_iam_role_arn,
+  ]
+
+  # Aliases
+  aliases = ["eks/${local.name}/ebs"]
+
+  tags = local.tags
+}
+
 ################################################################################
 # EKS Cluster
 ################################################################################
@@ -193,15 +219,21 @@ module "eks" {
   cluster_endpoint_private_access      = var.k8s_api_private
   cluster_endpoint_public_access_cidrs = var.ssh_cidr_blocks_k8s
 
-  # EKS Addons.
-  /* cluster_addons = {
-    coredns    = {} # Installed by default
-    kube-proxy = {} # Installed by default
-    vpc-cni    = {}
-  } */
-
   vpc_id     = local.vpc_id
   subnet_ids = local.private_subnet_ids
+
+  #NOTE: In EKS blueprint v5 it is managed via eks_addons
+  /* cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  } */
 
   eks_managed_node_group_defaults = {
     iam_role_additional_policies = {

@@ -20,3 +20,7 @@
 ## AWS Quick Start with CloudFormation
 
 - [CloudBees CI on AWS](https://aws-quickstart.github.io/quickstart-cloudbees-ci/). NOTE: At the moment of writting this note that code do not follow latest recommendations for CloudBees CI on AWS (like using ALB instead of CLB).
+
+## Known Issues
+
+- https://github.com/terraform-aws-modules/terraform-aws-eks/issues/411

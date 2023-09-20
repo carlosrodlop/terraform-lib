@@ -1,16 +1,3 @@
-################################################################################
-# Shared
-################################################################################
-
-variable "preffix" {
-  description = "Preffix of the demo. Used for tagging and naming resources. Must be unique."
-  type        = string
-  validation {
-    condition     = trim(var.preffix, " ") != ""
-    error_message = "Preffix must not be en empty string."
-  }
-}
-
 variable "tags" {
   description = "Tags to apply to resources."
   default     = {}
@@ -26,26 +13,15 @@ variable "domain_name" {
   }
 }
 
-variable "hosted_zone_type" {
-  description = "Route 53 Hosted Zone Type."
-  default     = "public"
-  type        = string
-
-  validation {
-    condition     = contains(["public", "private"], var.hosted_zone_type)
-    error_message = "Hosted zone type must be either 'public' or 'private'."
-  }
+variable "private_hosted_zone" {
+  description = "Private Route 53 Hosted Zone Type."
+  default     = false
+  type        = bool
 }
 
 ################################################################################
 # EKS
 ################################################################################
-
-variable "kubeconfig_file" {
-  description = "Kubeconfig file path to be used as context for te Kubernetes provider."
-  default     = "~/.kube/config"
-  type        = string
-}
 
 variable "eks_cluster_version" {
   description = "EKS cluster version."
@@ -67,10 +43,10 @@ variable "eks_oidc_provider" {
   type        = string
 }
 
-
 ################################################################################
 # EKS Add-ons
 ################################################################################
+
 
 variable "efs_id" {
   description = "EFS ID"
@@ -101,21 +77,21 @@ variable "acm_certificate_arn" {
 
 }
 
-variable "enable_addon_cluster_autoscaler" {
-  description = "Enable cluster-autoscaler. Chart: ."
+variable "eks_bp_addon_cluster_autoscaler" {
+  description = "Enable EKS blueprint add-on cluster-autoscaler. Chart: https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler"
   default     = true
   type        = bool
 }
 
-variable "enable_addon_external_dns" {
-  description = "Enable External DNS. Chart: https://artifacthub.io/packages/helm/bitnami/external-dns."
+variable "eks_bp_addon_external_dns" {
+  description = "Enable EKS blueprint add-on External DNS. Chart: https://artifacthub.io/packages/helm/bitnami/external-dns."
   default     = true
   type        = bool
 }
 
 
-variable "enable_addon_kube_prometheus_stack" {
-  description = "Enable kube-prometheus-stack. Chart: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack"
+variable "eks_bp_addon_kube_prometheus_stack" {
+  description = "Enable EKS blueprint add-on  kube-prometheus-stack. Chart: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack"
   default     = true
   type        = bool
 }
@@ -126,8 +102,8 @@ variable "grafana_admin_password" {
   type        = string
 }
 
-variable "enable_addon_velero" {
-  description = "Enable Velero. It requires a valid S3 bucket. Chart: https://artifacthub.io/packages/helm/vmware-tanzu/velero"
+variable "eks_bp_addon_velero" {
+  description = "Enable EKS blueprint add-on Velero. It requires a valid S3 bucket. Chart: https://artifacthub.io/packages/helm/vmware-tanzu/velero"
   default     = true
   type        = bool
 }

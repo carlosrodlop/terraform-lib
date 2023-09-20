@@ -7,4 +7,4 @@ tags = { # Optional. Tags for the resources created. Default set to empty.
   "tf:folder" : "clouds/aws"
 }
 domain_name      = "example.com" # Required. An existing domain name maped to a Route 53 Hosted Zone.
-hosted_zone_type = "public"     # Optional. Hosted Zone Type. Default to public. Valid values: public, private
+private_hosted_zone = false     # Optional. Private Hosted Zone Type. Default to public.

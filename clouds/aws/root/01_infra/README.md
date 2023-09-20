@@ -22,8 +22,9 @@
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 4.3.2 |
-| <a name="module_aws_s3_bucket"></a> [aws\_s3\_bucket](#module\_aws\_s3\_bucket) | ../../../modules/aws-s3-bucket | n/a |
-| <a name="module_bastion"></a> [bastion](#module\_bastion) | ../../../modules/aws-bastion | n/a |
+| <a name="module_aws_s3_bucket"></a> [aws\_s3\_bucket](#module\_aws\_s3\_bucket) | ../../modules/aws-s3-bucket | n/a |
+| <a name="module_bastion"></a> [bastion](#module\_bastion) | ../../modules/aws-bastion | n/a |
+| <a name="module_ebs_kms_key"></a> [ebs\_kms\_key](#module\_ebs\_kms\_key) | terraform-aws-modules/kms/aws | ~> 1.5 |
 | <a name="module_efs"></a> [efs](#module\_efs) | terraform-aws-modules/efs/aws | 1.2.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 19.15.3 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.0.0 |
@@ -36,6 +37,7 @@
 | [aws_iam_role.managed_ng](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [null_resource.create_kubeconfig](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.managed_ng_assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
@@ -49,14 +51,14 @@
 | <a name="input_enable_acm"></a> [enable\_acm](#input\_enable\_acm) | Enable ACM Certificate for the EKS cluster ingress. | `bool` | `true` | no |
 | <a name="input_enable_bastion"></a> [enable\_bastion](#input\_enable\_bastion) | Enable Bastion Host for Private only EKS endpoints. | `bool` | `false` | no |
 | <a name="input_enable_efs"></a> [enable\_efs](#input\_enable\_efs) | Enable EFS Storage for the EKS cluster. | `bool` | `true` | no |
-| <a name="input_hosted_zone_type"></a> [hosted\_zone\_type](#input\_hosted\_zone\_type) | Route 53 Hosted Zone Type. | `string` | `"public"` | no |
 | <a name="input_k8s_api_private"></a> [k8s\_api\_private](#input\_k8s\_api\_private) | Indicates whether or not the Amazon EKS private API server endpoint is enabled | `bool` | `false` | no |
 | <a name="input_k8s_api_public"></a> [k8s\_api\_public](#input\_k8s\_api\_public) | Indicates whether or not the Amazon EKS public API server endpoint is enabled | `bool` | `true` | no |
 | <a name="input_k8s_apps_node_size"></a> [k8s\_apps\_node\_size](#input\_k8s\_apps\_node\_size) | Desired number of nodes for the k8s-apps node group. Node group is not scalable. | `number` | `1` | no |
 | <a name="input_k8s_instance_types"></a> [k8s\_instance\_types](#input\_k8s\_instance\_types) | Map with instance types to use for the EKS cluster nodes for each node group. See https://aws.amazon.com/ec2/instance-types/ | `map(list(string))` | <pre>{<br>  "agent": [<br>    "m5.2xlarge"<br>  ],<br>  "agent-spot": [<br>    "m5.2xlarge"<br>  ],<br>  "cb-apps": [<br>    "m5d.4xlarge"<br>  ],<br>  "k8s-apps": [<br>    "m5.8xlarge"<br>  ]<br>}</pre> | no |
-| <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24. | `string` | `"1.24"` | no |
+| <a name="input_k8s_version"></a> [k8s\_version](#input\_k8s\_version) | Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24. | `string` | `"1.25"` | no |
 | <a name="input_key_name_bastion"></a> [key\_name\_bastion](#input\_key\_name\_bastion) | Name of the Existing Key Pair Name from EC2 to use for ssh into the Bastion Host instance. | `string` | `""` | no |
 | <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo. Used for tagging and naming resources. Must be unique. | `string` | n/a | yes |
+| <a name="input_private_hosted_zone"></a> [private\_hosted\_zone](#input\_private\_hosted\_zone) | Private Route 53 Hosted Zone Type. | `bool` | `false` | no |
 | <a name="input_private_subnets_cidr_blocks"></a> [private\_subnets\_cidr\_blocks](#input\_private\_subnets\_cidr\_blocks) | SSH CIDR blocks for existing Private Subnets. If not provided, the private subnets CIDR blocks from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_private_subnets_ids"></a> [private\_subnets\_ids](#input\_private\_subnets\_ids) | Existing Private Subnet IDs. If not provided, the private subnets from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_public_subnet_id_bastion"></a> [public\_subnet\_id\_bastion](#input\_public\_subnet\_id\_bastion) | Existing Public Subnet ID to place the Bastion Host. When this value it is empty, the first public subnet from a new VPC is taken. | `string` | `""` | no |
