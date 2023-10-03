@@ -77,22 +77,8 @@ module "bastion" {
 }
 
 ################################################################################
-# Supported Resources
+# Pre-requisites
 ################################################################################
-
-module "aws_s3_bucket" {
-  source      = "../../modules/aws-s3-bucket"
-  for_each    = toset(local.s3_bucket_list)
-  bucket_name = each.key
-
-  force_destroy = true
-  #TODO: Fix InsufficientS3BucketPolicyException
-  #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
-  enable_logging = false
-  #SECO-3109
-  enable_object_lock = false
-  tags               = local.tags
-}
 
 module "acm" {
   count   = local.enable_acm ? 1 : 0
@@ -154,6 +140,21 @@ module "vpc" {
 ################################################################################
 # Storage
 ################################################################################
+
+# For Buckups, Artifacts and Cache
+module "s3_bucket" {
+  source      = "../../modules/aws-s3-bucket"
+  for_each    = toset(local.s3_bucket_list)
+  bucket_name = each.key
+
+  force_destroy = true
+  #TODO: Fix InsufficientS3BucketPolicyException
+  #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
+  enable_logging = false
+  #SECO-3109
+  enable_object_lock = false
+  tags               = local.tags
+}
 
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
 module "efs" {
@@ -235,14 +236,11 @@ module "eks" {
     }
   }
 
-  eks_managed_node_group_defaults = {
-    iam_role_additional_policies = {
-      # Not required, but used in the example to access the nodes to inspect mounted volumes
-      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    }
-  }
-
+  # Security groups based on the best practices doc https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html.
+  #   So, by default the security groups are restrictive. Users needs to enable rules for specific ports required for App requirement or Add-ons
+  #   See the notes below for each rule used in these examples
   node_security_group_additional_rules = {
+    # Recommended outbound traffic for Node groups
     egress_self_all = {
       description = "Node to node all ports/protocols"
       protocol    = "-1"
@@ -251,7 +249,7 @@ module "eks" {
       type        = "egress"
       self        = true
     }
-
+    # Extend node-to-node security group rules. Recommended and required for the Add-ons
     ingress_self_all = {
       description = "Node to node all ports/protocols"
       protocol    = "-1"

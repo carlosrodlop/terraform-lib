@@ -23,8 +23,8 @@ locals {
 }
 
 module "eks_blueprints_addons" {
-  #Note v4.32.1 support External DNS with Private Hosted Zones
-  #Version > 4.32.1 to avoid https://github.com/aws-ia/terraform-aws-eks-blueprints/issues/1630#issuecomment-1577525242
+  #IMPORTANT: DO NOT CHANGE THE REFERENCE TO THE MODULE
+  #Since 4.32.1 to avoid https://github.com/aws-ia/terraform-aws-eks-blueprints/issues/1630#issuecomment-1577525242
   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.32.1"
 
   eks_cluster_id       = var.eks_cluster_id
@@ -35,7 +35,7 @@ module "eks_blueprints_addons" {
   #Used by `ExternalDNS` to create DNS records in this Hosted Zone.
   eks_cluster_domain = var.domain_name
 
-  # Managed Add-ons
+  # EKS Managed Add-ons
   # https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/v4.24.0/docs/add-ons/managed-add-ons.md
   enable_amazon_eks_aws_ebs_csi_driver = true
   enable_aws_efs_csi_driver            = local.eks_bp_addon_efs_driver
@@ -96,7 +96,8 @@ module "eks_blueprints_addons" {
 }
 
 resource "helm_release" "kube_prometheus_stack_local" {
-  count            = local.eks_bp_addon_kube_prometheus_stack ? 1 : 0
+  #count            = local.eks_bp_addon_kube_prometheus_stack ? 1 : 0
+  count            = 0
   depends_on       = [module.eks_blueprints_addons]
   name             = "kube-prometheus-stack-local"
   chart            = "${local.helm_charts_path}/kube-prometheus-stack-local"

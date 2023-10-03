@@ -20,7 +20,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_aws_eks_addons"></a> [aws\_eks\_addons](#module\_aws\_eks\_addons) | ../../modules/aws-eks-addons-v4 | n/a |
+| <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ../../modules/aws-eks-addons-v4 | n/a |
 
 ## Resources
 

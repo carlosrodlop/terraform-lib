@@ -10,7 +10,7 @@ output "efs_id" {
 
 output "buckets" {
   description = "Buckets IDs"
-  value       = [for bucket in module.aws_s3_bucket : bucket.bucket_name]
+  value       = [for bucket in module.s3_bucket : bucket.bucket_name]
 }
 
 output "kubeconfig_file" {

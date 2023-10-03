@@ -40,13 +40,13 @@ variable "private_hosted_zone" {
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud
 variable "k8s_version" {
   description = "Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24."
-  default     = "1.25"
+  default     = "1.24"
   type        = string
 
   #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_kubernetes
   validation {
-    condition     = contains(["1.23", "1.24", "1.25"], var.k8s_version)
-    error_message = "Provided Kubernetes version is not supported by EKS and/or CloudBees."
+    condition     = contains(["1.24"], var.k8s_version)
+    error_message = "Provided Kubernetes version has not been tested."
   }
 }
 
