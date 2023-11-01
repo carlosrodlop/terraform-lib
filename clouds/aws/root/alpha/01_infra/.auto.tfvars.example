@@ -1,4 +1,5 @@
 
+# aws_region # Required. AWS Region
 # k8s_version = "1.24" # Optional. K8s cluster version. Default is 1.24
 # k8s_instance_types = { # Optional. K8s Node Groups instance types. Default set to:
     "k8s-apps"   = ["m5d.4xlarge"]
@@ -9,7 +10,8 @@
 # k8s_apps_node_size = 1 # Optional. Desired number of nodes for the k8s-apps node group. Node group is not scalable. Default set to 1
 # k8s_api_public = true # Optional. K8s API public access. Default set to true
 # k8s_api_private = false # Optional. K8s API private access. Default set to false
-# refresh_kubeconfig = false # Optional. Refresh
+# kubeconfig_file_update = false # Optional. Refresh
+# aws_tf_bp_version = v5 # Optional. Default to v5
 # ssh_cidr_blocks_k8s = ["0.0.0.0/0"] # Optional. K8s SSH CIDR blocks with access to the EKS cluster. Default set to all IPs
 # enable_bastion = false # Optional. Enable Bastion Host. Default set to false
 # ssh_cidr_blocks_bastion = ["0.0.0.0/0"] # Optional. Bastion Host SSH CIDR blocks with access to the EKS cluster. Default set to all IPs

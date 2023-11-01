@@ -1,10 +1,3 @@
-provider "aws" {
-  #https://github.com/hashicorp/terraform-provider-aws/issues/19583
-  /* default_tags {
-    tags = local.tags
-  } */
-}
-
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -16,197 +9,20 @@ provider "kubernetes" {
   }
 }
 
-data "aws_route53_zone" "this" {
-  name         = var.domain_name
-  private_zone = var.private_hosted_zone
-}
-
-data "aws_availability_zones" "available" {}
+data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {}
-
 locals {
-  root                        = basename(abspath(path.module))
-  workspace_suffix            = terraform.workspace == "default" ? "" : "_${terraform.workspace}"
-  name                        = "${var.preffix}${local.workspace_suffix}"
-  vpc_name                    = "${local.name}-vpc"
-  efs_name                    = "${local.name}-efs"
-  cluster_name                = "${local.name}-eks"
-  ec2_bastion_name            = "${local.name}-bastion"
-  s3_ci_backup_name           = "${local.name}-ci-backups"
-  s3_velero_name              = "${local.name}-velero"
-  s3_artifacts_name           = "${local.name}-artifacts"
-  s3_bucket_list              = [local.s3_ci_backup_name, local.s3_artifacts_name, local.s3_velero_name]
-  route53_zone_id             = data.aws_route53_zone.this.id
-  current_region              = data.aws_region.current.name
-  azs                         = slice(data.aws_availability_zones.available.names, 0, var.azs_number)
-  vpc_id                      = trim(var.vpc_id, " ") == "" ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
-  vpc_cidr                    = "10.0.0.0/16"
-  private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
-  private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
-  enable_bastion              = alltrue([var.enable_bastion, trim(var.key_name_bastion, " ") != "", length(var.ssh_cidr_blocks_bastion) > 0])
-  enable_acm                  = alltrue([var.enable_acm])
-  enable_vpc                  = alltrue([trim(var.vpc_id, " ") == ""])
-  enable_efs                  = alltrue([var.enable_efs, length(local.private_subnet_ids) > 0, length(local.azs) > 0, length(local.private_subnets_cidr_blocks) > 0])
-
-  tags = merge(var.tags, {
-    "tf:preffix"        = var.preffix
-    "tf:blueprint_root" = local.root
-  })
-
+  cluster_name         = "${var.name}-eks"
+  efs_name             = "${var.name}-efs"
+  enable_efs           = alltrue([var.enable_efs, length(var.private_subnets_ids) > 0, length(var.azs) > 0, length(var.private_subnets_cidr_blocks) > 0])
+  current_region       = data.aws_region.current.name
+  current_account_id   = data.aws_caller_identity.current.account_id
+  current_account_arn  = data.aws_caller_identity.current.arn
   kubeconfig_file      = "kubeconfig-${module.eks.cluster_name}.yaml"
   kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
 }
-
-################################################################################
-# EC2. Bastion Host
-################################################################################
-
-module "bastion" {
-  count  = local.enable_bastion ? 1 : 0
-  source = "../../modules/aws-bastion"
-
-  key_name                 = var.key_name_bastion
-  resource_prefix          = local.ec2_bastion_name
-  source_security_group_id = module.eks.node_security_group_id
-  ssh_cidr_blocks          = var.ssh_cidr_blocks_bastion
-  subnet_id                = trim(var.public_subnet_id_bastion, " ") == "" ? module.vpc[0].public_subnets[0] : var.public_subnet_id_bastion
-  vpc_id                   = local.vpc_id
-}
-
-################################################################################
-# Pre-requisites
-################################################################################
-
-module "acm" {
-  count   = local.enable_acm ? 1 : 0
-  source  = "terraform-aws-modules/acm/aws"
-  version = "4.3.2"
-
-  domain_name = var.domain_name
-  subject_alternative_names = [
-    "*.ci.${var.domain_name}",
-    "*.cd.${var.domain_name}",
-    "*.${var.domain_name}"
-  ]
-
-  #https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html
-  zone_id = local.route53_zone_id
-
-  tags = local.tags
-}
-
-module "vpc" {
-  count   = local.enable_vpc ? 1 : 0
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.0.0"
-
-  name = local.vpc_name
-  cidr = local.vpc_cidr
-
-  azs = local.azs
-  # Ensure HA by creating different subnets in each AZ and connecting to an Autocaling Group
-  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
-
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
-
-  # Manage so we can name
-  manage_default_network_acl    = true
-  default_network_acl_tags      = { Name = "${local.vpc_name}-default" }
-  manage_default_route_table    = true
-  default_route_table_tags      = { Name = "${local.vpc_name}-default" }
-  manage_default_security_group = true
-  default_security_group_tags   = { Name = "${local.vpc_name}-default" }
-
-  #https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
-  #https://docs.aws.amazon.com/eks/latest/userguide/network-load-balancing.html
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = 1
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = 1
-  }
-
-  tags = var.tags
-
-}
-
-################################################################################
-# Storage
-################################################################################
-
-# For Buckups, Artifacts and Cache
-module "s3_bucket" {
-  source      = "../../modules/aws-s3-bucket"
-  for_each    = toset(local.s3_bucket_list)
-  bucket_name = each.key
-
-  force_destroy = true
-  #TODO: Fix InsufficientS3BucketPolicyException
-  #https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
-  enable_logging = false
-  #SECO-3109
-  enable_object_lock = false
-  tags               = local.tags
-}
-
-#https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
-module "efs" {
-  count   = local.enable_efs ? 1 : 0
-  source  = "terraform-aws-modules/efs/aws"
-  version = "1.2.0"
-
-  creation_token = local.efs_name
-  name           = local.efs_name
-
-  mount_targets = {
-    for k, v in zipmap(local.azs, local.private_subnet_ids) : k => { subnet_id = v }
-  }
-  security_group_description = "${local.efs_name} EFS security group"
-  security_group_vpc_id      = local.vpc_id
-  #https://d1.awsstatic.com/events/reinvent/2021/Amazon_EFS_performance_best_practices_STG403.pdf
-  performance_mode = "generalPurpose"
-  security_group_rules = {
-    vpc = {
-      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
-      description = "NFS ingress from VPC private subnets"
-      cidr_blocks = local.private_subnets_cidr_blocks
-    }
-  }
-
-  tags = local.tags
-}
-
-module "ebs_kms_key" {
-  source  = "terraform-aws-modules/kms/aws"
-  version = "~> 1.5"
-
-  description = "Customer managed key to encrypt EKS managed node group volumes"
-
-  # Policy
-  key_administrators = [data.aws_caller_identity.current.arn]
-  key_service_roles_for_autoscaling = [
-    # required for the ASG to manage encrypted volumes for nodes
-    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
-    # required for the cluster / persistentvolume-controller to create encrypted PVCs
-    module.eks.cluster_iam_role_arn,
-  ]
-
-  # Aliases
-  aliases = ["eks/${local.name}/ebs"]
-
-  tags = local.tags
-}
-
-################################################################################
-# EKS Cluster
-################################################################################
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -220,11 +36,10 @@ module "eks" {
   cluster_endpoint_private_access      = var.k8s_api_private
   cluster_endpoint_public_access_cidrs = var.ssh_cidr_blocks_k8s
 
-  vpc_id     = local.vpc_id
-  subnet_ids = local.private_subnet_ids
+  vpc_id     = var.vpc_id
+  subnet_ids = var.private_subnets_ids
 
-  #NOTE: In EKS blueprint v5 it is managed via eks_addons
-  cluster_addons = {
+  cluster_addons = var.aws_tf_bp_version == "v4" ? {
     coredns = {
       most_recent = true
     }
@@ -234,7 +49,7 @@ module "eks" {
     vpc-cni = {
       most_recent = true
     }
-  }
+  } : {}
 
   # Security groups based on the best practices doc https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html.
   #   So, by default the security groups are restrictive. Users needs to enable rules for specific ports required for App requirement or Add-ons
@@ -383,19 +198,19 @@ resource "aws_iam_role" "managed_ng" {
               "s3:GetObject",
               "s3:DeleteObject"
             ],
-            "Resource" : "arn:aws:s3:::${local.s3_ci_backup_name}/cbci/*"
+            "Resource" : "arn:aws:s3:::${var.s3_ci_backup_name}/cbci/*"
           },
           {
             "Sid" : "CBCIBackupPolicy2",
             "Effect" : "Allow",
             "Action" : "s3:ListBucket",
-            "Resource" : "arn:aws:s3:::${local.s3_ci_backup_name}"
+            "Resource" : "arn:aws:s3:::${var.s3_ci_backup_name}"
           },
         ]
       }
     )
   }
-  tags = local.tags
+  tags = var.tags
 }
 
 resource "aws_iam_instance_profile" "managed_ng" {
@@ -407,7 +222,59 @@ resource "aws_iam_instance_profile" "managed_ng" {
     create_before_destroy = true
   }
 
-  tags = local.tags
+  tags = var.tags
+}
+
+#---------------------------------------------------------------
+# Storage
+#---------------------------------------------------------------
+
+#https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
+module "efs" {
+  count   = local.enable_efs ? 1 : 0
+  source  = "terraform-aws-modules/efs/aws"
+  version = "1.2.0"
+
+  creation_token = local.efs_name
+  name           = local.efs_name
+
+  mount_targets = {
+    for k, v in zipmap(var.azs, var.private_subnets_ids) : k => { subnet_id = v }
+  }
+  security_group_description = "${local.efs_name} EFS security group"
+  security_group_vpc_id      = var.vpc_id
+  #https://d1.awsstatic.com/events/reinvent/2021/Amazon_EFS_performance_best_practices_STG403.pdf
+  performance_mode = "generalPurpose"
+  security_group_rules = {
+    vpc = {
+      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
+      description = "NFS ingress from VPC private subnets"
+      cidr_blocks = var.private_subnets_cidr_blocks
+    }
+  }
+
+  tags = var.tags
+}
+
+module "ebs_kms_key" {
+  source  = "terraform-aws-modules/kms/aws"
+  version = "1.5.0"
+
+  description = "Customer managed key to encrypt EKS managed node group volumes"
+
+  # Policy
+  key_administrators = [local.current_account_arn]
+  key_service_roles_for_autoscaling = [
+    # required for the ASG to manage encrypted volumes for nodes
+    "arn:aws:iam::${local.current_account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+    # required for the cluster / persistentvolume-controller to create encrypted PVCs
+    module.eks.cluster_iam_role_arn
+  ]
+
+  # Aliases
+  aliases = ["eks/${var.name}/ebs"]
+
+  tags = var.tags
 }
 
 #---------------------------------------------------------------
@@ -416,7 +283,7 @@ resource "aws_iam_instance_profile" "managed_ng" {
 
 #https://www.bitslovers.com/terraform-null-resource/
 resource "null_resource" "create_kubeconfig" {
-  triggers = var.refresh_kubeconfig ? {
+  triggers = var.kubeconfig_file_update ? {
     always_run = timestamp() #Force to recreate on every apply
   } : {}
 

@@ -30,15 +30,17 @@ locals {
 
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.7" #ensure to update this to the latest/desired version
+  version = "1.9.1" #ensure to update this to the latest/desired version
 
   cluster_name      = var.eks_cluster_id
   cluster_endpoint  = var.eks_cluster_endpoint
-  cluster_version   = var.eks_oidc_provider
-  oidc_provider_arn = var.eks_cluster_version
+  oidc_provider_arn = var.eks_oidc_provider
+  cluster_version   = var.eks_cluster_version
 
-  #ERROR: https://github.com/carlosrodlop/terraform-lib/issues/10
   eks_addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+    }
     coredns    = {}
     vpc-cni    = {}
     kube-proxy = {}
@@ -94,6 +96,24 @@ module "eks_blueprints_addons" {
   enable_velero = local.eks_bp_addon_velero
   velero = {
     s3_backup_location = local.velero_bucket_arn
+  }
+
+  tags = var.tags
+}
+
+module "ebs_csi_driver_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.29.0"
+
+  role_name_prefix = "${var.eks_cluster_id}-ebs-csi-driver-"
+
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = var.eks_oidc_provider
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
   }
 
   tags = var.tags

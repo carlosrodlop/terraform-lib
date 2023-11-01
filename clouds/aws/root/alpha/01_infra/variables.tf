@@ -1,5 +1,14 @@
 
 ################################################################################
+# AWS
+################################################################################
+
+variable "aws_region" {
+  type        = string
+  description = "Alpha AWS region"
+}
+
+################################################################################
 # Shared
 ################################################################################
 
@@ -39,13 +48,13 @@ variable "private_hosted_zone" {
 
 #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud
 variable "k8s_version" {
-  description = "Kubernetes version to use for the EKS cluster. Supported versions are 1.23 and 1.24."
-  default     = "1.24"
+  description = "Kubernetes version to use for the EKS cluster. Supported versions are 1.24. and 1.26"
+  default     = "1.26"
   type        = string
 
   #https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_kubernetes
   validation {
-    condition     = contains(["1.24"], var.k8s_version)
+    condition     = contains(["1.24", "1.26"], var.k8s_version)
     error_message = "Provided Kubernetes version has not been tested."
   }
 }
@@ -97,11 +106,23 @@ variable "ssh_cidr_blocks_k8s" {
   }
 }
 
-variable "refresh_kubeconfig" {
+variable "kubeconfig_file_update" {
   description = "Refresh kubeconfig file with the new EKS cluster configuration."
   type        = bool
   default     = false
 }
+
+variable "aws_tf_bp_version" {
+  description = "AWS Terraform Blueprint Version"
+  type        = string
+  default     = "v5"
+
+  validation {
+    condition     = contains(["v4", "v5"], var.aws_tf_bp_version)
+    error_message = "Provided Blueprint version does not exist. Accepted values: v4 or v5."
+  }
+}
+
 
 ################################################################################
 # Bastion Host

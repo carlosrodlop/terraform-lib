@@ -24,9 +24,12 @@ locals {
   eks_efs_driver = trim(var.efs_id, " ") == "" ? false : true
 }
 
+################################################################################
+# EKS-Addons
+################################################################################
+
 module "eks_addons" {
-  source = "../../modules/aws-eks-addons-v4"
-  #source = "../../modules/aws-eks-addons-v5"
+  source = "../../../modules/aws-eks-addons-v4"
 
   eks_cluster_version                = var.eks_cluster_version
   eks_cluster_id                     = var.eks_cluster_id
