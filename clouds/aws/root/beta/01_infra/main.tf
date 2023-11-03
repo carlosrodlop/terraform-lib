@@ -11,12 +11,6 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.eks.eks_cluster_certificate_authority_data)
   token                  = data.aws_eks_cluster_auth.this.token
 }
-
-data "aws_route53_zone" "this" {
-  name         = var.domain_name
-  private_zone = var.private_hosted_zone
-}
-
 data "aws_eks_cluster_auth" "this" {
   name = module.eks.eks_cluster_id
 }
@@ -24,7 +18,7 @@ data "aws_eks_cluster_auth" "this" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  platform                    = "alpha"
+  platform                    = "beta"
   root                        = basename(abspath(path.module))
   workspace_suffix            = terraform.workspace == "default" ? "" : "-${terraform.workspace}"
   global_name                 = "${var.preffix}${local.workspace_suffix}"
@@ -32,17 +26,11 @@ locals {
   efs_name                    = "${local.platform_name}-efs"
   vpc_name                    = "${local.platform_name}-vpc"
   ec2_bastion_name            = "${local.platform_name}-bastion"
-  s3_ci_backup_name           = "${local.global_name}-ci-backups"
-  s3_velero_name              = "${local.global_name}-velero"
-  s3_artifacts_name           = "${local.global_name}-artifacts"
-  s3_bucket_list              = [local.s3_ci_backup_name, local.s3_artifacts_name, local.s3_velero_name]
-  route53_zone_id             = data.aws_route53_zone.this.id
   azs                         = slice(data.aws_availability_zones.available.names, 0, var.azs_number)
   vpc_id                      = trim(var.vpc_id, " ") == "" ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
   vpc_cidr                    = "10.0.0.0/16"
   private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
-  enable_acm                  = alltrue([var.enable_acm])
   enable_bastion              = alltrue([var.enable_bastion, trim(var.key_name_bastion, " ") != "", length(var.ssh_cidr_blocks_bastion) > 0])
   # To enable VPC (create a new one): Requires empty values for vpc_id, private_subnets_ids and private_subnets_cidr_blocks
   enable_vpc = alltrue([trim(var.vpc_id, " ") == "", length(var.private_subnets_ids) == 0, length(var.private_subnets_cidr_blocks) == 0])
@@ -57,26 +45,6 @@ locals {
 ################################################################################
 # Pre-requisites
 ################################################################################
-
-#Global Resources
-module "acm" {
-  count   = local.enable_acm ? 1 : 0
-  source  = "terraform-aws-modules/acm/aws"
-  version = "4.3.2"
-
-  #Important: Application Services Hostname must be the same as the domain name or subject_alternative_names
-  domain_name = var.domain_name
-  subject_alternative_names = [
-    "ci.${var.domain_name}",
-    "*.${var.domain_name}", # For subdomains example.${var.domain_name}
-    "cd.${var.domain_name}"
-  ]
-
-  #https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html
-  zone_id = local.route53_zone_id
-
-  tags = local.tags
-}
 
 module "vpc" {
   count   = local.enable_vpc ? 1 : 0
@@ -125,7 +93,7 @@ module "eks" {
   aws_tf_bp_version      = var.aws_tf_bp_version
   vpc_id                 = local.vpc_id
   private_subnets_ids    = local.private_subnet_ids
-  s3_ci_backup_name      = local.s3_ci_backup_name
+  s3_ci_backup_name      = var.s3_ci_backup_name
   tags                   = local.tags
 
 }
@@ -147,18 +115,7 @@ module "bastion" {
   vpc_id    = local.vpc_id
 }
 
-#Global Resources
-module "s3_bucket" {
-  source      = "../../../modules/aws-s3-bucket"
-  for_each    = toset(local.s3_bucket_list)
-  bucket_name = each.key
-
-  force_destroy = true
-  #SECO-3109
-  enable_object_lock = false
-  tags               = local.tags
-}
-
+#https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
 module "efs" {
   count   = local.enable_efs ? 1 : 0
   source  = "terraform-aws-modules/efs/aws"

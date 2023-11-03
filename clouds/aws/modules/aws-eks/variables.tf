@@ -5,7 +5,7 @@ variable "tags" {
 }
 
 variable "name" {
-  description = "EKS Name."
+  description = "Platform Name."
   type        = string
 }
 
@@ -87,7 +87,7 @@ variable "kubeconfig_file_update" {
 }
 
 variable "vpc_id" {
-  description = "Existing VPC ID."
+  description = "Existing VPC ID. If not provided, a new VPC will be created."
   type        = string
   default     = ""
 }
@@ -96,30 +96,6 @@ variable "private_subnets_ids" {
   description = "Existing Private Subnet IDs."
   type        = list(string)
   default     = []
-}
-
-variable "private_subnets_cidr_blocks" {
-  description = "SSH CIDR blocks for existing Private Subnets."
-  default     = []
-  type        = list(string)
-
-  validation {
-    condition     = contains([for block in var.private_subnets_cidr_blocks : try(cidrhost(block, 0), "")], "") == false
-    error_message = "List of SSH CIDR blocks contains an invalid CIDR block."
-  }
-}
-
-# https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-availability-zones.html
-variable "azs" {
-  description = "Availability Zones to use for the EKS cluster."
-  type        = list(string)
-
-}
-
-variable "enable_efs" {
-  description = "Enable EFS Storage for the EKS cluster."
-  type        = bool
-  default     = true
 }
 
 variable "s3_ci_backup_name" {

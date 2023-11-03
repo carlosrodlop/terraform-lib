@@ -30,7 +30,6 @@ No resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_acm_certificate_arn"></a> [acm\_certificate\_arn](#input\_acm\_certificate\_arn) | ACM certificate ARN. It is used by the ALB/Nginx ingress controller. | `string` | n/a | yes |
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | Alpha AWS region | `string` | `"us-east-1"` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | An existing domain name maped to a Route 53 Hosted Zone. | `string` | n/a | yes |
 | <a name="input_efs_id"></a> [efs\_id](#input\_efs\_id) | EFS ID | `string` | `""` | no |
 | <a name="input_eks_bp_addon_cluster_autoscaler"></a> [eks\_bp\_addon\_cluster\_autoscaler](#input\_eks\_bp\_addon\_cluster\_autoscaler) | Enable EKS blueprint add-on cluster-autoscaler. Chart: https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler | `bool` | `true` | no |

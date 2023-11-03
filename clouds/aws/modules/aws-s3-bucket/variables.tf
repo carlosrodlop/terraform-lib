@@ -15,12 +15,6 @@ variable "is_tf_backend" {
   default     = false
 }
 
-variable "enable_logging" {
-  type        = bool
-  description = "Enable S3 bucket access logging via CloudTrail"
-  default     = true
-}
-
 #SECO-3109 - Problem with Backups
 variable "enable_object_lock" {
   type        = bool

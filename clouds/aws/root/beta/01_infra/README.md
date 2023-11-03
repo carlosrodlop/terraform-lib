@@ -13,17 +13,15 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.13.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.23.1 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 4.3.2 |
 | <a name="module_bastion"></a> [bastion](#module\_bastion) | ../../../modules/aws-bastion | n/a |
 | <a name="module_efs"></a> [efs](#module\_efs) | terraform-aws-modules/efs/aws | 1.2.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | ../../../modules/aws-eks | n/a |
-| <a name="module_s3_bucket"></a> [s3\_bucket](#module\_s3\_bucket) | ../../../modules/aws-s3-bucket | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.0.0 |
 
 ## Resources
@@ -32,7 +30,6 @@
 |------|------|
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_eks_cluster_auth.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster_auth) | data source |
-| [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
 ## Inputs
 
@@ -42,7 +39,6 @@
 | <a name="input_aws_tf_bp_version"></a> [aws\_tf\_bp\_version](#input\_aws\_tf\_bp\_version) | AWS Terraform Blueprint Version | `string` | `"v5"` | no |
 | <a name="input_azs_number"></a> [azs\_number](#input\_azs\_number) | Number of Availability Zones to use for the VPC for the Selected Region. Minimum 2 for HA. | `number` | `3` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | An existing domain name maped to a Route 53 Hosted Zone | `string` | n/a | yes |
-| <a name="input_enable_acm"></a> [enable\_acm](#input\_enable\_acm) | Enable ACM Certificate for the EKS cluster ingress. | `bool` | `true` | no |
 | <a name="input_enable_bastion"></a> [enable\_bastion](#input\_enable\_bastion) | Enable Bastion Host for Private only EKS endpoints. | `bool` | `false` | no |
 | <a name="input_enable_efs"></a> [enable\_efs](#input\_enable\_efs) | Enable EFS Storage for the EKS cluster. | `bool` | `true` | no |
 | <a name="input_k8s_api_private"></a> [k8s\_api\_private](#input\_k8s\_api\_private) | Indicates whether or not the Amazon EKS private API server endpoint is enabled | `bool` | `false` | no |
@@ -53,10 +49,10 @@
 | <a name="input_key_name_bastion"></a> [key\_name\_bastion](#input\_key\_name\_bastion) | Name of the Existing Key Pair Name from EC2 to use for ssh into the Bastion Host instance. | `string` | `""` | no |
 | <a name="input_kubeconfig_file_update"></a> [kubeconfig\_file\_update](#input\_kubeconfig\_file\_update) | Refresh kubeconfig file with the new EKS cluster configuration. | `bool` | `false` | no |
 | <a name="input_preffix"></a> [preffix](#input\_preffix) | Preffix of the demo. Used for tagging and naming resources. Must be unique. | `string` | n/a | yes |
-| <a name="input_private_hosted_zone"></a> [private\_hosted\_zone](#input\_private\_hosted\_zone) | Private Route 53 Hosted Zone Type. | `bool` | `false` | no |
 | <a name="input_private_subnets_cidr_blocks"></a> [private\_subnets\_cidr\_blocks](#input\_private\_subnets\_cidr\_blocks) | SSH CIDR blocks for existing Private Subnets. If not provided, the private subnets CIDR blocks from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_private_subnets_ids"></a> [private\_subnets\_ids](#input\_private\_subnets\_ids) | Existing Private Subnet IDs. If not provided, the private subnets from a new VPC are taken. | `list(string)` | `[]` | no |
 | <a name="input_public_subnet_id_bastion"></a> [public\_subnet\_id\_bastion](#input\_public\_subnet\_id\_bastion) | Existing Public Subnet ID to place the Bastion Host. When this value it is empty, the first public subnet from a new VPC is taken. | `string` | `""` | no |
+| <a name="input_s3_ci_backup_name"></a> [s3\_ci\_backup\_name](#input\_s3\_ci\_backup\_name) | S3 Bucket Name for CI Backups. | `string` | n/a | yes |
 | <a name="input_ssh_cidr_blocks_bastion"></a> [ssh\_cidr\_blocks\_bastion](#input\_ssh\_cidr\_blocks\_bastion) | SSH CIDR blocks with access to the EKS cluster from Bastion Host. | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_ssh_cidr_blocks_k8s"></a> [ssh\_cidr\_blocks\_k8s](#input\_ssh\_cidr\_blocks\_k8s) | SSH CIDR blocks with access to the EKS cluster K8s API | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
@@ -66,8 +62,6 @@
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | ACM certificate ARN |
-| <a name="output_buckets"></a> [buckets](#output\_buckets) | Buckets IDs |
 | <a name="output_efs_id"></a> [efs\_id](#output\_efs\_id) | EFS ID |
 | <a name="output_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#output\_eks\_cluster\_endpoint) | EKS cluster endpoint |
 | <a name="output_eks_cluster_id"></a> [eks\_cluster\_id](#output\_eks\_cluster\_id) | EKS cluster ID |

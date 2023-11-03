@@ -1,9 +1,3 @@
-
-output "efs_id" {
-  description = "EFS ID"
-  value       = var.enable_efs ? module.efs[0].id : null
-}
-
 output "kubeconfig_file_path" {
   description = "Kubeconfig full file path"
   value       = local.kubeconfig_file_path
@@ -34,7 +28,12 @@ output "eks_oidc_provider" {
   value       = module.eks.oidc_provider
 }
 
-output "node_security_group_id" {
+output "eks_cluster_certificate_authority_data" {
+  description = "EKS cluster OIDC issuer URL"
+  value       = module.eks.cluster_certificate_authority_data
+}
+
+output "eks_node_security_group_id" {
   description = "EKS cluster node security group ID"
   value       = module.eks.node_security_group_id
 }

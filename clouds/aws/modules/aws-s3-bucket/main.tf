@@ -1,6 +1,5 @@
 locals {
-  cloudtrail_name = "${var.bucket_name}-s3s"
-  dynamo_tf_lock  = "${var.bucket_name}-tf-lock"
+  dynamo_tf_lock = "${var.bucket_name}-tf-lock"
 }
 
 module "aws_s3" {
@@ -69,27 +68,6 @@ resource "aws_kms_key" "bucket_key" {
 resource "aws_kms_alias" "key_alias" {
   name          = "alias/${var.bucket_name}"
   target_key_id = aws_kms_key.bucket_key.key_id
-}
-
-########################
-# Auditing: CloudTrail
-########################
-
-resource "aws_cloudtrail" "s3_cloudtrail" {
-  count = var.enable_logging ? 1 : 0
-  name  = local.cloudtrail_name
-  # TODO: This bucket should should match with this spec https://github.com/tmknom/terraform-aws-s3-cloudtrail/blob/master/README.md
-  # The CloudTrail bucket must be created before this Bucket and its common for all cloudtrail logs https://docs.aws.amazon.com/es_es/AmazonS3/latest/userguide/enable-cloudtrail-logging-for-s3.html
-  s3_bucket_name = "cloudtrail-logs-example"
-
-  event_selector {
-    read_write_type = "All"
-
-    data_resource {
-      type   = "AWS::S3::Object"
-      values = ["arn:aws:s3:::${var.bucket_name}/*"]
-    }
-  }
 }
 
 ########################################

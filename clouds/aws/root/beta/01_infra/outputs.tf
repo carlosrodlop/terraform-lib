@@ -1,21 +1,3 @@
-############################
-#Global Resources
-############################
-
-output "acm_certificate_arn" {
-  description = "ACM certificate ARN"
-  value       = var.enable_acm ? module.acm[0].acm_certificate_arn : null
-}
-
-output "buckets" {
-  description = "Buckets IDs"
-  value       = [for bucket in module.s3_bucket : bucket.bucket_name]
-}
-
-############################
-#Regional Resources
-############################
-
 output "efs_id" {
   description = "EFS ID"
   value       = local.enable_efs ? module.efs[0].id : null

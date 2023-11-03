@@ -1,27 +1,17 @@
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    # This requires the awscli to be installed locally where Terraform is executed
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-  }
-}
-
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
 locals {
-  cluster_name         = "${var.name}-eks"
-  efs_name             = "${var.name}-efs"
-  enable_efs           = alltrue([var.enable_efs, length(var.private_subnets_ids) > 0, length(var.azs) > 0, length(var.private_subnets_cidr_blocks) > 0])
-  current_region       = data.aws_region.current.name
-  current_account_id   = data.aws_caller_identity.current.account_id
-  current_account_arn  = data.aws_caller_identity.current.arn
-  kubeconfig_file      = "kubeconfig-${module.eks.cluster_name}.yaml"
-  kubeconfig_file_path = abspath("${path.root}/${local.kubeconfig_file}")
+  cluster_name              = "${var.name}-eks"
+  iam_role_mn               = "${var.name}-managed-node-role"
+  iam_inline_policy         = "${var.name}-cbci"
+  iam_instance_profile_name = "${var.name}-instance_profile"
+  current_region            = data.aws_region.current.name
+  current_account_id        = data.aws_caller_identity.current.account_id
+  current_account_arn       = data.aws_caller_identity.current.arn
+  kubeconfig_file           = "kubeconfig-${module.eks.cluster_name}.yaml"
+  kubeconfig_file_path      = abspath("${path.root}/${local.kubeconfig_file}")
 }
 
 module "eks" {
@@ -50,6 +40,27 @@ module "eks" {
       most_recent = true
     }
   } : {}
+
+  eks_managed_node_group_defaults = {
+    iam_role_additional_policies = {
+      # Not required, but used in the example to access the nodes to inspect mounted volumes
+      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    }
+    block_device_mappings = {
+      # Root volume
+      xvda = {
+        device_name = "/dev/xvda"
+        ebs = {
+          volume_size           = 24
+          volume_type           = "gp3"
+          iops                  = 3000
+          encrypted             = true
+          kms_key_id            = module.ebs_kms_key.key_arn
+          delete_on_termination = true
+        }
+      }
+    }
+  }
 
   # Security groups based on the best practices doc https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html.
   #   So, by default the security groups are restrictive. Users needs to enable rules for specific ports required for App requirement or Add-ons
@@ -171,7 +182,7 @@ data "aws_iam_policy_document" "managed_ng_assume_role_policy" {
 }
 
 resource "aws_iam_role" "managed_ng" {
-  name                  = "managed-node-role"
+  name                  = local.iam_role_mn
   description           = "EKS Managed Node group IAM Role"
   assume_role_policy    = data.aws_iam_policy_document.managed_ng_assume_role_policy.json
   path                  = "/"
@@ -185,7 +196,7 @@ resource "aws_iam_role" "managed_ng" {
   ]
   # Additional Permissions for for EKS Managed Node Group per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
   inline_policy {
-    name = "CloudBees_CI"
+    name = local.iam_inline_policy
     policy = jsonencode(
       {
         "Version" : "2012-10-17",
@@ -214,7 +225,7 @@ resource "aws_iam_role" "managed_ng" {
 }
 
 resource "aws_iam_instance_profile" "managed_ng" {
-  name = "managed-node-instance-profile-ci"
+  name = local.iam_instance_profile_name
   role = aws_iam_role.managed_ng.name
   path = "/"
 
@@ -228,33 +239,6 @@ resource "aws_iam_instance_profile" "managed_ng" {
 #---------------------------------------------------------------
 # Storage
 #---------------------------------------------------------------
-
-#https://docs.cloudbees.com/docs/cloudbees-common/latest/supported-platforms/cloudbees-ci-cloud#_amazon_elastic_file_system_amazon_efs
-module "efs" {
-  count   = local.enable_efs ? 1 : 0
-  source  = "terraform-aws-modules/efs/aws"
-  version = "1.2.0"
-
-  creation_token = local.efs_name
-  name           = local.efs_name
-
-  mount_targets = {
-    for k, v in zipmap(var.azs, var.private_subnets_ids) : k => { subnet_id = v }
-  }
-  security_group_description = "${local.efs_name} EFS security group"
-  security_group_vpc_id      = var.vpc_id
-  #https://d1.awsstatic.com/events/reinvent/2021/Amazon_EFS_performance_best_practices_STG403.pdf
-  performance_mode = "generalPurpose"
-  security_group_rules = {
-    vpc = {
-      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
-      description = "NFS ingress from VPC private subnets"
-      cidr_blocks = var.private_subnets_cidr_blocks
-    }
-  }
-
-  tags = var.tags
-}
 
 module "ebs_kms_key" {
   source  = "terraform-aws-modules/kms/aws"

@@ -26,7 +26,6 @@ Reference [Terraform S3 Backend Best Practices](https://technology.doximity.com/
 
 | Name | Type |
 |------|------|
-| [aws_cloudtrail.s3_cloudtrail](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudtrail) | resource |
 | [aws_dynamodb_table.block_table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
 | [aws_kms_alias.key_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.bucket_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
@@ -36,7 +35,6 @@ Reference [Terraform S3 Backend Best Practices](https://technology.doximity.com/
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the S3 bucket | `string` | n/a | yes |
-| <a name="input_enable_logging"></a> [enable\_logging](#input\_enable\_logging) | Enable S3 bucket access logging via CloudTrail | `bool` | `true` | no |
 | <a name="input_enable_object_lock"></a> [enable\_object\_lock](#input\_enable\_object\_lock) | Enable S3 bucket object lock | `bool` | `false` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Allow deletion of non-empty bucket. It shoukld not be enabled for production environments | `bool` | `false` | no |
 | <a name="input_is_tf_backend"></a> [is\_tf\_backend](#input\_is\_tf\_backend) | Is this bucket used as a Terraform backend? | `bool` | `false` | no |
