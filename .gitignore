@@ -52,3 +52,5 @@ backend.tf
 
 #For testing
 clouds/aws/root/v4/tmp/*.*
+
+.DS_Store
