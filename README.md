@@ -23,4 +23,3 @@
 - It has been developed using tools provided in [asdf.ubuntu](https://github.com/carlosrodlop/docker-lib/tree/v1.1.0/docker/asdf.ubuntu) image for testing.
 - It uses submodules. For example, the Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib). Helm provider is separated from the creation of the K8s cluster [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
   - ⚠️ IMPORTANT - It requires `git submodule update --init --recursive`
-- This is a test
