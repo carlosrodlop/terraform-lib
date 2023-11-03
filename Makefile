@@ -10,5 +10,3 @@ run:
 		--env-file=.docker.env \
 		-v $(MKFILEDIR):/home/swiss-user/terraform-lib -v $(HOME)/.aws:/home/swiss-user/.aws \
 		carlosrodlop/swissknife.ubuntu.m1
-
-.PHONY: test
