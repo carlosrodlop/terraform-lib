@@ -1,8 +1,6 @@
 name: linksCheck
 # runs every monday at 9 am
 on:
-  schedule:
-    - cron: "0 9 * * 1"
   push:
     branches:
       - main
