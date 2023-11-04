@@ -98,6 +98,10 @@ tf_action: check_aws_env guard-ROOT guard-ACTION check_vars print_vars
 	terraform -chdir=$(ROOT_SHARED)/$(ROOT) $(ACTION)
 
 .PHONY: tf_files_plans_wipeout
-tf_files_plans_wipeout: ## Wipeout TF files plans. Usage: [ROOT=eks-bp-v4] make tf_files_plans_wipeout
-tf_files_plans_wipeout: guard-ROOT
-	@rm -rf $(ROOT_SHARED)/$(ROOT)/*.plan
+tf_files_wipeout: ## Wipeout TF files plans. Usage: [ROOT=eks-bp-v4] make tf_files_plans_wipeout
+tf_files_wipeout: guard-ROOT
+	@echo -n "Are you sure you want to wipeout $(ROOT_PATH)/$(ROOT)? [yes/No] " && read ans && [ $${ans:-No} = yes ]
+	rm -rf $(ROOT_SHARED)/$(ROOT).terraform/ || echo "No .terraform folder found"
+	rm -f $(ROOT_SHARED)/$(ROOT)/*.plan || echo "No terraform plan files found"
+	rm -rf $(ROOT_SHARED)/$(ROOT)/.terraform.lock.hcl || echo "No .terraform.lock.hcl file found"
+	rm -rf $(ROOT_SHARED)/$(ROOT)/terraform.tfstate || echo "No .terraform.tfstate file found"
