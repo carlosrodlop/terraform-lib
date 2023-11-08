@@ -1,11 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-  #https://github.com/hashicorp/terraform-provider-aws/issues/19583
-  /* default_tags {
-    tags = local.tags
-  } */
-}
-
 provider "kubernetes" {
   config_path = var.kubeconfig_file
 }
