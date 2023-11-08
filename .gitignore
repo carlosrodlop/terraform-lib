@@ -46,6 +46,7 @@ secrets.*
 !*secrets.*.example
 !*secrets.*.example.enc
 kubeconfig-*.yaml
+kubeconfig-*.yaml.lock
 !kubeconfig-*.yaml.enc
 #*values*.yaml
 backend.tf
