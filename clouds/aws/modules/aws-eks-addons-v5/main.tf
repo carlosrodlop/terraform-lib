@@ -59,6 +59,7 @@ module "eks_blueprints_addons" {
   }
   enable_external_dns = local.eks_bp_addon_external_dns
   external_dns = {
+    create_role = true,
     values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
       zoneIdFilter = local.route53_zone_id
       zoneType     = local.hosted_zone_type
@@ -105,7 +106,7 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.29.0"
 
-  role_name_prefix = "${var.eks_cluster_id}-ebs-csi-driver-"
+  role_name_prefix = "${var.eks_cluster_id}-ebs-csi-driv"
 
   attach_ebs_csi_policy = true
 
