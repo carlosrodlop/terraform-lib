@@ -17,7 +17,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ../../../modules/aws-eks-addons-v4 | n/a |
+| <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ../../../modules/aws-eks-addons-v5 | n/a |
 | <a name="module_eks_sc"></a> [eks\_sc](#module\_eks\_sc) | ../../../modules/aws-eks-sc | n/a |
 
 ## Resources
@@ -50,5 +50,17 @@ No resources.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_bp_v5_external_dns"></a> [bp\_v5\_external\_dns](#output\_bp\_v5\_external\_dns) | External DNS values from Terraforn Blueprints Module |
+| <a name="output_eks_bp_addon_aws_lb_controller"></a> [eks\_bp\_addon\_aws\_lb\_controller](#output\_eks\_bp\_addon\_aws\_lb\_controller) | Local Enablement for AWS controller addon |
+| <a name="output_eks_bp_addon_efs_driver"></a> [eks\_bp\_addon\_efs\_driver](#output\_eks\_bp\_addon\_efs\_driver) | Local Eneblement for EFS driver |
+| <a name="output_eks_bp_addon_external_dns"></a> [eks\_bp\_addon\_external\_dns](#output\_eks\_bp\_addon\_external\_dns) | Local Enablement external\_dns |
+| <a name="output_eks_bp_addon_ing_nginx_controller"></a> [eks\_bp\_addon\_ing\_nginx\_controller](#output\_eks\_bp\_addon\_ing\_nginx\_controller) | Local Enablement for Nginx controller |
+| <a name="output_eks_bp_addon_kube_prometheus_stack"></a> [eks\_bp\_addon\_kube\_prometheus\_stack](#output\_eks\_bp\_addon\_kube\_prometheus\_stack) | Local enablement of Kube Prometheus Stack |
+| <a name="output_eks_bp_addon_velero"></a> [eks\_bp\_addon\_velero](#output\_eks\_bp\_addon\_velero) | Local enablement for velero |
+| <a name="output_hosted_zone_type"></a> [hosted\_zone\_type](#output\_hosted\_zone\_type) | Local Hosted zone type |
+| <a name="output_route53_zone_arn"></a> [route53\_zone\_arn](#output\_route53\_zone\_arn) | Route 53 arn |
+| <a name="output_route53_zone_id"></a> [route53\_zone\_id](#output\_route53\_zone\_id) | Route 53 ID |
+| <a name="output_velero_bucket_arn"></a> [velero\_bucket\_arn](#output\_velero\_bucket\_arn) | Velero Bucket arn |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

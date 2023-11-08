@@ -21,7 +21,7 @@ locals {
 ################################################################################
 
 module "eks_addons" {
-  source = "../../../modules/aws-eks-addons-v4"
+  source = "../../../modules/aws-eks-addons-v5"
 
   eks_cluster_version                = var.eks_cluster_version
   eks_cluster_id                     = var.eks_cluster_id
