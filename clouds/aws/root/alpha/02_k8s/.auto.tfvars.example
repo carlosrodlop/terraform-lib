@@ -1,4 +1,3 @@
-aws_region = "us-east-1" # Optional. Default "us-east-1"
 #kubeconfig_file = "/root/labs/terraform-lib/clouds/aws/root/eks-bp-v4-31/kubeconfig-example-v3-eks.yaml" # Required. Kubecofig file path fro Kuberntes Provider. Default to ~/.kube/config.
 eks_cluster_version = "1.24" # Required. Kubernetes version to use for the EKS cluster.
 eks_cluster_id = "pr-example-v3-eks" # Required. EKS Cluster ID
