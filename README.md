@@ -12,7 +12,12 @@
 | [Documentation](https://github.com/carlosrodlop/carlosrodlop-docs/tree/main/hashicorp) | [References](https://github.com/carlosrodlop/carlosrodlop-docs#terraform) |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 
+## About
+
 - It contains deployments and configuration for Kubernetes Cluster and companion infrastructure for different Cloud providers.
+
+## Usage
+
 - Terraform operations use makefile inside every cloud provider (e.g. `aws`) to give you examples of the most common operation command set. There are targets for the most common scenarios: init (with backend), plan/apply and destroy but also a general action target to run any terraform command.
   - Copy `.env.example` to `.env` to customize the environment variables. Although, some variables can be passed as arguments to target in the make command (`ROOT` for example).
 - Values Customization:
@@ -20,6 +25,6 @@
   - Backend:
     1. Apply the Root `state-bucket` creates a remote backend
     2. Copy `backend.tf.example` to `backend.tf` in every Root to use the backend created in the previous step.
-- It has been developed using tools provided in [asdf.ubuntu](https://github.com/carlosrodlop/docker-lib/tree/v1.1.0/docker/asdf.ubuntu) image for testing.
 - It uses submodules. For example, the Helm provider uses the values from the [Kubernetes library](https://github.com/carlosrodlop/K8s-lib). Helm provider is separated from the creation of the K8s cluster [Stacking with managed Kubernetes cluster resources](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources)
   - ⚠️ IMPORTANT - It requires `git submodule update --init --recursive`
+- Dev Container approach: `make run` using images from [docker-lib](https://github.com/carlosrodlop/docker-lib)
