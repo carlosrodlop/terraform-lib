@@ -34,7 +34,7 @@ module "eks_blueprints_addons" {
 
   cluster_name      = var.eks_cluster_id
   cluster_endpoint  = var.eks_cluster_endpoint
-  oidc_provider_arn = var.eks_oidc_provider
+  oidc_provider_arn = var.eks_oidc_provider_arn
   cluster_version   = var.eks_cluster_version
 
   eks_addons = {
@@ -59,8 +59,9 @@ module "eks_blueprints_addons" {
   }
   enable_external_dns = local.eks_bp_addon_external_dns
   external_dns = {
-    create_role = true,
-    values      = [file("${local.helm_values_path}/external-dns-v5.yaml")]
+    values = [templatefile("${local.helm_values_path}/external-dns-v5.yaml", {
+      zoneDNS = var.domain_name
+    })]
   }
   external_dns_route53_zone_arns      = [local.route53_zone_arn]
   enable_aws_load_balancer_controller = local.eks_bp_addon_aws_lb_controller
@@ -109,7 +110,7 @@ module "ebs_csi_driver_irsa" {
 
   oidc_providers = {
     main = {
-      provider_arn               = var.eks_oidc_provider
+      provider_arn               = var.eks_oidc_provider_arn
       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
     }
   }

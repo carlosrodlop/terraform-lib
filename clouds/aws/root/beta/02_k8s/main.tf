@@ -26,7 +26,7 @@ module "eks_addons" {
   eks_cluster_version                = var.eks_cluster_version
   eks_cluster_id                     = var.eks_cluster_id
   eks_cluster_endpoint               = var.eks_cluster_endpoint
-  eks_oidc_provider                  = var.eks_oidc_provider
+  eks_oidc_provider_arn              = var.eks_oidc_provider_arn
   efs_id                             = var.efs_id
   lb_type                            = var.lb_type
   domain_name                        = var.domain_name

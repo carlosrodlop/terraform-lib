@@ -29,8 +29,13 @@ output "eks_cluster_endpoint" {
 }
 
 output "eks_oidc_provider" {
-  description = "EKS cluster OIDC issuer URL"
+  description = "EKS cluster OIDC issuer URL. Required for EKS blueprints v4."
   value       = module.eks.eks_oidc_provider
+}
+
+output "eks_oidc_provider_arn" {
+  description = "EKS cluster OIDC ARN. Required for EKS blueprints v5."
+  value       = module.eks.eks_oidc_provider_arn
 }
 
 ############################

@@ -63,6 +63,7 @@
 | <a name="output_eks_cluster_version"></a> [eks\_cluster\_version](#output\_eks\_cluster\_version) | EKS cluster version |
 | <a name="output_eks_node_security_group_id"></a> [eks\_node\_security\_group\_id](#output\_eks\_node\_security\_group\_id) | EKS cluster node security group ID |
 | <a name="output_eks_oidc_provider"></a> [eks\_oidc\_provider](#output\_eks\_oidc\_provider) | EKS cluster OIDC issuer URL |
+| <a name="output_eks_oidc_provider_arn"></a> [eks\_oidc\_provider\_arn](#output\_eks\_oidc\_provider\_arn) | EKS cluster OIDC issuer URL |
 | <a name="output_kubeconfig_file_path"></a> [kubeconfig\_file\_path](#output\_kubeconfig\_file\_path) | Kubeconfig full file path |
 | <a name="output_kubeconfig_update"></a> [kubeconfig\_update](#output\_kubeconfig\_update) | Update KUBECONFIG file |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
