@@ -53,7 +53,7 @@ module "eks_blueprints_addons" {
 
   enable_external_dns = local.eks_bp_addon_external_dns
   external_dns_helm_config = {
-    values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
+    values = [templatefile("${local.helm_values_path}/external-dns-v4.yaml", {
       zoneIdFilter = local.route53_zone_id
       zoneType     = local.hosted_zone_type
     })]

@@ -60,10 +60,7 @@ module "eks_blueprints_addons" {
   enable_external_dns = local.eks_bp_addon_external_dns
   external_dns = {
     create_role = true,
-    values = [templatefile("${local.helm_values_path}/external-dns.yaml", {
-      zoneIdFilter = local.route53_zone_id
-      zoneType     = local.hosted_zone_type
-    })]
+    values      = [file("${local.helm_values_path}/external-dns-v5.yaml")]
   }
   external_dns_route53_zone_arns      = [local.route53_zone_arn]
   enable_aws_load_balancer_controller = local.eks_bp_addon_aws_lb_controller
