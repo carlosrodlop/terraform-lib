@@ -1,9 +1,9 @@
 
-#kubeconfig_file = "/root/labs/terraform-lib/clouds/aws/root/eks-bp-v4-31/kubeconfig-example-v3-eks.yaml" # Required. Kubecofig file path fro Kuberntes Provider. Default to ~/.kube/config.
-eks_cluster_version = "1.24" # Required. Kubernetes version to use for the EKS cluster.
+kubeconfig_file = "/root/labs/terraform-lib/clouds/aws/root/eks-bp-v4-31/kubeconfig-example-v3-eks.yaml" # Required. Kubecofig file path fro Kuberntes Provider. Default to ~/.kube/config.
+eks_cluster_version = "1.26" # Required. Kubernetes version to use for the EKS cluster.
 eks_cluster_id = "pr-example-v3-eks" # Required. EKS Cluster ID
 eks_cluster_endpoint = "https://12345EXAMPLE.gr7.us-east-1.eks.amazonaws.com" # Required. EKS Cluster Endpoint
-eks_oidc_provider = "oidc.eks.us-east-1.amazonaws.com/id/12345EXAMPLE" # Required. EKS OIDC Provider
+eks_oidc_provider_arn = "arn:aws:iam::123EXAMPLE:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/678EXAMPLE" # Required. EKS OIDC Provider
 #eks_bp_version = "v5" # Optional. EKS Blueprints version. Default v5
 #lb_type = "alb" # Optional. Load Balancer Type. Default to alb. Valid values: alb, nlb
 #efs_id = "fs-12345EXAMPLE" # Optional. EFS Resource ID. Default to empty string.

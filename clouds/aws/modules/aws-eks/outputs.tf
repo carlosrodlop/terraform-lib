@@ -28,6 +28,11 @@ output "eks_oidc_provider" {
   value       = module.eks.oidc_provider
 }
 
+output "eks_oidc_provider_arn" {
+  description = "EKS cluster OIDC issuer URL"
+  value       = module.eks.oidc_provider_arn
+}
+
 output "eks_cluster_certificate_authority_data" {
   description = "EKS cluster OIDC issuer URL"
   value       = module.eks.cluster_certificate_authority_data

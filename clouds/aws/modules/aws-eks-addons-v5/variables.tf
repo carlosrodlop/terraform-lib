@@ -38,9 +38,15 @@ variable "eks_cluster_endpoint" {
   type        = string
 }
 
-variable "eks_oidc_provider" {
-  description = "EKS cluster OIDC issuer URL."
+variable "eks_oidc_provider_arn" {
+  description = "EKS cluster OIDC issuer ARN. Note it is the ARN not the URL (difference between v4)"
   type        = string
+
+  validation {
+    # regex(...) fails if it cannot find a match
+    condition     = can(regex("^arn", var.eks_oidc_provider_arn))
+    error_message = "For the eks_oidc_provider should start with arn."
+  }
 }
 
 ################################################################################
