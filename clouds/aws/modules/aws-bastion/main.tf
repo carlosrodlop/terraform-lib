@@ -13,6 +13,11 @@ resource "aws_instance" "this" {
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [aws_security_group.this.id]
   associate_public_ip_address = true
+  disable_api_termination     = true
+  ebs_optimized               = true
+  metadata_options {
+    http_tokens = "required"
+  }
 
   tags = merge(var.tags, {
     Name = local.bastion_host_name
