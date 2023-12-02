@@ -5,7 +5,7 @@ variable "bucket_name" {
 
 variable "force_destroy" {
   type        = bool
-  description = "Allow deletion of non-empty bucket. It shoukld not be enabled for production environments"
+  description = "Allow deletion of non-empty bucket. It should not be enabled for production environments"
   default     = false
 }
 
