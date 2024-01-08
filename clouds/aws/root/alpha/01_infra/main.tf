@@ -38,9 +38,9 @@ locals {
   s3_bucket_list              = [local.s3_ci_backup_name, local.s3_artifacts_name, local.s3_velero_name]
   route53_zone_id             = data.aws_route53_zone.this.id
   azs                         = slice(data.aws_availability_zones.available.names, 0, var.azs_number)
-  vpc_id                      = trim(var.vpc_id, " ") == "" ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
+  vpc_id                      = trim(var.vpc_id, " ") == "" && module.vpc[0] != null ? module.vpc[0].vpc_id : trim(var.vpc_id, " ")
   vpc_cidr                    = "10.0.0.0/16"
-  private_subnet_ids          = length(var.private_subnets_ids) == 0 ? module.vpc[0].private_subnets : var.private_subnets_ids
+  private_subnet_ids          = length(var.private_subnets_ids) == 0 && module.vpc[0] != null ? module.vpc[0].private_subnets : var.private_subnets_ids
   private_subnets_cidr_blocks = length(var.private_subnets_cidr_blocks) == 0 ? module.vpc[0].private_subnets_cidr_blocks : var.private_subnets_cidr_blocks
   enable_acm                  = alltrue([var.enable_acm])
   enable_bastion              = alltrue([var.enable_bastion, trim(var.key_name_bastion, " ") != "", length(var.ssh_cidr_blocks_bastion) > 0])
